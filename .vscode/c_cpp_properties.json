@@ -1,0 +1,35 @@
+{
+	"configurations": [
+		{
+			"name": "Linux",
+			"includePath": [
+				"/usr/include",
+				"/usr/local/include",
+				"/usr/include/c++/11",
+				"/usr/include/c++/11/backward",
+				"/usr/lib/gcc/aarch64-linux-gnu/11/include",
+				"/usr/local/include",
+				"${workspaceFolder}/**",
+				"~/JUCE/",
+				"~/JUCE/modules/"
+			],
+			"browse": {
+				"limitSymbolsToIncludedHeaders": true,
+				"databaseFilename": "",
+				"path": [
+					"/usr/include",
+					"/usr/local/include",
+					"${workspaceFolder}/**",
+					"~/JUCE/",
+					"~/JUCE/modules/"
+					
+				]
+			},
+			"intelliSenseMode": "gcc-arm64",
+			"compilerPath": "/usr/bin/g++",
+			"cStandard": "c11",
+			"cppStandard": "c++17"
+		}
+	],
+	"version": 4
+}
