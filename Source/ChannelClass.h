@@ -13,9 +13,9 @@
 
 #pragma once
 
-// #include <stdint.h>
 #include <cstdint>
 #include <string>
+#include <array>
 
 class Channel
 {
@@ -33,20 +33,16 @@ private:
 
     bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R)
 
-    char label[8];          // channel label.
+    std::array<char, 8> label;          // channel label.
 
     uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
     bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
 
-
     static uint8_t nextID; // Static variable to keept track of next object's ID
 
 public:
-
-
     // Constructor
     Channel();
-
 };
 
 

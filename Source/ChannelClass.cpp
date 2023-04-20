@@ -10,9 +10,7 @@
 
 #include "ChannelClass.h"
 
-
 uint8_t Channel::nextID = 0;
-
 
 // Constructor
 Channel::Channel() : channelID{nextID++}
