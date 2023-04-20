@@ -17,7 +17,6 @@
 #include <cstdint>
 #include <string>
 
-// We probably do need both a channel class, and a channelstrip class, because a channelstrip can be linked to different channels.
 class Channel
 {
 private:
@@ -38,6 +37,19 @@ private:
 
     uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
     bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
+
+
+    static uint8_t nextID; // Static variable to keept track of next object's ID
+
+public:
+
+
+    // Constructor
+    Channel();
+
+};
+
+
 
     // // Should these be classes also??
     // int pre_dsp_insert;  // somehow must ID channel-, bus-, aux- taps or 2-track inputs or plugins.
@@ -61,13 +73,3 @@ private:
     // float eqLowQ;
     // float eqMidQ;
     // float eqHighQ;
-
-    static uint8_t nextID; // Static variable to keept track of next object's ID
-
-public:
-
-
-    // Constructor
-    Channel();
-
-};

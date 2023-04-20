@@ -23,8 +23,7 @@ public:
   MixerManager();
 
   // Public methods for interacting with channels
-  Channel &getChannel(uint8_t id);
-  const Channel &getChannel(uint8_t id) const; // not allowing changes.
+  const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
 
   // Add methods to handle communication with the Brain and DSP boards
 };

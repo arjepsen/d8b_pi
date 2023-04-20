@@ -10,15 +10,14 @@
 
 #include "MixerManagerClass.h"
 #include <algorithm>
-#include <stdexcept>
 #include <numeric>
+#include <stdexcept>
+
+// std::array automatically initializes elements to default value - 
+// so Channel constructor gets called automatically.
 MixerManager::MixerManager() : channels{} {}
-Channel &MixerManager::getChannel(uint8_t id)
-{
-    if (id < CHANNEL_COUNT)
-        return channels[id];
-    throw std::out_of_range("Invalid channel ID");
-}
+
+
 const Channel &MixerManager::getChannel(uint8_t id) const
 {
     if (id < CHANNEL_COUNT)
