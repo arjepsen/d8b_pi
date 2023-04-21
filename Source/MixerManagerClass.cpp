@@ -13,6 +13,7 @@
 #include <numeric>
 #include <stdexcept>
 
+// ############################ CONSTRUCTOR ####################################
 // std::array automatically initializes elements to default value - 
 // so Channel constructor gets called automatically.
 MixerManager::MixerManager() : channels{} 
@@ -41,6 +42,7 @@ MixerManager::MixerManager() : channels{}
     }
 }
 
+// ############################### METHODS ####################################
 const Channel &MixerManager::getChannel(uint8_t id) const
 {
     if (id < CHANNEL_COUNT)

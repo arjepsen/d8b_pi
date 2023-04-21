@@ -104,5 +104,4 @@ private:
 };
 
 //==============================================================================
-// This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (d8b_project1Application)
+// This macro generates the main() routine that launch

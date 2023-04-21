@@ -20,7 +20,7 @@
 #define BUF_SIZE 1024
 #define BRAIN_DEVICE "/dev/ttyUSB0"
 #define DSP_DEVICE "/dev/ttyUSB1"
-#define BRAINWARE_FILE "../controlfast.asc"
+#define BRAINWARE_FILE "../DataFiles/controlfast.asc"
 #define DSP_MASTER_FILE "../master.asc"
 #define DSP_SLAVE_FILE "../slave.asc"
 #define DSP_CONFIG_FILE "../Config.asc"
