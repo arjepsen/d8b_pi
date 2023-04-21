@@ -33,7 +33,9 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class SettingsWindowComponent  : public juce::Component
+class SettingsWindowComponent  : public juce::Component,
+                                 public juce::ComboBox::Listener,
+                                 public juce::Button::Listener
 {
 public:
     //==============================================================================
@@ -46,6 +48,8 @@ public:
 
     void paint (juce::Graphics& g) override;
     void resized() override;
+    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
+    void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
 
 
@@ -54,6 +58,15 @@ private:
     //[/UserVariables]
 
     //==============================================================================
+    std::unique_ptr<juce::ComboBox> brainPortComboBox;
+    std::unique_ptr<juce::ComboBox> dspPortComboBox;
+    std::unique_ptr<juce::TextButton> bootButton;
+
+    // Function to populate the combo boxes with available USB ports:
+    void populateUsbPortCompoBoxes();
+
+    // Function to execute Mixer Boot process:
+    void bootProcess();
 
 
     //==============================================================================

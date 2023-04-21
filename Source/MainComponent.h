@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "ChannelStripComponent.h"
+#include "SettingsWindowComponent.h"
 
 //==============================================================================
 /*
@@ -28,6 +29,8 @@ private:
     //==============================================================================
 
     // Your private member variables go here...
+
+    SettingsWindowComponent settingsWindow;
 
     ChannelStripComponent channelStrip1;
     ChannelStripComponent channelStrip2;
