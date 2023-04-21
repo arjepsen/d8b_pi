@@ -252,4 +252,34 @@ std::string FXSlot::get_brainresponse(int brain_descriptor)
     //     }
 
     //     if (result == 1)
-    //   
+    //         // brain_reply_stream << response;
+    //         brain_reply_stream.put(response);
+    //     else if (result < 0)
+    //     {
+    //         perror("Error reading from file descriptor");
+    //         exit(1);
+    //     }
+    //     else if (result == 0)
+    //     {
+    //         printf("end of file.\n");
+    //     }
+    //     // usleep(10000); // Sleep for 10ms
+    // }
+
+    do
+    {
+        int result = read(brain_descriptor, &response, 1);
+        if (result < 1)
+        {
+            printf("Read returned: %d\n", result);
+            printf("Which long calculations have shown is less than 1!");
+            exit(1);
+        }
+
+        if (response != 'l' && response != 'k')
+            brain_reply_stream.put(response);
+
+    } while (response != 'l' && response != 'k');
+
+    return brain_reply_stream.str();
+}
