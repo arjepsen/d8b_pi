@@ -39,9 +39,9 @@
       <FILE id="XN9V5Z" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="dvH6xz" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
-      <FILE id="X0jNuk" name="SettingsWindowComponent.cpp" compile="1" resource="0"
+      <FILE id="eatEe4" name="SettingsWindowComponent.cpp" compile="1" resource="0"
             file="Source/SettingsWindowComponent.cpp"/>
-      <FILE id="rPdrhE" name="SettingsWindowComponent.h" compile="0" resource="0"
+      <FILE id="tYTxIH" name="SettingsWindowComponent.h" compile="0" resource="0"
             file="Source/SettingsWindowComponent.h"/>
     </GROUP>
   </MAINGROUP>
