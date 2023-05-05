@@ -21,7 +21,7 @@
 //[/Headers]
 
 #include "SettingsWindowComponent.h"
-#include "SettingsClass.h"
+
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
@@ -32,33 +32,22 @@ SettingsWindowComponent::SettingsWindowComponent ()
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
 
-    brainPortComboBox.reset (new juce::ComboBox ("new combo box"));
-    dspPortComboBox.reset (new juce::ComboBox ("new combo box"));
+    juce__comboBox.reset (new juce::ComboBox ("new combo box"));
+    addAndMakeVisible (juce__comboBox.get());
+    juce__comboBox->setEditableText (false);
+    juce__comboBox->setJustificationType (juce::Justification::centredLeft);
+    juce__comboBox->setTextWhenNothingSelected (juce::String());
+    juce__comboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    juce__comboBox->addListener (this);
 
-    addAndMakeVisible (brainPortComboBox.get());
-    brainPortComboBox->setEditableText (false);
-    brainPortComboBox->setJustificationType (juce::Justification::centredLeft);
-    brainPortComboBox->setTextWhenNothingSelected (juce::String());
-    brainPortComboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    brainPortComboBox->addListener (this);
+    juce__comboBox->setBounds (176, 200, 150, 24);
 
-    addAndMakeVisible (dspPortComboBox.get());
-    dspPortComboBox->setEditableText (false);
-    dspPortComboBox->setJustificationType (juce::Justification::centredLeft);
-    dspPortComboBox->setTextWhenNothingSelected (juce::String());
-    dspPortComboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    dspPortComboBox->addListener (this);
+    juce__textButton.reset (new juce::TextButton ("new button"));
+    addAndMakeVisible (juce__textButton.get());
+    juce__textButton->addListener (this);
 
-    bootButton.reset (new juce::TextButton ("new button"));
-    addAndMakeVisible (bootButton.get());
-    bootButton->addListener (this);
+    juce__textButton->setBounds (360, 200, 150, 24);
 
-    populateUsbPortCompoBoxes();
-
-
-    // brainPortComboBox->setBounds (10, 10, 150, 24);
-    // dspPortComboBox->setBounds (10, 45, 150, 24);
-    // bootButton->setBounds (10, 80, 150, 24);
 
     //[UserPreSize]
     //[/UserPreSize]
@@ -75,9 +64,8 @@ SettingsWindowComponent::~SettingsWindowComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    brainPortComboBox = nullptr;
-    dspPortComboBox = nullptr;
-    bootButton = nullptr;
+    juce__comboBox = nullptr;
+    juce__textButton = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -90,9 +78,7 @@ void SettingsWindowComponent::paint (juce::Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
-
     g.fillAll (juce::Colour (0xff323e44));
-    //g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
@@ -102,9 +88,7 @@ void SettingsWindowComponent::resized()
 {
     //[UserPreResize] Add your own custom resize code here..
     //[/UserPreResize]
-    brainPortComboBox->setBounds (10, 10, 150, 24);
-    dspPortComboBox->setBounds (10, 45, 150, 24);
-    bootButton->setBounds (10, 80, 150, 24);
+
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }
@@ -114,18 +98,11 @@ void SettingsWindowComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasCh
     //[UsercomboBoxChanged_Pre]
     //[/UsercomboBoxChanged_Pre]
 
-    if (comboBoxThatHasChanged == brainPortComboBox.get())
+    if (comboBoxThatHasChanged == juce__comboBox.get())
     {
-        Settings::getInstance().brainPort = brainPortComboBox.get()->getSelectedItemIndex();
+        //[UserComboBoxCode_juce__comboBox] -- add your combo box handling code here..
+        //[/UserComboBoxCode_juce__comboBox]
     }
-    else if (comboBoxThatHasChanged == dspPortComboBox.get())
-    {
-        Settings::getInstance().dspPort = dspPortComboBox.get()->getSelectedItemIndex();
-    }
-
-
-
-
 
     //[UsercomboBoxChanged_Post]
     //[/UsercomboBoxChanged_Post]
@@ -136,26 +113,16 @@ void SettingsWindowComponent::buttonClicked (juce::Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == bootButton.get())
+    if (buttonThatWasClicked == juce__textButton.get())
     {
-        bootProcess();
-        //[UserButtonCode_bootButton] -- add your button handler code here..
-        //[/UserButtonCode_bootButton]
+        //[UserButtonCode_juce__textButton] -- add your button handler code here..
+        //[/UserButtonCode_juce__textButton]
     }
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
 }
 
-void SettingsWindowComponent::populateUsbPortCompoBoxes()
-{
-    
-}
-
-void SettingsWindowComponent::bootProcess()
-{
-    // HERE GOES DA SCRIPT FOR BOOOOOOOTIN
-}
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...

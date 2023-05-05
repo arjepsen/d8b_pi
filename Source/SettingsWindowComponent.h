@@ -58,15 +58,8 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    std::unique_ptr<juce::ComboBox> brainPortComboBox;
-    std::unique_ptr<juce::ComboBox> dspPortComboBox;
-    std::unique_ptr<juce::TextButton> bootButton;
-
-    // Function to populate the combo boxes with available USB ports:
-    void populateUsbPortCompoBoxes();
-
-    // Function to execute Mixer Boot process:
-    void bootProcess();
+    std::unique_ptr<juce::ComboBox> juce__comboBox;
+    std::unique_ptr<juce::TextButton> juce__textButton;
 
 
     //==============================================================================

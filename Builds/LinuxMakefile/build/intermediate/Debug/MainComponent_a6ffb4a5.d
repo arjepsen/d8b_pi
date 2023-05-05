@@ -352,4 +352,5 @@ build/intermediate/Debug/MainComponent_a6ffb4a5.o: \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_Grid.h \
  /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h \
  ../../Source/ChannelStripComponent.h \
- ../../Source/SettingsWindowComponent.h
+ ../../Source/SettingsWindowComponent.h ../../Source/settingsplay.h \
+ ../../Source/TopBarComponent.h

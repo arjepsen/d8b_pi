@@ -34,6 +34,11 @@ MainComponent::MainComponent()
     addAndMakeVisible(channelStrip23);
     addAndMakeVisible(channelStrip24);
 
+
+    addAndMakeVisible(settingsWindow);
+
+    addAndMakeVisible(topBar);
+
 }
 
 MainComponent::~MainComponent()
@@ -60,7 +65,9 @@ void MainComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
 
-    //settingsWindow.setBounds(10, 10, 300, 120);
+    settingsWindow.setBounds(10, 10, 300, 120);
+
+    topBar.setBounds(0, 0, 1920, 28);
 
     channelStrip1.setBounds(0, 28, 75, 1024);
     channelStrip2.setBounds(76, 28, 75, 1024);

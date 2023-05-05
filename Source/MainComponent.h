@@ -4,6 +4,9 @@
 #include "ChannelStripComponent.h"
 #include "SettingsWindowComponent.h"
 
+#include "settingsplay.h"
+#include "TopBarComponent.h"
+
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -31,6 +34,10 @@ private:
     // Your private member variables go here...
 
     //SettingsWindowComponent settingsWindow;
+
+    SettingsWindow settingsWindow;
+
+    TopBarComponent topBar;
 
     ChannelStripComponent channelStrip1;
     ChannelStripComponent channelStrip2;

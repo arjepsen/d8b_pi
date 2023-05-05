@@ -351,5 +351,4 @@ build/intermediate/Debug/SettingsWindowComponent_3c1fe3ab.o: \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_FlexBox.h \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_GridItem.h \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_Grid.h \
- /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h \
- ../../Source/SettingsClass.h
+ /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h
