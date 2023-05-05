@@ -30,7 +30,7 @@ private:
 
     // Your private member variables go here...
 
-    SettingsWindowComponent settingsWindow;
+    //SettingsWindowComponent settingsWindow;
 
     ChannelStripComponent channelStrip1;
     ChannelStripComponent channelStrip2;

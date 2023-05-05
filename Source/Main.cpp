@@ -10,11 +10,11 @@
 #include "MainComponent.h"
 
 //==============================================================================
-class d8b_project1Application  : public juce::JUCEApplication
+class d8b_piApplication  : public juce::JUCEApplication
 {
 public:
     //==============================================================================
-    d8b_project1Application() {}
+    d8b_piApplication() {}
 
     const juce::String getApplicationName() override       { return ProjectInfo::projectName; }
     const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -104,4 +104,5 @@ private:
 };
 
 //==============================================================================
-// This macro generates the main() routine that launch
+// This macro generates the main() routine that launches the app.
+START_JUCE_APPLICATION (d8b_piApplication)

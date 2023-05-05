@@ -5,8 +5,8 @@
 MainComponent::MainComponent()
 
 {
-    setSize(800,600);
-    addAndMakeVisible(settingsWindow);
+    //setSize(800,600);
+    //addAndMakeVisible(settingsWindow);
 
     setSize(1920, 1080);
     addAndMakeVisible(channelStrip1);
@@ -60,7 +60,7 @@ void MainComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
 
-    settingsWindow.setBounds(10, 10, 300, 120);
+    //settingsWindow.setBounds(10, 10, 300, 120);
 
     channelStrip1.setBounds(0, 28, 75, 1024);
     channelStrip2.setBounds(76, 28, 75, 1024);
