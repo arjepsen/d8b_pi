@@ -21,8 +21,9 @@ public:
         auto settingsComponent = std::make_unique<Component>();
         auto label = std::make_unique<juce::Label>("Label", "KurtLabel");
         settingsComponent->addAndMakeVisible(label.get());
-        settingsComponent->setSize(400, 300);
+        settingsComponent->setSize(800, 600);
         setContentOwned(settingsComponent.release(), true);
+        setMenuBar();
     }
 
     void closeButtonPressed() override

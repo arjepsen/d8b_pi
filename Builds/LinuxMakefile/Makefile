@@ -83,7 +83,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/Main_90ebc5c2.o \
   $(JUCE_OBJDIR)/MainComponent_a6ffb4a5.o \
   $(JUCE_OBJDIR)/SettingsWindowComponent_3c1fe3ab.o \
-  $(JUCE_OBJDIR)/TopBarComponent_973a2100.o \
+  $(JUCE_OBJDIR)/TopMenubarComponent_405b1fdf.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
   $(JUCE_OBJDIR)/include_juce_events_fd7d695.o \
@@ -158,9 +158,9 @@ $(JUCE_OBJDIR)/SettingsWindowComponent_3c1fe3ab.o: ../../Source/SettingsWindowCo
 	@echo "Compiling SettingsWindowComponent.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/TopBarComponent_973a2100.o: ../../Source/TopBarComponent.cpp
+$(JUCE_OBJDIR)/TopMenubarComponent_405b1fdf.o: ../../Source/TopMenubarComponent.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling TopBarComponent.cpp"
+	@echo "Compiling TopMenubarComponent.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp

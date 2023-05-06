@@ -20,41 +20,34 @@
 //[Headers] You can add your own extra header files here...
 //[/Headers]
 
-#include "TopBarComponent.h"
+#include "TopMenubarComponent.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
 
 //==============================================================================
-TopBarComponent::TopBarComponent ()
+TopMenubarComponent::TopMenubarComponent ()
 {
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
-
-    juce__textButton.reset (new juce::TextButton ("new button"));
-    addAndMakeVisible (juce__textButton.get());
-    juce__textButton->addListener (this);
-
-    juce__textButton->setBounds (0, 0, 150, 27);
 
 
     //[UserPreSize]
     //[/UserPreSize]
 
-    setSize (1920, 27);
+    setSize (600, 400);
 
 
     //[Constructor] You can add your own custom stuff here..
     //[/Constructor]
 }
 
-TopBarComponent::~TopBarComponent()
+TopMenubarComponent::~TopMenubarComponent()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    juce__textButton = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -62,7 +55,7 @@ TopBarComponent::~TopBarComponent()
 }
 
 //==============================================================================
-void TopBarComponent::paint (juce::Graphics& g)
+void TopMenubarComponent::paint (juce::Graphics& g)
 {
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
@@ -73,28 +66,13 @@ void TopBarComponent::paint (juce::Graphics& g)
     //[/UserPaint]
 }
 
-void TopBarComponent::resized()
+void TopMenubarComponent::resized()
 {
     //[UserPreResize] Add your own custom resize code here..
     //[/UserPreResize]
 
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
-}
-
-void TopBarComponent::buttonClicked (juce::Button* buttonThatWasClicked)
-{
-    //[UserbuttonClicked_Pre]
-    //[/UserbuttonClicked_Pre]
-
-    if (buttonThatWasClicked == juce__textButton.get())
-    {
-        //[UserButtonCode_juce__textButton] -- add your button handler code here..
-        //[/UserButtonCode_juce__textButton]
-    }
-
-    //[UserbuttonClicked_Post]
-    //[/UserbuttonClicked_Post]
 }
 
 
@@ -112,14 +90,11 @@ void TopBarComponent::buttonClicked (juce::Button* buttonThatWasClicked)
 
 BEGIN_JUCER_METADATA
 
-<JUCER_COMPONENT documentType="Component" className="TopBarComponent" componentName=""
+<JUCER_COMPONENT documentType="Component" className="TopMenubarComponent" componentName=""
                  parentClasses="public juce::Component" constructorParams="" variableInitialisers=""
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
-                 fixedSize="1" initialWidth="1920" initialHeight="27">
+                 fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ff323e44"/>
-  <TEXTBUTTON name="new button" id="f5735f7d339767f0" memberName="juce__textButton"
-              virtualName="" explicitFocusOrder="0" pos="0 0 150 27" buttonText="new button"
-              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA

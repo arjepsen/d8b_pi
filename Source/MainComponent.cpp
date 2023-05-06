@@ -34,10 +34,12 @@ MainComponent::MainComponent()
     addAndMakeVisible(channelStrip23);
     addAndMakeVisible(channelStrip24);
 
+    menuBar.reset(new MenuBarComponent(getApplicationCommaandManager()));
+    addAndMakeVisible(menuBar.get());
 
     addAndMakeVisible(settingsWindow);
 
-    addAndMakeVisible(topBar);
+
 
 }
 
@@ -67,7 +69,7 @@ void MainComponent::resized()
 
     settingsWindow.setBounds(10, 10, 300, 120);
 
-    topBar.setBounds(0, 0, 1920, 28);
+    //topBar.setBounds(0, 0, 1920, 28);
 
     channelStrip1.setBounds(0, 28, 75, 1024);
     channelStrip2.setBounds(76, 28, 75, 1024);

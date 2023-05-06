@@ -44,10 +44,10 @@
       <FILE id="tYTxIH" name="SettingsWindowComponent.h" compile="0" resource="0"
             file="Source/SettingsWindowComponent.h"/>
       <FILE id="dZV9eV" name="settingsplay.h" compile="0" resource="0" file="Source/settingsplay.h"/>
-      <FILE id="GAAIXt" name="TopBarComponent.cpp" compile="1" resource="0"
-            file="Source/TopBarComponent.cpp"/>
-      <FILE id="K9TxJn" name="TopBarComponent.h" compile="0" resource="0"
-            file="Source/TopBarComponent.h"/>
+      <FILE id="JfpSPr" name="TopMenubarComponent.cpp" compile="1" resource="0"
+            file="Source/TopMenubarComponent.cpp"/>
+      <FILE id="fPikB0" name="TopMenubarComponent.h" compile="0" resource="0"
+            file="Source/TopMenubarComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>

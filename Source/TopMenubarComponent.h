@@ -33,13 +33,12 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class TopBarComponent  : public juce::Component,
-                         public juce::Button::Listener
+class TopMenubarComponent  : public juce::Component
 {
 public:
     //==============================================================================
-    TopBarComponent ();
-    ~TopBarComponent() override;
+    TopMenubarComponent ();
+    ~TopMenubarComponent() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
@@ -47,7 +46,6 @@ public:
 
     void paint (juce::Graphics& g) override;
     void resized() override;
-    void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
 
 
@@ -56,11 +54,10 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    std::unique_ptr<juce::TextButton> juce__textButton;
 
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopBarComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopMenubarComponent)
 };
 
 //[EndFile] You can add extra defines here...

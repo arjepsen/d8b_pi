@@ -5,7 +5,7 @@
 #include "SettingsWindowComponent.h"
 
 #include "settingsplay.h"
-#include "TopBarComponent.h"
+#include "MenuBarComponent.h"
 
 //==============================================================================
 /*
@@ -37,7 +37,9 @@ private:
 
     SettingsWindow settingsWindow;
 
-    TopBarComponent topBar;
+    //TopBarComponent topBar;
+
+    std::unique_ptr<MenuBarComponent> menuBar;
 
     ChannelStripComponent channelStrip1;
     ChannelStripComponent channelStrip2;
