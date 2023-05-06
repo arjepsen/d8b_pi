@@ -21,18 +21,9 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
+#include "TopMenuBarModel.h"
 //[/Headers]
-
-
-
 //==============================================================================
-/**
-                                                                    //[Comments]
-    An auto-generated component, created by the Projucer.
-
-    Describe your class and how it works here!
-                                                                    //[/Comments]
-*/
 class TopMenuBarComponent  : public juce::MenuBarComponent
 {
 public:
@@ -46,18 +37,12 @@ public:
 
     void paint (juce::Graphics& g) override;
     void resized() override;
-
-    int getNumItems() override;
-    juce::String getItemText (int itemIndex) override;
-    void itemClicked(int itemIndex) override;
-    void itemSelected( int itemIndex) override;
-
 private:
+    TopMenuBarModel menuBarModel;
     //[UserVariables]   -- You can add your own custom variables in this section.
     //[/UserVariables]
 
     //==============================================================================
-
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopMenuBarComponent)

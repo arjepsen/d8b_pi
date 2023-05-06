@@ -5,46 +5,38 @@
 MainComponent::MainComponent()
 
 {
-    //setSize(800,600);
-    //addAndMakeVisible(settingsWindow);
-
     setSize(1920, 1080);
-    addAndMakeVisible(channelStrip1);
-    addAndMakeVisible(channelStrip2);
-    addAndMakeVisible(channelStrip3);
-    addAndMakeVisible(channelStrip4);
-    addAndMakeVisible(channelStrip5);
-    addAndMakeVisible(channelStrip6);
-    addAndMakeVisible(channelStrip7);
-    addAndMakeVisible(channelStrip8);
-    addAndMakeVisible(channelStrip9);
-    addAndMakeVisible(channelStrip10);
-    addAndMakeVisible(channelStrip11);
-    addAndMakeVisible(channelStrip12);
-    addAndMakeVisible(channelStrip13);
-    addAndMakeVisible(channelStrip14);
-    addAndMakeVisible(channelStrip15);
-    addAndMakeVisible(channelStrip16);
-    addAndMakeVisible(channelStrip17);
-    addAndMakeVisible(channelStrip18);
-    addAndMakeVisible(channelStrip19);
-    addAndMakeVisible(channelStrip20);
-    addAndMakeVisible(channelStrip21);
-    addAndMakeVisible(channelStrip22);
-    addAndMakeVisible(channelStrip23);
-    addAndMakeVisible(channelStrip24);
+    // addAndMakeVisible(channelStrip1);
+    // addAndMakeVisible(channelStrip2);
+    // addAndMakeVisible(channelStrip3);
+    // addAndMakeVisible(channelStrip4);
+    // addAndMakeVisible(channelStrip5);
+    // addAndMakeVisible(channelStrip6);
+    // addAndMakeVisible(channelStrip7);
+    // addAndMakeVisible(channelStrip8);
+    // addAndMakeVisible(channelStrip9);
+    // addAndMakeVisible(channelStrip10);
+    // addAndMakeVisible(channelStrip11);
+    // addAndMakeVisible(channelStrip12);
+    // addAndMakeVisible(channelStrip13);
+    // addAndMakeVisible(channelStrip14);
+    // addAndMakeVisible(channelStrip15);
+    // addAndMakeVisible(channelStrip16);
+    // addAndMakeVisible(channelStrip17);
+    // addAndMakeVisible(channelStrip18);
+    // addAndMakeVisible(channelStrip19);
+    // addAndMakeVisible(channelStrip20);
+    // addAndMakeVisible(channelStrip21);
+    // addAndMakeVisible(channelStrip22);
+    // addAndMakeVisible(channelStrip23);
+    // addAndMakeVisible(channelStrip24);
 
-    menuBar.reset(new MenuBarComponent(getApplicationCommaandManager()));
-    addAndMakeVisible(menuBar.get());
+    addAndMakeVisible(menuBar);
 
-    addAndMakeVisible(settingsWindow);
-
-
-
+    //addAndMakeVisible(settingsWindow);
 }
 
 MainComponent::~MainComponent()
-
 {
 }
 
@@ -57,7 +49,7 @@ void MainComponent::paint(juce::Graphics &g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setFont(juce::Font(16.0f));
     g.setColour(juce::Colours::white);
-    g.drawText("Hello World!", getLocalBounds(), juce::Justification::centred, true);
+    //g.drawText("Hello World!", getLocalBounds(), juce::Justification::centred, true);
 }
 
 void MainComponent::resized()
@@ -68,9 +60,7 @@ void MainComponent::resized()
     // update their positions.
 
     settingsWindow.setBounds(10, 10, 300, 120);
-
-    //topBar.setBounds(0, 0, 1920, 28);
-
+    menuBar.setBounds(0, 0, 1920, 28);
     channelStrip1.setBounds(0, 28, 75, 1024);
     channelStrip2.setBounds(76, 28, 75, 1024);
     channelStrip3.setBounds(152, 28, 75, 1024);
@@ -93,7 +83,6 @@ void MainComponent::resized()
     channelStrip20.setBounds(1444, 28, 75, 1024);
     channelStrip21.setBounds(1520, 28, 75, 1024);
     channelStrip22.setBounds(1596, 28, 75, 1024);
-    channelStrip23.setBounds(1064, 28, 75, 1024);
-    channelStrip24.setBounds(1064, 28, 75, 1024);
-
+    channelStrip23.setBounds(1664, 28, 75, 1024);
+    channelStrip24.setBounds(1764, 28, 75, 1024);
 }

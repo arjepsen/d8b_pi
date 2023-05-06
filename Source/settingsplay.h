@@ -23,7 +23,7 @@ public:
         settingsComponent->addAndMakeVisible(label.get());
         settingsComponent->setSize(800, 600);
         setContentOwned(settingsComponent.release(), true);
-        setMenuBar();
+        //setMenuBar();
     }
 
     void closeButtonPressed() override

@@ -3,9 +3,8 @@
 #include <JuceHeader.h>
 #include "ChannelStripComponent.h"
 #include "SettingsWindowComponent.h"
-
 #include "settingsplay.h"
-#include "MenuBarComponent.h"
+#include "TopMenuBarComponent.h"
 
 //==============================================================================
 /*
@@ -31,15 +30,9 @@ public:
 private:
     //==============================================================================
 
-    // Your private member variables go here...
-
-    //SettingsWindowComponent settingsWindow;
-
     SettingsWindow settingsWindow;
 
-    //TopBarComponent topBar;
-
-    std::unique_ptr<MenuBarComponent> menuBar;
+    TopMenuBarComponent menuBar;
 
     ChannelStripComponent channelStrip1;
     ChannelStripComponent channelStrip2;
