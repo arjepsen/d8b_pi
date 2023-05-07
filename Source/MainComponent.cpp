@@ -6,32 +6,33 @@ MainComponent::MainComponent()
 
 {
     setSize(1920, 1080);
-    // addAndMakeVisible(channelStrip1);
-    // addAndMakeVisible(channelStrip2);
-    // addAndMakeVisible(channelStrip3);
-    // addAndMakeVisible(channelStrip4);
-    // addAndMakeVisible(channelStrip5);
-    // addAndMakeVisible(channelStrip6);
-    // addAndMakeVisible(channelStrip7);
-    // addAndMakeVisible(channelStrip8);
-    // addAndMakeVisible(channelStrip9);
-    // addAndMakeVisible(channelStrip10);
-    // addAndMakeVisible(channelStrip11);
-    // addAndMakeVisible(channelStrip12);
-    // addAndMakeVisible(channelStrip13);
-    // addAndMakeVisible(channelStrip14);
-    // addAndMakeVisible(channelStrip15);
-    // addAndMakeVisible(channelStrip16);
-    // addAndMakeVisible(channelStrip17);
-    // addAndMakeVisible(channelStrip18);
-    // addAndMakeVisible(channelStrip19);
-    // addAndMakeVisible(channelStrip20);
-    // addAndMakeVisible(channelStrip21);
-    // addAndMakeVisible(channelStrip22);
-    // addAndMakeVisible(channelStrip23);
-    // addAndMakeVisible(channelStrip24);
+    addAndMakeVisible(channelStrip1);
+    addAndMakeVisible(channelStrip2);
+    addAndMakeVisible(channelStrip3);
+    addAndMakeVisible(channelStrip4);
+    addAndMakeVisible(channelStrip5);
+    addAndMakeVisible(channelStrip6);
+    addAndMakeVisible(channelStrip7);
+    addAndMakeVisible(channelStrip8);
+    addAndMakeVisible(channelStrip9);
+    addAndMakeVisible(channelStrip10);
+    addAndMakeVisible(channelStrip11);
+    addAndMakeVisible(channelStrip12);
+    addAndMakeVisible(channelStrip13);
+    addAndMakeVisible(channelStrip14);
+    addAndMakeVisible(channelStrip15);
+    addAndMakeVisible(channelStrip16);
+    addAndMakeVisible(channelStrip17);
+    addAndMakeVisible(channelStrip18);
+    addAndMakeVisible(channelStrip19);
+    addAndMakeVisible(channelStrip20);
+    addAndMakeVisible(channelStrip21);
+    addAndMakeVisible(channelStrip22);
+    addAndMakeVisible(channelStrip23);
+    addAndMakeVisible(channelStrip24);
 
     addAndMakeVisible(menuBar);
+
 
     //addAndMakeVisible(settingsWindow);
 }
@@ -47,8 +48,8 @@ void MainComponent::paint(juce::Graphics &g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    g.setFont(juce::Font(16.0f));
-    g.setColour(juce::Colours::white);
+    // g.setFont(juce::Font(16.0f));
+    // g.setColour(juce::Colours::white);
     //g.drawText("Hello World!", getLocalBounds(), juce::Justification::centred, true);
 }
 
@@ -59,8 +60,10 @@ void MainComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
 
+    menuBar.setBounds(0, 0, getWidth(), 30);
+
     settingsWindow.setBounds(10, 10, 300, 120);
-    menuBar.setBounds(0, 0, 1920, 28);
+
     channelStrip1.setBounds(0, 28, 75, 1024);
     channelStrip2.setBounds(76, 28, 75, 1024);
     channelStrip3.setBounds(152, 28, 75, 1024);

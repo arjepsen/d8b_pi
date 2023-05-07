@@ -4,7 +4,7 @@
 #include "ChannelStripComponent.h"
 #include "SettingsWindowComponent.h"
 #include "settingsplay.h"
-#include "TopMenuBarComponent.h"
+#include "MenuBar.h"
 
 //==============================================================================
 /*
@@ -32,7 +32,8 @@ private:
 
     SettingsWindow settingsWindow;
 
-    TopMenuBarComponent menuBar;
+
+    MenuBar menuBar;
 
     ChannelStripComponent channelStrip1;
     ChannelStripComponent channelStrip2;

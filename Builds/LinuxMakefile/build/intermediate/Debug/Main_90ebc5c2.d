@@ -352,4 +352,4 @@ build/intermediate/Debug/Main_90ebc5c2.o: ../../Source/Main.cpp \
  /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h \
  ../../Source/MainComponent.h ../../Source/ChannelStripComponent.h \
  ../../Source/SettingsWindowComponent.h ../../Source/settingsplay.h \
- ../../Source/TopMenuBarComponent.h ../../Source/TopMenuBarModel.h
+ ../../Source/MenuBar.h

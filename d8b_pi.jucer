@@ -44,14 +44,8 @@
       <FILE id="tYTxIH" name="SettingsWindowComponent.h" compile="0" resource="0"
             file="Source/SettingsWindowComponent.h"/>
       <FILE id="dZV9eV" name="settingsplay.h" compile="0" resource="0" file="Source/settingsplay.h"/>
-      <FILE id="JfpSPr" name="TopMenuBarComponent.cpp" compile="1" resource="0"
-            file="Source/TopMenuBarComponent.cpp"/>
-      <FILE id="fPikB0" name="TopMenuBarComponent.h" compile="0" resource="0"
-            file="Source/TopMenuBarComponent.h"/>
-      <FILE id="elfgSj" name="TopMenuBarModel.cpp" compile="1" resource="0"
-            file="Source/TopMenuBarModel.cpp"/>
-      <FILE id="gLxroQ" name="TopMenuBarModel.h" compile="0" resource="0"
-            file="Source/TopMenuBarModel.h"/>
+      <FILE id="RTo9y5" name="MenuBar.cpp" compile="1" resource="0" file="Source/MenuBar.cpp"/>
+      <FILE id="f9zfpk" name="MenuBar.h" compile="0" resource="0" file="Source/MenuBar.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
