@@ -50,7 +50,7 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="usb &#10;udev">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="d8b_pi"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="d8b_pi"/>

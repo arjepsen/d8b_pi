@@ -1,10 +1,11 @@
 #pragma once
 
-#include <JuceHeader.h>
 #include "ChannelStripComponent.h"
+#include "MenuBar.h"
+#include "SettingsClass.h"
 #include "SettingsWindowComponent.h"
 #include "settingsplay.h"
-#include "MenuBar.h"
+#include <JuceHeader.h>
 
 //==============================================================================
 /*
@@ -32,6 +33,7 @@ private:
 
     SettingsWindow settingsWindow;
 
+    Settings &settings;
 
     MenuBar menuBar;
 

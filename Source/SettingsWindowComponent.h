@@ -23,8 +23,6 @@
 #include <JuceHeader.h>
 //[/Headers]
 
-
-
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -33,25 +31,23 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class SettingsWindowComponent  : public juce::Component,
-                                 public juce::ComboBox::Listener,
-                                 public juce::Button::Listener
+class SettingsWindowComponent : public juce::Component,
+                                public juce::ComboBox::Listener,
+                                public juce::Button::Listener
 {
 public:
     //==============================================================================
-    SettingsWindowComponent ();
+    SettingsWindowComponent();
     ~SettingsWindowComponent() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     //[/UserMethods]
 
-    void paint (juce::Graphics& g) override;
+    void paint(juce::Graphics &g) override;
     void resized() override;
-    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
-    void buttonClicked (juce::Button* buttonThatWasClicked) override;
-
-
+    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
+    void buttonClicked(juce::Button *buttonThatWasClicked) override;
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
@@ -61,11 +57,9 @@ private:
     std::unique_ptr<juce::ComboBox> juce__comboBox;
     std::unique_ptr<juce::TextButton> juce__textButton;
 
-
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsWindowComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsWindowComponent)
 };
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

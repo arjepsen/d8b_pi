@@ -32,7 +32,7 @@ public:
 //////////////////////////////////
 // VARIOUS NOTES //
 
-// Mixermanager object should be instantiated in MainComponent.
+// Mixermanager object should be instantiated in MainComponent. (So it's accessible for everything else...)
 // Remaining classes should be instantiated in mixermanager.
 // So channels gets instantiated in mixermanager.
 // But channelstripcomponent are also instantiated in maincomponent, since they are a gui element.

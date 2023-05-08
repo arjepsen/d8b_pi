@@ -17,6 +17,7 @@
  */
 class MenuBar : public juce::Component,
                 public juce::MenuBarModel
+// public juce::ApplicationCommandTarget
 
 {
 public:
@@ -32,6 +33,7 @@ public:
 
 private:
     std::unique_ptr<juce::MenuBarComponent> menuBar;
+    // juce::ApplicationCommandManager commandManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBar)
 };

@@ -26,7 +26,7 @@ MixerManager::MixerManager() : channels{}
   // So the user starts out where he left?
     for (auto &channel : channels)
     {
-        // Initialize channel member variables to their default values
+        // Initialize channel member variables to their default (OR saved) values
         // For example:
         // channel.setVolume(defaultVolume);
         // channel.setPan(defaultPan);

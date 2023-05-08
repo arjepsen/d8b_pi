@@ -52,7 +52,7 @@ SettingsWindowComponent::SettingsWindowComponent ()
     //[UserPreSize]
     //[/UserPreSize]
 
-    setSize (600, 400);
+    setSize (800, 600);
 
 
     //[Constructor] You can add your own custom stuff here..

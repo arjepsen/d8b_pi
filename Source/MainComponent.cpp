@@ -3,9 +3,15 @@
 //==============================================================================
 
 MainComponent::MainComponent()
-
+    : settings(Settings::getInstance())
 {
+    // Main window size.
     setSize(1920, 1080);
+
+    // This would print out the devices
+    //settings.printUsbDevices();
+
+    // Show channelStrips.
     addAndMakeVisible(channelStrip1);
     addAndMakeVisible(channelStrip2);
     addAndMakeVisible(channelStrip3);
@@ -31,10 +37,10 @@ MainComponent::MainComponent()
     addAndMakeVisible(channelStrip23);
     addAndMakeVisible(channelStrip24);
 
+    // Show MenuBar.
     addAndMakeVisible(menuBar);
 
-
-    //addAndMakeVisible(settingsWindow);
+    addAndMakeVisible(settingsWindow);
 }
 
 MainComponent::~MainComponent()
@@ -50,7 +56,7 @@ void MainComponent::paint(juce::Graphics &g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     // g.setFont(juce::Font(16.0f));
     // g.setColour(juce::Colours::white);
-    //g.drawText("Hello World!", getLocalBounds(), juce::Justification::centred, true);
+    // g.drawText("Hello World!", getLocalBounds(), juce::Justification::centred, true);
 }
 
 void MainComponent::resized()
@@ -64,28 +70,29 @@ void MainComponent::resized()
 
     settingsWindow.setBounds(10, 10, 300, 120);
 
+    // Channelstrip placements.
     channelStrip1.setBounds(0, 28, 75, 1024);
-    channelStrip2.setBounds(76, 28, 75, 1024);
-    channelStrip3.setBounds(152, 28, 75, 1024);
-    channelStrip4.setBounds(228, 28, 75, 1024);
-    channelStrip5.setBounds(304, 28, 75, 1024);
-    channelStrip6.setBounds(380, 28, 75, 1024);
-    channelStrip7.setBounds(456, 28, 75, 1024);
-    channelStrip8.setBounds(532, 28, 75, 1024);
-    channelStrip9.setBounds(608, 28, 75, 1024);
-    channelStrip10.setBounds(684, 28, 75, 1024);
-    channelStrip11.setBounds(760, 28, 75, 1024);
-    channelStrip12.setBounds(836, 28, 75, 1024);
-    channelStrip13.setBounds(912, 28, 75, 1024);
-    channelStrip14.setBounds(988, 28, 75, 1024);
-    channelStrip15.setBounds(1064, 28, 75, 1024);
-    channelStrip16.setBounds(1140, 28, 75, 1024);
-    channelStrip17.setBounds(1216, 28, 75, 1024);
-    channelStrip18.setBounds(1292, 28, 75, 1024);
-    channelStrip19.setBounds(1368, 28, 75, 1024);
-    channelStrip20.setBounds(1444, 28, 75, 1024);
-    channelStrip21.setBounds(1520, 28, 75, 1024);
-    channelStrip22.setBounds(1596, 28, 75, 1024);
-    channelStrip23.setBounds(1664, 28, 75, 1024);
-    channelStrip24.setBounds(1764, 28, 75, 1024);
+    channelStrip2.setBounds(75, 28, 75, 1024);
+    channelStrip3.setBounds(150, 28, 75, 1024);
+    channelStrip4.setBounds(225, 28, 75, 1024);
+    channelStrip5.setBounds(300, 28, 75, 1024);
+    channelStrip6.setBounds(375, 28, 75, 1024);
+    channelStrip7.setBounds(450, 28, 75, 1024);
+    channelStrip8.setBounds(525, 28, 75, 1024);
+    channelStrip9.setBounds(600, 28, 75, 1024);
+    channelStrip10.setBounds(675, 28, 75, 1024);
+    channelStrip11.setBounds(750, 28, 75, 1024);
+    channelStrip12.setBounds(825, 28, 75, 1024);
+    channelStrip13.setBounds(900, 28, 75, 1024);
+    channelStrip14.setBounds(975, 28, 75, 1024);
+    channelStrip15.setBounds(1050, 28, 75, 1024);
+    channelStrip16.setBounds(1125, 28, 75, 1024);
+    channelStrip17.setBounds(1200, 28, 75, 1024);
+    channelStrip18.setBounds(1275, 28, 75, 1024);
+    channelStrip19.setBounds(1350, 28, 75, 1024);
+    channelStrip20.setBounds(1425, 28, 75, 1024);
+    channelStrip21.setBounds(1500, 28, 75, 1024);
+    channelStrip22.setBounds(1575, 28, 75, 1024);
+    channelStrip23.setBounds(1650, 28, 75, 1024);
+    channelStrip24.setBounds(1725, 28, 75, 1024);
 }

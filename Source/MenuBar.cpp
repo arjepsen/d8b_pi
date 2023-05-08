@@ -14,34 +14,28 @@
 //==============================================================================
 MenuBar::MenuBar()
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
+    // Create the menubarcomponent, and show it.
     menuBar.reset(new juce::MenuBarComponent(this));
     addAndMakeVisible(menuBar.get());
 
-    setSize(1000, 27);
+    // setApplicationCommandManagerToWatch(&commandManager);
+    // commandManager.registerAllCommandsForTarget(this);
+    
+    // // Let cmdMangr use keypresses.
+    // addKeyListener(commandManager.getKeyMappings());
+
+    // Not sure what setSize here would do....
+    //setSize(100, 10);
 }
 
 MenuBar::~MenuBar() {}
 
 void MenuBar::paint(juce::Graphics &g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); // clear the background
-
+    // Set background for the MenuBar - draw a rectangle around it.
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); 
     g.setColour(juce::Colours::grey);
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-
-    // g.setColour(juce::Colours::white);
-    // g.setFont(14.0f);
-    // g.drawText("TestBar", getLocalBounds(),
-    //            juce::Justification::centred, true); // draw some placeholder text
 }
 
 void MenuBar::resized()
@@ -61,6 +55,11 @@ juce::StringArray MenuBar::getMenuBarNames()
 juce::PopupMenu MenuBar::getMenuForIndex(int menuIndex, const juce::String &menuName)
 {
     juce::PopupMenu menu;
+    juce::PopupMenu automationSubMenu;
+    juce::PopupMenu transportSubMenu;
+    juce::PopupMenu metersSubMenu;
+    juce::PopupMenu meterTypeSubMenu;
+    juce::PopupMenu meterRefPointSubMenu;
 
     switch (menuIndex)
     {
@@ -106,6 +105,8 @@ juce::PopupMenu MenuBar::getMenuForIndex(int menuIndex, const juce::String &menu
             menu.addItem(25, "Play From Selection");
             menu.addSeparator();
             menu.addItem(26, "Select All");
+            menu.addSeparator();
+            menu.addItem(87, "Settings");
             break;
         case 2: // "Channel"
             menu.addItem(27, "Channel List");
@@ -137,9 +138,48 @@ juce::PopupMenu MenuBar::getMenuForIndex(int menuIndex, const juce::String &menu
             menu.addItem(43, "Solo Latch");
             menu.addItem(44, "Link Speakers");
             menu.addSeparator();
-            menu.addItem(45, "Automation");
-            menu.addItem(46, "Transport");
-            menu.addItem(47, "Meters");
+            
+            // Automation submenu
+            automationSubMenu.addItem(450, "Bypass");
+            automationSubMenu.addSeparator();
+            automationSubMenu.addItem(451, "Trim Levels");
+            automationSubMenu.addItem(452, "Auto Touch");
+            automationSubMenu.addSeparator();
+            automationSubMenu.addItem(453, "Faders");
+            automationSubMenu.addItem(454, "Mutes");
+            automationSubMenu.addItem(455, "Pan");
+            automationSubMenu.addItem(456, "All");
+            automationSubMenu.addSeparator();
+            automationSubMenu.addItem(457, "Write Flyback");
+            automationSubMenu.addItem(458, "Write Ready Mode");
+            menu.addSubMenu("Automation", automationSubMenu);
+
+            // Transport submenu
+            transportSubMenu.addItem(460, "Use PreRoll");
+            transportSubMenu.addItem(461, "Record Safe");
+            transportSubMenu.addItem(462, "One Button Punch");
+            menu.addSubMenu("Transport", transportSubMenu);
+
+            // MeterType (sub)submenu
+            meterTypeSubMenu.addItem(470, "Pre Fader");
+            meterTypeSubMenu.addItem(471, "Post Fader");
+            meterTypeSubMenu.addItem(472, "Post Mute/Fader");
+
+            // Meter Reference Point (sub)submenu
+            meterRefPointSubMenu.addItem(473, "-10 dB");
+            meterRefPointSubMenu.addItem(474, "-15 dB");
+            meterRefPointSubMenu.addItem(475, "-20 dB");
+
+            // Meters submenu
+            metersSubMenu.addSubMenu("Meter Type", meterTypeSubMenu);
+            metersSubMenu.addSubMenu("Meter Reference Point", meterRefPointSubMenu);
+            metersSubMenu.addSeparator();
+            metersSubMenu.addItem(476, "Show Meters In Trim Mode");
+            metersSubMenu.addItem(477, "Show Peak Holds");
+            metersSubMenu.addSeparator();
+            metersSubMenu.addItem(478, "Clear Overloads");
+            menu.addSubMenu("Meters", metersSubMenu);
+
             menu.addSeparator();
             menu.addItem(48, "Faders to Tape");
             menu.addSeparator();
@@ -167,7 +207,7 @@ juce::PopupMenu MenuBar::getMenuForIndex(int menuIndex, const juce::String &menu
             menu.addItem(66, "P 15");
             menu.addItem(67, "P 16");
             break;
-        case 5:
+        case 5: // "Windows"
             menu.addItem(68, "About");
             menu.addItem(69, "Help");
             menu.addItem(70, "Hot Keys");
