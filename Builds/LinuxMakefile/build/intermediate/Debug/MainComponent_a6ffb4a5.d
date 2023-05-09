@@ -351,5 +351,6 @@ build/intermediate/Debug/MainComponent_a6ffb4a5.o: \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_GridItem.h \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_Grid.h \
  /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h \
- ../../Source/MenuBar.h ../../Source/SettingsClass.h \
- ../../Source/SettingsWindowComponent.h ../../Source/settingsplay.h
+ ../../Source/MenuBar.h ../../Source/MixerManagerClass.h \
+ ../../Source/ChannelClass.h ../../Source/SettingsClass.h \
+ ../../Source/SettingsWindowComponent.h

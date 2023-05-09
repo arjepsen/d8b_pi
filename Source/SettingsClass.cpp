@@ -19,7 +19,7 @@
 
 Settings::Settings() : brainPort(-1), dspPort(-1)
 {
-    std::cout << "Constructor" << std::endl;
+    std::cout << "Settings Constructor" << std::endl;
     findUSBDevices();
     // std::vector<std::string> devices;
     // glob_t glob_result;

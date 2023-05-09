@@ -13,11 +13,21 @@
 #include <numeric>
 #include <stdexcept>
 
+
+// // Set up singleton
+// MixerManager MixerManager::instance;
+
+// MixerManager& MixerManager::getInstance()
+// {
+//   return instance;
+// }
+
 // ############################ CONSTRUCTOR ####################################
 // std::array automatically initializes elements to default value - 
 // so Channel constructor gets called automatically.
-MixerManager::MixerManager() : channels{} 
+MixerManager::MixerManager() : channels{}, settings(Settings::getInstance())
 {
+  std::cout << "MixerManger Constructor" << std::endl;
   // assign default values to each channel's members, 
   // And at the same time, send the corresponding commands to the mixer.
   // When this program runs, and this constructor is run, we can have had
@@ -40,6 +50,9 @@ MixerManager::MixerManager() : channels{}
         // ...
 
     }
+
+    // Just for laughs - print out usb devices
+    settings.printUsbDevices();
 }
 
 // ############################### METHODS ####################################

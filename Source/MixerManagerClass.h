@@ -5,29 +5,51 @@
     Created: 14 Apr 2023 10:12:41pm
     Author:  anders
 
+    The MixerManager class is where the UI is tied together with the rest
+    of the program. Everything should pass through here, so we have
+    seperation of concerns.
+    This should be a "singleton" class, so only one instance can exist.
   ==============================================================================
 */
 
 #pragma once
-#include <cstdint>
-#include <array>
 #include "ChannelClass.h"
+#include "SettingsClass.h"
+#include <array>
+#include <cstdint>
 
 class MixerManager
 {
 private:
-  static constexpr uint8_t CHANNEL_COUNT = 56;
-  std::array<Channel, CHANNEL_COUNT> channels;
+    static constexpr uint8_t CHANNEL_COUNT = 56;
+    std::array<Channel, CHANNEL_COUNT> channels;
+
+    Settings &settings;
+
+    MixerManager();               // Constructor
+
+
+    // Delete copy constructor and assignment operator, to avoid copying the singleton.
+    MixerManager(const MixerManager &) = delete;
+    MixerManager &operator=(const MixerManager &) = delete;
 
 public:
-  MixerManager();
+    static MixerManager &getInstance(); // Returns a reference to the instance.
 
-  // Public methods for interacting with channels
-  const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
+    // Public methods for interacting with channels
+    const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
 
-  // Add methods to handle communication with the Brain and DSP boards
+    // TODO: Add methods to handle communication with the Brain and DSP boards
+
+
 };
 
+// Singleton modifications
+inline MixerManager &MixerManager::getInstance()
+{
+    static MixerManager instance;
+    return instance;
+}
 
 //////////////////////////////////
 // VARIOUS NOTES //

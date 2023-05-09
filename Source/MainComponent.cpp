@@ -3,13 +3,15 @@
 //==============================================================================
 
 MainComponent::MainComponent()
-    : settings(Settings::getInstance())
+    : mixerManager(MixerManager::getInstance())
+//    : settings(Settings::getInstance())
 {
+    std::cout << "MainComponent Constructor" << std::endl;
     // Main window size.
     setSize(1920, 1080);
 
     // This would print out the devices
-    //settings.printUsbDevices();
+    // settings.printUsbDevices();
 
     // Show channelStrips.
     addAndMakeVisible(channelStrip1);

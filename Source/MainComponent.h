@@ -2,7 +2,7 @@
 
 #include "ChannelStripComponent.h"
 #include "MenuBar.h"
-#include "SettingsClass.h"
+#include "MixerManagerClass.h"
 #include "SettingsWindowComponent.h"
 #include "settingsplay.h"
 #include <JuceHeader.h>
@@ -31,9 +31,9 @@ public:
 private:
     //==============================================================================
 
-    SettingsWindow settingsWindow;
+    MixerManager &mixerManager;
 
-    Settings &settings;
+    SettingsWindow settingsWindow;
 
     MenuBar menuBar;
 
