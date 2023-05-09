@@ -46,6 +46,8 @@
       <FILE id="dZV9eV" name="settingsplay.h" compile="0" resource="0" file="Source/settingsplay.h"/>
       <FILE id="RTo9y5" name="MenuBar.cpp" compile="1" resource="0" file="Source/MenuBar.cpp"/>
       <FILE id="f9zfpk" name="MenuBar.h" compile="0" resource="0" file="Source/MenuBar.h"/>
+      <FILE id="DxM7ee" name="MySettingsWindow.h" compile="0" resource="0"
+            file="Source/MySettingsWindow.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>

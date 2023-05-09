@@ -32,27 +32,31 @@ SettingsWindowComponent::SettingsWindowComponent ()
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
 
-    juce__comboBox.reset (new juce::ComboBox ("new combo box"));
-    addAndMakeVisible (juce__comboBox.get());
-    juce__comboBox->setEditableText (false);
-    juce__comboBox->setJustificationType (juce::Justification::centredLeft);
-    juce__comboBox->setTextWhenNothingSelected (juce::String());
-    juce__comboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    juce__comboBox->addListener (this);
+    USBcomboBox.reset (new juce::ComboBox ("new combo box"));
+    addAndMakeVisible (USBcomboBox.get());
+    USBcomboBox->setEditableText (false);
+    USBcomboBox->setJustificationType (juce::Justification::centredLeft);
+    USBcomboBox->setTextWhenNothingSelected (TRANS("kurt"));
+    USBcomboBox->setTextWhenNoChoicesAvailable (juce::String());
+    USBcomboBox->addItem (TRANS("item1"), 1);
+    USBcomboBox->addItem (TRANS("item2"), 2);
+    USBcomboBox->addItem (TRANS("item3"), 3);
+    USBcomboBox->addItem (TRANS("item4"), 4);
+    USBcomboBox->addListener (this);
 
-    juce__comboBox->setBounds (176, 200, 150, 24);
+    USBcomboBox->setBounds (168, 128, 150, 24);
 
     juce__textButton.reset (new juce::TextButton ("new button"));
     addAndMakeVisible (juce__textButton.get());
     juce__textButton->addListener (this);
 
-    juce__textButton->setBounds (360, 200, 150, 24);
+    juce__textButton->setBounds (336, 128, 150, 24);
 
 
     //[UserPreSize]
     //[/UserPreSize]
 
-    setSize (800, 600);
+    setSize (600, 400);
 
 
     //[Constructor] You can add your own custom stuff here..
@@ -64,7 +68,7 @@ SettingsWindowComponent::~SettingsWindowComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    juce__comboBox = nullptr;
+    USBcomboBox = nullptr;
     juce__textButton = nullptr;
 
 
@@ -98,10 +102,10 @@ void SettingsWindowComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasCh
     //[UsercomboBoxChanged_Pre]
     //[/UsercomboBoxChanged_Pre]
 
-    if (comboBoxThatHasChanged == juce__comboBox.get())
+    if (comboBoxThatHasChanged == USBcomboBox.get())
     {
-        //[UserComboBoxCode_juce__comboBox] -- add your combo box handling code here..
-        //[/UserComboBoxCode_juce__comboBox]
+        //[UserComboBoxCode_USBcomboBox] -- add your combo box handling code here..
+        //[/UserComboBoxCode_USBcomboBox]
     }
 
     //[UsercomboBoxChanged_Post]
@@ -143,11 +147,12 @@ BEGIN_JUCER_METADATA
                  variableInitialisers="" snapPixels="8" snapActive="1" snapShown="1"
                  overlayOpacity="0.330" fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ff323e44"/>
-  <COMBOBOX name="new combo box" id="c1022a9818edca80" memberName="juce__comboBox"
-            virtualName="" explicitFocusOrder="0" pos="176 200 150 24" editable="0"
-            layout="33" items="" textWhenNonSelected="" textWhenNoItems="(no choices)"/>
+  <COMBOBOX name="new combo box" id="c1022a9818edca80" memberName="USBcomboBox"
+            virtualName="" explicitFocusOrder="0" pos="168 128 150 24" editable="0"
+            layout="33" items="item1&#10;item2&#10;item3&#10;item4" textWhenNonSelected="kurt"
+            textWhenNoItems=""/>
   <TEXTBUTTON name="new button" id="2ffde614d17c6c92" memberName="juce__textButton"
-              virtualName="" explicitFocusOrder="0" pos="360 200 150 24" buttonText="new button"
+              virtualName="" explicitFocusOrder="0" pos="336 128 150 24" buttonText="new button"
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 

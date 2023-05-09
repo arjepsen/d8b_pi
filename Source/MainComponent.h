@@ -4,8 +4,10 @@
 #include "MenuBar.h"
 #include "MixerManagerClass.h"
 #include "SettingsWindowComponent.h"
-#include "settingsplay.h"
 #include <JuceHeader.h>
+
+//#include "settingsplay.h"
+
 
 //==============================================================================
 /*
@@ -33,7 +35,10 @@ private:
 
     MixerManager &mixerManager;
 
-    SettingsWindow settingsWindow;
+
+    //SettingsWindowComponent kurt;
+
+    //SettingsWindow settingsWindow;
 
     MenuBar menuBar;
 

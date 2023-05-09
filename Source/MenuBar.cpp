@@ -43,6 +43,9 @@ void MenuBar::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     menuBar->setBounds(getLocalBounds());
+
+
+    settingsWindow.setBounds(10, 10, 300, 120);
 }
 
 juce::StringArray MenuBar::getMenuBarNames()
@@ -243,4 +246,12 @@ juce::PopupMenu MenuBar::getMenuForIndex(int menuIndex, const juce::String &menu
 void MenuBar::menuItemSelected(int menuItemID, int topLevelMenuIndex)
 {
     // Handle menuitem selection
+    if (menuItemID == 87)
+    {
+        std::cout << "settings chosen" << std::endl;
+        //MySettingsWindow* mySettingsWindow = new MySettingsWindow();
+        // NOT WORKING AS INTENDED
+        // This opens the window WITHIN the menubar....
+        addAndMakeVisible(settingsWindow);
+    }
 }

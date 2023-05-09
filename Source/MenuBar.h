@@ -11,6 +11,9 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "SettingsWindowComponent.h"
+#include "MySettingsWindow.h"
+#include "settingsplay.h"
 
 //==============================================================================
 /*
@@ -34,6 +37,9 @@ public:
 private:
     std::unique_ptr<juce::MenuBarComponent> menuBar;
     // juce::ApplicationCommandManager commandManager;
+
+    //SettingsWindowComponent vindue;
+    SettingsWindow settingsWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBar)
 };

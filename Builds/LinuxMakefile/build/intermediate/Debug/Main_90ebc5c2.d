@@ -351,6 +351,7 @@ build/intermediate/Debug/Main_90ebc5c2.o: ../../Source/Main.cpp \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_Grid.h \
  /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h \
  ../../Source/MainComponent.h ../../Source/ChannelStripComponent.h \
- ../../Source/MenuBar.h ../../Source/MixerManagerClass.h \
- ../../Source/ChannelClass.h ../../Source/SettingsClass.h \
- ../../Source/SettingsWindowComponent.h
+ ../../Source/MenuBar.h ../../Source/SettingsWindowComponent.h \
+ ../../Source/MySettingsWindow.h ../../Source/settingsplay.h \
+ ../../Source/MixerManagerClass.h ../../Source/ChannelClass.h \
+ ../../Source/SettingsClass.h

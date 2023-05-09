@@ -42,7 +42,8 @@ MainComponent::MainComponent()
     // Show MenuBar.
     addAndMakeVisible(menuBar);
 
-    addAndMakeVisible(settingsWindow);
+    
+
 }
 
 MainComponent::~MainComponent()
@@ -70,7 +71,8 @@ void MainComponent::resized()
 
     menuBar.setBounds(0, 0, getWidth(), 30);
 
-    settingsWindow.setBounds(10, 10, 300, 120);
+    
+
 
     // Channelstrip placements.
     channelStrip1.setBounds(0, 28, 75, 1024);
