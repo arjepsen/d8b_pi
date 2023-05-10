@@ -11,7 +11,7 @@
 #include "SettingsWindow.h"
 
 
-
+SettingsWindow* SettingsWindow::currentInstance = nullptr;  // Define the static member.
 
 
 SettingsWindow::SettingsWindow(const juce::String& name, juce::Colour backgroundColour, int requiredButtons, bool addToDesktop)
@@ -19,7 +19,9 @@ SettingsWindow::SettingsWindow(const juce::String& name, juce::Colour background
 {
     //setUsingNativeTitleBar(true);
     //setResizable(false, false);
+    setAlwaysOnTop(true);
     centreWithSize(400, 300);
+    currentInstance = this;
 
     // Add any necessary components to your window here
     
@@ -29,5 +31,6 @@ SettingsWindow::~SettingsWindow() {}
 
 void SettingsWindow::closeButtonPressed()
 {
+  currentInstance = nullptr;  // Reset the current instance when window closed.
     delete this;
 }

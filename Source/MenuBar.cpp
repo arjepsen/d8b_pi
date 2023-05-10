@@ -11,7 +11,6 @@
 #include "MenuBar.h"
 #include <JuceHeader.h>
 
-
 //==============================================================================
 MenuBar::MenuBar()
 {
@@ -21,12 +20,12 @@ MenuBar::MenuBar()
 
     // setApplicationCommandManagerToWatch(&commandManager);
     // commandManager.registerAllCommandsForTarget(this);
-    
+
     // // Let cmdMangr use keypresses.
     // addKeyListener(commandManager.getKeyMappings());
 
     // Not sure what setSize here would do....
-    //setSize(100, 10);
+    // setSize(100, 10);
 }
 
 MenuBar::~MenuBar() {}
@@ -34,7 +33,7 @@ MenuBar::~MenuBar() {}
 void MenuBar::paint(juce::Graphics &g)
 {
     // Set background for the MenuBar - draw a rectangle around it.
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); 
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::grey);
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
 }
@@ -44,7 +43,7 @@ void MenuBar::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     menuBar->setBounds(getLocalBounds());
-    //settingsWindow.setBounds(10, 10, 300, 120);
+    // settingsWindow.setBounds(10, 10, 300, 120);
 }
 
 juce::StringArray MenuBar::getMenuBarNames()
@@ -140,7 +139,7 @@ juce::PopupMenu MenuBar::getMenuForIndex(int menuIndex, const juce::String &menu
             menu.addItem(43, "Solo Latch");
             menu.addItem(44, "Link Speakers");
             menu.addSeparator();
-            
+
             // Automation submenu
             automationSubMenu.addItem(450, "Bypass");
             automationSubMenu.addSeparator();
@@ -249,10 +248,19 @@ void MenuBar::menuItemSelected(int menuItemID, int topLevelMenuIndex)
     {
         std::cout << "settings chosen" << std::endl;
 
-        auto* window = new SettingsWindow("Settings", juce::Colours::lightgrey, juce::DocumentWindow::allButtons);
-        window->setVisible(true);
+        // Check if settings window is already open.
+        if (SettingsWindow::currentInstance != nullptr)
+        {
+            SettingsWindow::currentInstance->toFront(true);
+            std::cout << "no more than one!" << std::endl;
+        }
+        else
+        {
+            auto *window = new SettingsWindow("Settings", juce::Colours::lightgrey, juce::DocumentWindow::allButtons);
+            window->setVisible(true);
+        }
 
-        //std::unique_ptr<SettingsWindow> settingsWindow(new SettingsWindow());
-        //settingsWindow->setVisible(true);
+        // std::unique_ptr<SettingsWindow> settingsWindow(new SettingsWindow());
+        // settingsWindow->setVisible(true);
     }
 }

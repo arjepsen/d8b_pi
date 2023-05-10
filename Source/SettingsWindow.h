@@ -19,6 +19,9 @@ public:
 
     ~SettingsWindow() override;
 
+
+    static SettingsWindow* currentInstance; // Declare the static member.
+
     void closeButtonPressed() override;
 
 private:
