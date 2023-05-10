@@ -5,6 +5,7 @@
 MainComponent::MainComponent()
     : mixerManager(MixerManager::getInstance())
 //    : settings(Settings::getInstance())
+
 {
     std::cout << "MainComponent Constructor" << std::endl;
     // Main window size.

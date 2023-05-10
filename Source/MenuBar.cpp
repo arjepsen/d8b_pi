@@ -11,6 +11,7 @@
 #include "MenuBar.h"
 #include <JuceHeader.h>
 
+
 //==============================================================================
 MenuBar::MenuBar()
 {
@@ -43,9 +44,7 @@ void MenuBar::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     menuBar->setBounds(getLocalBounds());
-
-
-    settingsWindow.setBounds(10, 10, 300, 120);
+    //settingsWindow.setBounds(10, 10, 300, 120);
 }
 
 juce::StringArray MenuBar::getMenuBarNames()
@@ -249,9 +248,11 @@ void MenuBar::menuItemSelected(int menuItemID, int topLevelMenuIndex)
     if (menuItemID == 87)
     {
         std::cout << "settings chosen" << std::endl;
-        //MySettingsWindow* mySettingsWindow = new MySettingsWindow();
-        // NOT WORKING AS INTENDED
-        // This opens the window WITHIN the menubar....
-        addAndMakeVisible(settingsWindow);
+
+        auto* window = new SettingsWindow("Settings", juce::Colours::lightgrey, juce::DocumentWindow::allButtons);
+        window->setVisible(true);
+
+        //std::unique_ptr<SettingsWindow> settingsWindow(new SettingsWindow());
+        //settingsWindow->setVisible(true);
     }
 }

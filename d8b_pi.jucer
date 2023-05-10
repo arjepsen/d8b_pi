@@ -48,6 +48,10 @@
       <FILE id="f9zfpk" name="MenuBar.h" compile="0" resource="0" file="Source/MenuBar.h"/>
       <FILE id="DxM7ee" name="MySettingsWindow.h" compile="0" resource="0"
             file="Source/MySettingsWindow.h"/>
+      <FILE id="kHmpSU" name="SettingsWindow.cpp" compile="1" resource="0"
+            file="Source/SettingsWindow.cpp"/>
+      <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
+            file="Source/SettingsWindow.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>

@@ -1,5 +1,6 @@
 build/intermediate/Debug/MenuBar_49511495.o: ../../Source/MenuBar.cpp \
- ../../Source/MenuBar.h ../../JuceLibraryCode/JuceHeader.h \
+ ../../Source/MenuBar.h ../../Source/SettingsWindowComponent.h \
+ ../../JuceLibraryCode/JuceHeader.h \
  /home/anders/JUCE/modules/juce_core/juce_core.h \
  /home/anders/JUCE/modules/juce_core/system/juce_TargetPlatform.h \
  /home/anders/JUCE/modules/juce_core/system/juce_StandardHeader.h \
@@ -350,5 +351,4 @@ build/intermediate/Debug/MenuBar_49511495.o: ../../Source/MenuBar.cpp \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_GridItem.h \
  /home/anders/JUCE/modules/juce_gui_basics/layout/juce_Grid.h \
  /home/anders/JUCE/modules/juce_gui_basics/native/juce_ScopedDPIAwarenessDisabler.h \
- ../../Source/SettingsWindowComponent.h ../../Source/MySettingsWindow.h \
- ../../Source/settingsplay.h
+ ../../Source/SettingsWindow.h

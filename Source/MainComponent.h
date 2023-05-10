@@ -3,9 +3,10 @@
 #include "ChannelStripComponent.h"
 #include "MenuBar.h"
 #include "MixerManagerClass.h"
-#include "SettingsWindowComponent.h"
+//#include "SettingsWindowComponent.h"
 #include <JuceHeader.h>
 
+//#include "SettingsWindow.h"
 //#include "settingsplay.h"
 
 
@@ -66,6 +67,10 @@ private:
     ChannelStripComponent channelStrip22;
     ChannelStripComponent channelStrip23;
     ChannelStripComponent channelStrip24;
+
+    // Messing around, trying to handle a documentwindow with a safepionter:
+    //SafePointer<juce::DocumentWindow> documentWindow;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
