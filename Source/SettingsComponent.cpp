@@ -87,7 +87,7 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     // Add the USB devices to the comboboxes.
     for (const auto& device : mixerManager.getSettings().getUSBDevices())
     {
-        brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
+        brainPortComboBox->addItem(device.first + device.second, brainPortComboBox->getNumItems() + 1);
         dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
 
     }
