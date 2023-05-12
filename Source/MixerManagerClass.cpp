@@ -13,27 +13,18 @@
 #include <numeric>
 #include <stdexcept>
 
-
-// // Set up singleton
-// MixerManager MixerManager::instance;
-
-// MixerManager& MixerManager::getInstance()
-// {
-//   return instance;
-// }
-
 // ############################ CONSTRUCTOR ####################################
-// std::array automatically initializes elements to default value - 
+// std::array automatically initializes elements to default value -
 // so Channel constructor gets called automatically.
 MixerManager::MixerManager() : channels{}, settings(Settings::getInstance())
 {
-  std::cout << "MixerManger Constructor" << std::endl;
-  // assign default values to each channel's members, 
-  // And at the same time, send the corresponding commands to the mixer.
-  // When this program runs, and this constructor is run, we can have had
-  // The initial bootscript run already.
-  // ALSO - we might want this constructor to read a saved configuration file, from last "session"
-  // So the user starts out where he left?
+    std::cout << "MixerManger Constructor" << std::endl;
+    // assign default values to each channel's members,
+    // And at the same time, send the corresponding commands to the mixer.
+    // When this program runs, and this constructor is run, we can have had
+    // The initial bootscript run already.
+    // ALSO - we might want this constructor to read a saved configuration file, from last "session"
+    // So the user starts out where he left?
     for (auto &channel : channels)
     {
         // Initialize channel member variables to their default (OR saved) values
@@ -48,9 +39,7 @@ MixerManager::MixerManager() : channels{}, settings(Settings::getInstance())
         // sendVolumeCommand(channel.getChannelID(), defaultVolume);
         // sendPanCommand(channel.getChannelID(), defaultPan);
         // ...
-
     }
-
     // Just for laughs - print out usb devices
     settings.printUsbDevices();
 }
@@ -62,10 +51,16 @@ const Channel &MixerManager::getChannel(uint8_t id) const
         return channels[id];
     throw std::out_of_range("Invalid channel ID");
 }
+
+// Fetch the settings object
+const Settings &MixerManager::getSettings() const
+{
+    return settings;
+}
+
 // Implement other methods...
 
-
 // Other things to be aware of in constructor:
-// Which Bank to select? 
+// Which Bank to select?
 // config file
-// 
+//

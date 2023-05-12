@@ -26,8 +26,7 @@ private:
 
     Settings &settings;
 
-    MixerManager();               // Constructor
-
+    MixerManager(); // Constructor
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
     MixerManager(const MixerManager &) = delete;
@@ -39,9 +38,10 @@ public:
     // Public methods for interacting with channels
     const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
 
+    // Public method for providing access to the Settings instance
+    const Settings &getSettings() const;
+
     // TODO: Add methods to handle communication with the Brain and DSP boards
-
-
 };
 
 // Singleton modifications

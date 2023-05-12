@@ -52,6 +52,10 @@
             file="Source/SettingsWindow.cpp"/>
       <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
             file="Source/SettingsWindow.h"/>
+      <FILE id="FU9zmi" name="SettingsComponent.cpp" compile="1" resource="0"
+            file="Source/SettingsComponent.cpp"/>
+      <FILE id="ukFybi" name="SettingsComponent.h" compile="0" resource="0"
+            file="Source/SettingsComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
