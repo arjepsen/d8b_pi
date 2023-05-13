@@ -24,6 +24,8 @@
 #include <JuceHeader.h>
 //[/Headers]
 
+
+
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -32,25 +34,28 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class SettingsComponent : public juce::Component,
-                          public juce::ComboBox::Listener
+class SettingsComponent  : public juce::Component,
+                           public juce::ComboBox::Listener
 {
 public:
     //==============================================================================
-    // SettingsComponent();
-    SettingsComponent(MixerManager& mixerManagerInstance);
+    SettingsComponent (MixerManager& mixerManagerInstance);
     ~SettingsComponent() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     //[/UserMethods]
 
-    void paint(juce::Graphics &g) override;
+    void paint (juce::Graphics& g) override;
     void resized() override;
-    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
+    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
+
+
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+    MixerManager &mixerManager;
+    void updateInfo();
     //[/UserVariables]
 
     //==============================================================================
@@ -58,12 +63,13 @@ private:
     std::unique_ptr<juce::Label> brainPortLabel;
     std::unique_ptr<juce::ComboBox> dspPortComboBox;
     std::unique_ptr<juce::Label> dspPortLabel;
+    std::unique_ptr<juce::Label> deviceListLabel;
 
-    MixerManager &mixerManager;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComponent)
 };
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
+

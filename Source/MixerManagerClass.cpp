@@ -58,7 +58,39 @@ const Settings &MixerManager::getSettings() const
     return settings;
 }
 
-// Implement other methods...
+bool MixerManager::setBrainPort(std::string deviceString)
+{
+    std::string deviceStringStart = "/dev/ttyUSB";
+    if (deviceString.substr(0, deviceStringStart.length()) == deviceStringStart)
+    {
+        settings.settingSetBrainPort(deviceString);
+        return true;
+    }
+    else
+        return false;
+}
+
+bool MixerManager::setDspPort(std::string deviceString)
+{
+    std::string deviceStringStart = "/dev/ttyUSB";
+    if (deviceString.substr(0, deviceStringStart.length()) == deviceStringStart)
+    {
+        settings.settingSetBrainPort(deviceString);
+        return true;
+    }
+    else
+        return false;
+}
+
+std::string MixerManager::getBrainPort()
+{
+    return settings.settingsGetBrainPort();
+}
+
+std::string MixerManager::getDspPort()
+{
+    return settings.settingsGetDspPort();
+}
 
 // Other things to be aware of in constructor:
 // Which Bank to select?

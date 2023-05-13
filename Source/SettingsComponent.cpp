@@ -75,6 +75,18 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
 
     dspPortLabel->setBounds (176, 8, 79, 24);
 
+    deviceListLabel.reset (new juce::Label ("deviceListLabel",
+                                            juce::String()));
+    addAndMakeVisible (deviceListLabel.get());
+    deviceListLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
+    deviceListLabel->setJustificationType (juce::Justification::topLeft);
+    deviceListLabel->setEditable (false, false, false);
+    deviceListLabel->setColour (juce::Label::outlineColourId, juce::Colour (0x9ec4c4c4));
+    deviceListLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+    deviceListLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+
+    deviceListLabel->setBounds (8, 80, 320, 104);
+
 
     //[UserPreSize]
     //[/UserPreSize]
@@ -84,13 +96,22 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
 
     //[Constructor] You can add your own custom stuff here..
 
-    // Add the USB devices to the comboboxes.
-    for (const auto& device : mixerManager.getSettings().getUSBDevices())
-    {
-        brainPortComboBox->addItem(device.first + device.second, brainPortComboBox->getNumItems() + 1);
-        dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
+    // Add the USB devices to the comboboxes, and populate the deviceListLabel with descriptions
+    updateInfo();
+    // std::string deviceInfoText;
+    // for (const auto &device : mixerManager.getSettings().getUSBDevices())
+    // {
+    //     // brainPortComboBox->addItem(device.first + " (" + device.second + ")", brainPortComboBox->getNumItems() + 1);
+    //     // dspPortComboBox->addItem(device.first + " (" + device.second + ")", dspPortComboBox->getNumItems() + 1);
+    //     brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
+    //     dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
 
-    }
+    //     //kurt.append(device.first + ": " + device.second + "\n");
+
+    //     deviceInfoText.append(device.first + ":\n" + device.second + "\n");
+
+    // }
+    // deviceListLabel->setText(deviceInfoText, juce::dontSendNotification);
 
     //[/Constructor]
 }
@@ -104,6 +125,7 @@ SettingsComponent::~SettingsComponent()
     brainPortLabel = nullptr;
     dspPortComboBox = nullptr;
     dspPortLabel = nullptr;
+    deviceListLabel = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -139,11 +161,15 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     if (comboBoxThatHasChanged == brainPortComboBox.get())
     {
         //[UserComboBoxCode_brainPortComboBox] -- add your combo box handling code here..
+        const std::string portString = brainPortComboBox.get()->getText().toStdString();
+        mixerManager.setBrainPort(portString);
         //[/UserComboBoxCode_brainPortComboBox]
     }
     else if (comboBoxThatHasChanged == dspPortComboBox.get())
     {
         //[UserComboBoxCode_dspPortComboBox] -- add your combo box handling code here..
+        const std::string portString = dspPortComboBox.get()->getText().toStdString();
+        mixerManager.setDspPort(portString);
         //[/UserComboBoxCode_dspPortComboBox]
     }
 
@@ -154,6 +180,22 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
+void SettingsComponent::updateInfo()
+{
+    std::string deviceInfoText;
+    for (const auto &device : mixerManager.getSettings().getUSBDevices())
+    {
+        // brainPortComboBox->addItem(device.first + " (" + device.second + ")", brainPortComboBox->getNumItems() + 1);
+        // dspPortComboBox->addItem(device.first + " (" + device.second + ")", dspPortComboBox->getNumItems() + 1);
+        brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
+        dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
+
+        // kurt.append(device.first + ": " + device.second + "\n");
+
+        deviceInfoText.append(device.first + ":\n" + device.second + "\n");
+    }
+    deviceListLabel->setText(deviceInfoText, juce::dontSendNotification);
+}
 //[/MiscUserCode]
 
 
@@ -167,9 +209,10 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="SettingsComponent" componentName=""
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers=""
-                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
-                 fixedSize="1" initialWidth="400" initialHeight="300">
+                 parentClasses="public juce::Component" constructorParams="MixerManager&amp; mixerManagerInstance"
+                 variableInitialisers="mixerManager(mixerManagerInstance)" snapPixels="8"
+                 snapActive="1" snapShown="1" overlayOpacity="0.330" fixedSize="1"
+                 initialWidth="400" initialHeight="300">
   <BACKGROUND backgroundColour="ff323e44"/>
   <COMBOBOX name="brainPortComboBox" id="44672d4cfe2fd1bd" memberName="brainPortComboBox"
             virtualName="" explicitFocusOrder="0" pos="8 32 150 24" editable="0"
@@ -187,6 +230,11 @@ BEGIN_JUCER_METADATA
          edBkgCol="0" labelText="DSP Port&#10;" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="33"/>
+  <LABEL name="deviceListLabel" id="cafbb817d33d86b3" memberName="deviceListLabel"
+         virtualName="" explicitFocusOrder="0" pos="8 80 320 104" outlineCol="9ec4c4c4"
+         edTextCol="ff000000" edBkgCol="0" labelText="" editableSingleClick="0"
+         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
+         fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="9"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA

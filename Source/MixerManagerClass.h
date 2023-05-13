@@ -41,6 +41,11 @@ public:
     // Public method for providing access to the Settings instance
     const Settings &getSettings() const;
 
+    bool setBrainPort(std::string deviceString);
+    bool setDspPort(std::string deviceString);
+    std::string getBrainPort();
+    std::string getDspPort();
+
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };
 

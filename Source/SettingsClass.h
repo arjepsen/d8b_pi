@@ -22,6 +22,10 @@ public:
     // Public method to retreive the usb device list.
     const std::map<std::string, std::string> &getUSBDevices() const;
     void printUsbDevices();
+    void settingSetBrainPort(std::string deviceString);
+    void settingSetDspPort(std::string deviceString);
+    std::string settingsGetBrainPort();
+    std::string settingsGetDspPort();
 
 private:
     Settings();
@@ -31,8 +35,8 @@ private:
     Settings &operator=(const Settings &) = delete;
 
     // Settings members:
-    int brainPort;
-    int dspPort;
+    std::string brainPort;
+    std::string dspPort;
 
     std::map<std::string, std::string> usbDevices; // Map of connectd USB devices.
     void findUSBDevices();

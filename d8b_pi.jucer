@@ -56,6 +56,10 @@
             file="Source/SettingsComponent.cpp"/>
       <FILE id="ukFybi" name="SettingsComponent.h" compile="0" resource="0"
             file="Source/SettingsComponent.h"/>
+      <FILE id="pukK2Y" name="MixerInitScripts.cpp" compile="1" resource="0"
+            file="Source/MixerInitScripts.cpp"/>
+      <FILE id="mNGqLu" name="MixerInitScripts.h" compile="0" resource="0"
+            file="Source/MixerInitScripts.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
