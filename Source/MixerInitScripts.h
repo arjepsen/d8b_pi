@@ -13,4 +13,7 @@
 #include "MixerManagerClass.h"
 #include <termios.h>
 
+#define BRAINWARE_FAST_FILE "../DataFiles/controlfast.asc"
+
+
 int open_serial_port(const char *device_path, speed_t baud_rate);

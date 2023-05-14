@@ -82,12 +82,12 @@ bool MixerManager::setDspPort(std::string deviceString)
         return false;
 }
 
-std::string MixerManager::getBrainPort()
+const std::string MixerManager::getBrainPort() const
 {
     return settings.settingsGetBrainPort();
 }
 
-std::string MixerManager::getDspPort()
+const std::string MixerManager::getDspPort() const
 {
     return settings.settingsGetDspPort();
 }

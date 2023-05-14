@@ -12,15 +12,19 @@
 #include <fcntl.h>
 
 
+
 void initializeMixer()
 {
+
 
     // Get access to the mixerManager singleton:
     MixerManager &mixerManager = MixerManager::getInstance();
     
     // Fetch the com ports:
-    const char *BRAIN_DEVICE = "/dev/ttyUSB0";
+    const char *BRAIN_DEVICE = mixerManager.getBrainPort().c_str();
+    const char *DSP_DEVICE = mixerManager.getDspPort().c_str();
 
+    // Make a file descriptor for the 115200 baud rate brain connection.
     const int SLOW_BRAIN = open_serial_port(BRAIN_DEVICE, B115200);
 }
 

@@ -43,8 +43,8 @@ public:
 
     bool setBrainPort(std::string deviceString);
     bool setDspPort(std::string deviceString);
-    std::string getBrainPort();
-    std::string getDspPort();
+    const std::string getBrainPort() const;
+    const std::string getDspPort() const;
 
     const std::map<std::string, std::string> getUsbPortMap();
     

@@ -170,12 +170,12 @@ void Settings::settingSetDspPort(std::string deviceString)
     dspPort = deviceString;
 }
 
-std::string Settings::settingsGetBrainPort()
+const std::string Settings::settingsGetBrainPort() const
 {
     return brainPort;
 }
 
-std::string Settings::settingsGetDspPort()
+const std::string Settings::settingsGetDspPort() const
 {
     return dspPort;
 }

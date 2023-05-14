@@ -24,8 +24,8 @@ public:
     void printUsbDevices();
     void settingSetBrainPort(std::string deviceString);
     void settingSetDspPort(std::string deviceString);
-    std::string settingsGetBrainPort();
-    std::string settingsGetDspPort();
+    const std::string settingsGetBrainPort() const;
+    const std::string settingsGetDspPort() const;
     void findUSBDevices();
 
 private:
