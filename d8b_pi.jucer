@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="QenMpw" name="d8b_pi" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              maxBinaryFileSize="20971520">
   <MAINGROUP id="hHfYNg" name="d8b_pi">
     <GROUP id="{2A1B8560-4155-ED71-CEB1-417F6F169C9F}" name="Source">
       <FILE id="FLQd02" name="SettingsClass.cpp" compile="1" resource="0"
@@ -60,8 +61,8 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="usb &#10;udev"
                 extraLinkerFlags="-static-libgcc -static-libstdc++&#10;">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="d8b_pi"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="d8b_pi"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="d8b_pi" binaryPath="Builds/output/"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="d8b_pi" binaryPath="Builds/output/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../JUCE/modules"/>

@@ -6,7 +6,8 @@
 #define DISPLAY_LOW "30u2v"
 #define DISPLAY_MID "30u1v"
 #define DISPLAY_HIGH "30u0v"
-// These commands writes:
+
+// The following commands writes:
 //    D8B 5.1
 // MACKIE DIGITAL
 // the XXu is a position, the YYv is an character from the ascii table.
@@ -15,22 +16,26 @@
 // #define WELCOME_STRING3 = "CDu4Dv41v43v4Bv49v45v"    // MACKIE
 // #define WELCOME_STRING4 = "D4u44v49v47v49v54v41v4Cv" // DIGITAL
 
+// Let's make this version 6.0 (alpha), instead of 5.1
+// The string for that is: "94u36v2Ev30v20v28v61v6Cv70v68v61v29v"
+
+
 // The strings put together in one line.
-#define WELCOME_STRING "90u44v38v42v94u35v2Ev31vCDu4Dv41v43v4Bv49v45vD4u44v49v47v49v54v41v4Cv"
+//#define WELCOME_STRING "90u44v38v42v94u35v2Ev31vCDu4Dv41v43v4Bv49v45vD4u44v49v47v49v54v41v4Cv"
+#define WELCOME_STRING "90u44v38v42v94u36v2Ev30v20v28v61v6Cv70v68v61v29vCDu4Dv41v43v4Bv49v45vD4u44v49v47v49v54v41v4Cv"
+
+//#define BOOST_MESSAGE "80u 42v75v63v6Bv6Cv65v 20v 55v70 20v 44v6Fv72v6Fv74v68v79v2Cv C0u 27v63v61v75v73v65v 20v 4Bv61v6Ev73v61v73v2Ev2Ev2Ev 20v 69v73v 20v 67v6F69v6E67v 20v 42v79v65v2Dv42v79v65v"
+#define BOOST_MESSAGE "80u42v75v63v6Bv6Cv65v20v55v7020v44v6Fv72v6Fv74v68v79v2CvC0u27v63v61v75v73v65v20v4Bv61v6Ev73v61v73v2Ev2Ev2Ev20v69v73v20v67v6F69v6E67v20v42v79v65v2Dv42v79v65v"
+
+#define UPLOAD_FIRMWARE_MESSAGE "80u55v70v6cv6Fv61v64v69v6Ev67v20v46v69v72v6Dv77v61v72v65v73v2Ev2Ev2Ev"
+
+
 
 // This writes: "TAPE A   TAPE B   TAPE C   ALTIO" with a dash under each.
 // (it will overwrite the welcome string text, and includes spaces)
 #define TAPE_LIST "81u54v41v50v45v86u41v8Bu54v41v50v45v90u42v20v20v94u20v54v41v50v45v9Au43vA0u41v4Cv54v49v4FvC4u2DvCDu20v2Dv20v20v20v20vD4u20v20v20v20v2Dv20v20vE2u2Dv"
 
-enum tape
-{
-    TAPE_A,
-    TAPE_B,
-    TAPE_C,
-    ALTIO,
-    DIGI_IO,
-    CLOCK
-};
+
 
 #define QUERY_TAPE_A "80p"
 #define QUERY_TAPE_B "81p"

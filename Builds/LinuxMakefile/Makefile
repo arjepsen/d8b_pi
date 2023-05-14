@@ -33,7 +33,7 @@ ifeq ($(CONFIG),Debug)
   JUCE_BINDIR := build
   JUCE_LIBDIR := build
   JUCE_OBJDIR := build/intermediate/Debug
-  JUCE_OUTDIR := build
+  JUCE_OUTDIR := ../output
 
   ifeq ($(TARGET_ARCH),)
     TARGET_ARCH := 
@@ -54,7 +54,7 @@ ifeq ($(CONFIG),Release)
   JUCE_BINDIR := build
   JUCE_LIBDIR := build
   JUCE_OBJDIR := build/intermediate/Release
-  JUCE_OUTDIR := build
+  JUCE_OUTDIR := ../output
 
   ifeq ($(TARGET_ARCH),)
     TARGET_ARCH := 

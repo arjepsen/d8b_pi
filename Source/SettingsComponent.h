@@ -64,6 +64,9 @@ private:
     std::unique_ptr<juce::ComboBox> dspPortComboBox;
     std::unique_ptr<juce::Label> dspPortLabel;
     std::unique_ptr<juce::Label> deviceListLabel;
+    std::unique_ptr<juce::Label> comPortListLabel;
+    std::unique_ptr<juce::Label> brainBaudRateLabel;
+    std::unique_ptr<juce::ComboBox> brainBaudRateComboBox;
 
 
     //==============================================================================

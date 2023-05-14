@@ -13,7 +13,18 @@
 #include "MixerManagerClass.h"
 #include <termios.h>
 
-#define BRAINWARE_FAST_FILE "../DataFiles/controlfast.asc"
+// For the final program, these files should be in a "Datafiles" folder within the folder that the program file is in.
+#define BRAINWARE_FILE ".Datafiles/control.asc"
+#define BRAINWARE_FAST_FILE "./DataFiles/controlfast.asc"
+#define DSP_MASTER_FIRMWARE_FILE "./Datafiles/"
+#define DSP_SLAVE_FILE "./Datafiles/slave.asc"
+#define DSP_CONFIG_FILE "./Datafiles/Config.asc"
+#define BUF_SIZE 1024
 
 
-int open_serial_port(const char *device_path, speed_t baud_rate);
+int openSerialPort(const char *device_path, speed_t baud_rate);
+void sendFirmwareFile(const char* filename, int comPortDescriptor);
+std::string identifyIOCard(tape tapeSlot, int brainDescriptor);
+std::string decodeString(const std::string &input_string);
+std::string getBrainResponse(int brainDescriptor);
+std::string getDspResponse(int dspDescriptor);

@@ -47,6 +47,8 @@ public:
     const std::string getDspPort() const;
 
     const std::map<std::string, std::string> getUsbPortMap();
+    bool getBrainBoostState();
+    void setBrainBoostState(bool);
     
 
 

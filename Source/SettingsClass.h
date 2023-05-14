@@ -27,6 +27,8 @@ public:
     const std::string settingsGetBrainPort() const;
     const std::string settingsGetDspPort() const;
     void findUSBDevices();
+    bool settingsGetBrainBoostState();
+    void settingsSetBrainBoostState(bool);
 
 private:
     Settings();
@@ -38,6 +40,7 @@ private:
     // Settings members:
     std::string brainPort;
     std::string dspPort;
+    bool brainBoostState;
 
     std::map<std::string, std::string> usbDevicesMap; // Map of connectd USB devices.
     

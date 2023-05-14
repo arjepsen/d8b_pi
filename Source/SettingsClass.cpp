@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-Settings::Settings() : brainPort(""), dspPort("")
+Settings::Settings() : brainPort(""), dspPort(""), brainBoostState(false)
 {
     std::cout << "Settings Constructor" << std::endl;
     findUSBDevices();
@@ -178,4 +178,18 @@ const std::string Settings::settingsGetBrainPort() const
 const std::string Settings::settingsGetDspPort() const
 {
     return dspPort;
+}
+
+bool Settings::settingsGetBrainBoostState()
+{
+    return brainBoostState;
+}
+
+void Settings::settingsSetBrainBoostState(bool canWeGoToEleven)
+{
+    if (canWeGoToEleven)
+        std::cout << "WOOOHOOOOO" << std::endl;
+    else
+        std::cout << "oh.. ok... turtle speed then." << std::endl;
+    brainBoostState = canWeGoToEleven;
 }

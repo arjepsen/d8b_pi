@@ -102,6 +102,18 @@ const std::map<std::string, std::string> MixerManager::getUsbPortMap()
     return usbDeviceMap;
 }
 
+ bool MixerManager::getBrainBoostState()
+ {
+    return settings.settingsGetBrainBoostState();
+ }
+
+ void MixerManager::setBrainBoostState(bool doWeWantTurbo)
+ {
+    settings.settingsSetBrainBoostState(doWeWantTurbo);
+ }
+
+
+
 // Other things to be aware of in constructor:
 // Which Bank to select?
 // config file

@@ -85,7 +85,41 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     deviceListLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     deviceListLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
-    deviceListLabel->setBounds (8, 80, 320, 104);
+    deviceListLabel->setBounds (8, 96, 320, 104);
+
+    comPortListLabel.reset (new juce::Label ("comPortListLabel",
+                                             TRANS("COM port device list\n")));
+    addAndMakeVisible (comPortListLabel.get());
+    comPortListLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
+    comPortListLabel->setJustificationType (juce::Justification::centredLeft);
+    comPortListLabel->setEditable (false, false, false);
+    comPortListLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+    comPortListLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+
+    comPortListLabel->setBounds (8, 72, 176, 24);
+
+    brainBaudRateLabel.reset (new juce::Label ("brainBaudRateLabel",
+                                               TRANS("Brain Baudrate\n")));
+    addAndMakeVisible (brainBaudRateLabel.get());
+    brainBaudRateLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
+    brainBaudRateLabel->setJustificationType (juce::Justification::centredLeft);
+    brainBaudRateLabel->setEditable (false, false, false);
+    brainBaudRateLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+    brainBaudRateLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+
+    brainBaudRateLabel->setBounds (8, 224, 176, 24);
+
+    brainBaudRateComboBox.reset (new juce::ComboBox ("brainBaudRateComboBox"));
+    addAndMakeVisible (brainBaudRateComboBox.get());
+    brainBaudRateComboBox->setEditableText (false);
+    brainBaudRateComboBox->setJustificationType (juce::Justification::centredLeft);
+    brainBaudRateComboBox->setTextWhenNothingSelected (juce::String());
+    brainBaudRateComboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    brainBaudRateComboBox->addItem (TRANS("115200"), 1);
+    brainBaudRateComboBox->addItem (TRANS("230400"), 2);
+    brainBaudRateComboBox->addListener (this);
+
+    brainBaudRateComboBox->setBounds (8, 248, 150, 24);
 
 
     //[UserPreSize]
@@ -127,6 +161,9 @@ SettingsComponent::~SettingsComponent()
     dspPortComboBox = nullptr;
     dspPortLabel = nullptr;
     deviceListLabel = nullptr;
+    comPortListLabel = nullptr;
+    brainBaudRateLabel = nullptr;
+    brainBaudRateComboBox = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -172,6 +209,22 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
         const std::string portString = dspPortComboBox.get()->getText().toStdString();
         mixerManager.setDspPort(portString);
         //[/UserComboBoxCode_dspPortComboBox]
+    }
+    else if (comboBoxThatHasChanged == brainBaudRateComboBox.get())
+    {
+        //[UserComboBoxCode_brainBaudRateComboBox] -- add your combo box handling code here..
+        int baudRateID = brainBaudRateComboBox.get()->getSelectedId();
+        std::cout << "id for rate selected: " << baudRateID << std::endl;
+        if (baudRateID == 1)
+            mixerManager.setBrainBoostState(false);
+        else if (baudRateID == 2)
+            mixerManager.setBrainBoostState(true);
+        else
+        {
+            printf("SOMETHINGS WRONG WITH OUR TURBO COMBO");
+            exit(1);
+        }
+        //[/UserComboBoxCode_brainBaudRateComboBox]
     }
 
     //[UsercomboBoxChanged_Post]
@@ -232,10 +285,24 @@ BEGIN_JUCER_METADATA
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="33"/>
   <LABEL name="deviceListLabel" id="cafbb817d33d86b3" memberName="deviceListLabel"
-         virtualName="" explicitFocusOrder="0" pos="8 80 320 104" outlineCol="9ec4c4c4"
+         virtualName="" explicitFocusOrder="0" pos="8 96 320 104" outlineCol="9ec4c4c4"
          edTextCol="ff000000" edBkgCol="0" labelText="" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="9"/>
+  <LABEL name="comPortListLabel" id="a94e6088f71a5c15" memberName="comPortListLabel"
+         virtualName="" explicitFocusOrder="0" pos="8 72 176 24" edTextCol="ff000000"
+         edBkgCol="0" labelText="COM port device list&#10;" editableSingleClick="0"
+         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
+         fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="33"/>
+  <LABEL name="brainBaudRateLabel" id="4ca2f2a44624c82d" memberName="brainBaudRateLabel"
+         virtualName="" explicitFocusOrder="0" pos="8 224 176 24" edTextCol="ff000000"
+         edBkgCol="0" labelText="Brain Baudrate&#10;" editableSingleClick="0"
+         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
+         fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="33"/>
+  <COMBOBOX name="brainBaudRateComboBox" id="e1b7741da95828a" memberName="brainBaudRateComboBox"
+            virtualName="" explicitFocusOrder="0" pos="8 248 150 24" editable="0"
+            layout="33" items="115200&#10;230400" textWhenNonSelected=""
+            textWhenNoItems="(no choices)"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA
