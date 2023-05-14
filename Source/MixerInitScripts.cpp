@@ -9,17 +9,20 @@
 */
 
 #include "MixerInitScripts.h"
-#include <termios.h>
 #include <fcntl.h>
 
-void initPartOne()
-{
-    const BRAIN_DEVICE =
 
+void initializeMixer()
+{
+
+    // Get access to the mixerManager singleton:
+    MixerManager &mixerManager = MixerManager::getInstance();
+    
+    // Fetch the com ports:
+    const char *BRAIN_DEVICE = "/dev/ttyUSB0";
 
     const int SLOW_BRAIN = open_serial_port(BRAIN_DEVICE, B115200);
 }
-
 
 int open_serial_port(const char *device_path, speed_t baud_rate)
 {

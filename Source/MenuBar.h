@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "SettingsWindowComponent.h"
+//#include "SettingsWindowComponent.h"
 #include <JuceHeader.h>
 // #include "MySettingsWindow.h"
 // #include "settingsplay.h"

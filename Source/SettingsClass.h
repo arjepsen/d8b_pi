@@ -26,6 +26,7 @@ public:
     void settingSetDspPort(std::string deviceString);
     std::string settingsGetBrainPort();
     std::string settingsGetDspPort();
+    void findUSBDevices();
 
 private:
     Settings();
@@ -38,8 +39,8 @@ private:
     std::string brainPort;
     std::string dspPort;
 
-    std::map<std::string, std::string> usbDevices; // Map of connectd USB devices.
-    void findUSBDevices();
+    std::map<std::string, std::string> usbDevicesMap; // Map of connectd USB devices.
+    
 };
 
 // "Singleton" - ensure that only one instance of this class is created.

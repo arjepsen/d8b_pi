@@ -39,12 +39,16 @@ public:
     const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
 
     // Public method for providing access to the Settings instance
-    const Settings &getSettings() const;
+    //const Settings &getSettings() const;
 
     bool setBrainPort(std::string deviceString);
     bool setDspPort(std::string deviceString);
     std::string getBrainPort();
     std::string getDspPort();
+
+    const std::map<std::string, std::string> getUsbPortMap();
+    
+
 
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };

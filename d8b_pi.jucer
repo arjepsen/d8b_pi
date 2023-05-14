@@ -39,15 +39,8 @@
       <FILE id="XN9V5Z" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="dvH6xz" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
-      <FILE id="eatEe4" name="SettingsWindowComponent.cpp" compile="1" resource="0"
-            file="Source/SettingsWindowComponent.cpp"/>
-      <FILE id="tYTxIH" name="SettingsWindowComponent.h" compile="0" resource="0"
-            file="Source/SettingsWindowComponent.h"/>
-      <FILE id="dZV9eV" name="settingsplay.h" compile="0" resource="0" file="Source/settingsplay.h"/>
       <FILE id="RTo9y5" name="MenuBar.cpp" compile="1" resource="0" file="Source/MenuBar.cpp"/>
       <FILE id="f9zfpk" name="MenuBar.h" compile="0" resource="0" file="Source/MenuBar.h"/>
-      <FILE id="DxM7ee" name="MySettingsWindow.h" compile="0" resource="0"
-            file="Source/MySettingsWindow.h"/>
       <FILE id="kHmpSU" name="SettingsWindow.cpp" compile="1" resource="0"
             file="Source/SettingsWindow.cpp"/>
       <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
@@ -64,7 +57,8 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="usb &#10;udev">
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="usb &#10;udev"
+                extraLinkerFlags="-static-libgcc -static-libstdc++&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="d8b_pi"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="d8b_pi"/>

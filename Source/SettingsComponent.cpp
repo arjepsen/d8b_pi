@@ -98,6 +98,7 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
 
     // Add the USB devices to the comboboxes, and populate the deviceListLabel with descriptions
     updateInfo();
+
     // std::string deviceInfoText;
     // for (const auto &device : mixerManager.getSettings().getUSBDevices())
     // {
@@ -182,8 +183,8 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 void SettingsComponent::updateInfo()
 {
-    std::string deviceInfoText;
-    for (const auto &device : mixerManager.getSettings().getUSBDevices())
+    std::string deviceInfoText = "";
+    for (const auto &device : mixerManager.getUsbPortMap())
     {
         // brainPortComboBox->addItem(device.first + " (" + device.second + ")", brainPortComboBox->getNumItems() + 1);
         // dspPortComboBox->addItem(device.first + " (" + device.second + ")", dspPortComboBox->getNumItems() + 1);

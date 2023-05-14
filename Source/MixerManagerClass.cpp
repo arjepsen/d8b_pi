@@ -53,10 +53,10 @@ const Channel &MixerManager::getChannel(uint8_t id) const
 }
 
 // Fetch the settings object
-const Settings &MixerManager::getSettings() const
-{
-    return settings;
-}
+// const Settings &MixerManager::getSettings() const
+// {
+//     return settings;
+// }
 
 bool MixerManager::setBrainPort(std::string deviceString)
 {
@@ -90,6 +90,16 @@ std::string MixerManager::getBrainPort()
 std::string MixerManager::getDspPort()
 {
     return settings.settingsGetDspPort();
+}
+
+const std::map<std::string, std::string> MixerManager::getUsbPortMap()
+{
+    // Tell settings to update the device map.
+    settings.findUSBDevices();
+
+    // Get the map of devices and return it.
+    const std::map<std::string, std::string> usbDeviceMap = settings.getUSBDevices();
+    return usbDeviceMap;
 }
 
 // Other things to be aware of in constructor:

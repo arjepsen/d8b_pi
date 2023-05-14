@@ -53,7 +53,7 @@ Settings::~Settings() {}
 
 const std::map<std::string, std::string> &Settings::getUSBDevices() const
 {
-    return usbDevices;
+    return usbDevicesMap;
 }
 
 // This method scans the /dev/ttyUSB* ports, and puts the info in the usbDevices map.
@@ -87,6 +87,9 @@ const std::map<std::string, std::string> &Settings::getUSBDevices() const
 
 void Settings::findUSBDevices() {
     glob_t glob_result;
+
+    // First, empty the map
+    usbDevicesMap.clear();
 
     // Run lsusb to get descriptions of all devices
     std::map<std::string, std::string> lsusb_devices;
@@ -136,7 +139,7 @@ void Settings::findUSBDevices() {
 
             // If this ID was found in the lsusb output, use the corresponding description
             if (lsusb_devices.count(id)) {
-                usbDevices[port] = lsusb_devices[id];
+                usbDevicesMap[port] = lsusb_devices[id];
             }
         }
     }

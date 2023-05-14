@@ -11,5 +11,6 @@
 #pragma once
 
 #include "MixerManagerClass.h"
+#include <termios.h>
 
 int open_serial_port(const char *device_path, speed_t baud_rate);
