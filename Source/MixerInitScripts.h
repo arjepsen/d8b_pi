@@ -20,6 +20,7 @@
 #define DSP_MASTER_FIRMWARE_FILE "./Datafiles/"
 #define DSP_SLAVE_FILE "./Datafiles/slave.asc"
 #define DSP_CONFIG_FILE "./Datafiles/Config.asc"
+#define DSP_CMD1_FILE "./Datafiles/dspCmd1.asc"
 #define BUF_SIZE 1024
 
 enum ioCardType

@@ -216,7 +216,7 @@ void initializeMixer()
 
     printf("Config sent twice.\n");
 
-    // ############### FX CARDS ##########################
+    // =========================== INIT FX CARDS =============================
 
     // Display the FX card list:
     write(BRAIN, FX_CARD_LIST, strlen(FX_CARD_LIST));
@@ -232,6 +232,43 @@ void initializeMixer()
     mixerManager.initFXSlot(slotB, FX_SLOT_B);
     mixerManager.initFXSlot(slotC, FX_SLOT_C);
     mixerManager.initFXSlot(slotD, FX_SLOT_D);
+
+
+    // ==================== Send some 7x2$... ================================
+    // Some further configuration.....
+    // Unsure what this does - but it does it for all the channels.
+    // Command is similar to the filter for each channel, but slightly different.
+
+    // Open the file for reading
+    printf("Sending 7x2$....\n");
+    FILE *dspCmd1 = fopen(DSP_CMD1_FILE, "r");
+    if (dspCmd1 == NULL)
+    {
+        fprintf(stderr, "Error opening file: %s\n", strerror(errno));
+        exit(1);
+    }
+
+    // Send the file
+    dspBytesRead = 0;
+    while ((dspBytesRead = fread(buf, 1, BUF_SIZE, dspCmd1)) > 0)
+    {
+        ssize_t bytesWritten = write(DSP, buf, dspBytesRead);
+        if (bytesWritten < 0)
+        {
+            perror("write");
+            exit(1);
+        }
+    }
+
+    fclose(dspCmd1);
+
+    // Should there be a reponse?
+    std::cout << getDspResponse(DSP) << std::endl;
+
+
+    // AFTER THIS IT THE MIXER IS PROBABLY UP AND RUNNING, ALTHOUGH NO CHRISTMAS LIGHTS YET....
+    // MAYBE HERE WE SEND THE SAVED CONFIGURATION, AND THEN HAND OVER THINGS TO THE 
+    // CIRCULAR BUFFER MERRY GOAROUND....?
 
 }
 
