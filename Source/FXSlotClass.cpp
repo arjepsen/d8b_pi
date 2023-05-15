@@ -62,14 +62,14 @@
 
 
 // Constructor (initialization list)
-FXSlot::FXSlot(int brain_descriptor, FXSlotID slot_id) : fxcard(nullptr)
+FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID) : fxcard(nullptr)
 {
     // Setup commands, depending on slot:
-    char mfx_query[] = MFX_QUERY_BASE;
-    char mfx_reply[] = MFX_REPLY_BASE;
-    char slot = slot_id + 65;   // 65 = ascii 'A'
+    char mfxQuery[] = MFX_QUERY_BASE;
+    char mfxReply[] = MFX_REPLY_BASE;
+    char slot = slotID + 65;   // 65 = ascii 'A'
 
-    std::map<FXSlotID, char> mfx_lookup_table
+    std::map<FXSlotID, char> mfxLookupTable
     {
         {FX_SLOT_A, '1'},
         {FX_SLOT_B, '5'},
@@ -77,20 +77,20 @@ FXSlot::FXSlot(int brain_descriptor, FXSlotID slot_id) : fxcard(nullptr)
         {FX_SLOT_D, 'D'}
     };
 
-    mfx_query[16] = mfx_lookup_table[slot_id];
-    mfx_reply[16] = mfx_lookup_table[slot_id];
+    mfxQuery[16] = mfxLookupTable[slotID];
+    mfxReply[16] = mfxLookupTable[slotID];
 
     // Query for MFX.
     printf("Querying slot %c for MFX card\n", slot);
-    printf("(Query string: %s\n)", mfx_query);
+    printf("(Query string: %s\n)", mfxQuery);
 
     // Clear queue of l's and k's
-    tcflush(brain_descriptor, TCIOFLUSH);
+    tcflush(brainDescriptor, TCIOFLUSH);
 
-    write(brain_descriptor, mfx_query, strlen(mfx_query));
+    write(brainDescriptor, mfxQuery, strlen(mfxQuery));
 
     // Check reply
-    if (get_brainresponse(brain_descriptor) == mfx_reply)
+    if (getBrainResponse(brainDescriptor) == mfxReply)
     {
         printf("Found MFX card in slot %c\n", slot);
         
@@ -108,23 +108,23 @@ FXSlot::FXSlot(int brain_descriptor, FXSlotID slot_id) : fxcard(nullptr)
         //     {FX_SLOT_D, "E1"}
         // };
 
-        // display_mfx_cmd[0] = mfx_position_cmd[slot_id][0];
-        // display_mfx_cmd[1] = mfx_position_cmd[slot_id][1];
+        // display_mfx_cmd[0] = mfx_position_cmd[slotID][0];
+        // display_mfx_cmd[1] = mfx_position_cmd[slotID][1];
 
         // //  Send the command.
-        // write(brain_descriptor, display_mfx_cmd, strlen(display_mfx_cmd));
+        // write(brainDescriptor, display_mfx_cmd, strlen(display_mfx_cmd));
     }
     else
     {
         // Set up commands for UFX querying.
         printf("No MFX card found. Querying for UFX card.\n");
-        char ufx_query[] = UFX_QUERY_BASE;
-        char ufx_reply[] = UFX_REPLY_BASE;
-        char ufx_init1[] = UFX_INIT_BASE;
-        char ufx_init2[] = UFX_INIT_BASE;
+        char ufxQuery[] = UFX_QUERY_BASE;
+        char ufxReply[] = UFX_REPLY_BASE;
+        char ufxInit1[] = UFX_INIT_BASE;
+        char ufxInit2[] = UFX_INIT_BASE;
         // "slot" is still having it's value from above.
 
-        std::map<FXSlotID, char> ufx_lookup_table
+        std::map<FXSlotID, char> ufxLookupTable
         {
             {FX_SLOT_A, '0'},
             {FX_SLOT_B, '4'},
@@ -132,24 +132,24 @@ FXSlot::FXSlot(int brain_descriptor, FXSlotID slot_id) : fxcard(nullptr)
             {FX_SLOT_D, 'C'}
         };
 
-        ufx_query[13] = ufx_query[16] = ufx_lookup_table[slot_id];
-        ufx_reply[13] = ufx_reply[16] = ufx_lookup_table[slot_id];
-        ufx_init1[13] = ufx_init1[16] = ufx_lookup_table[slot_id];
-        ufx_init2[13] = ufx_init2[16] = ufx_lookup_table[slot_id] + 2;
+        ufxQuery[13] = ufxQuery[16] = ufxLookupTable[slotID];
+        ufxReply[13] = ufxReply[16] = ufxLookupTable[slotID];
+        ufxInit1[13] = ufxInit1[16] = ufxLookupTable[slotID];
+        ufxInit2[13] = ufxInit2[16] = ufxLookupTable[slotID] + 2;
 
         // Send UFX Query.
         printf("mr. UFX.... are you there?\n");
-        write(brain_descriptor, ufx_query, strlen(ufx_query));
+        write(brainDescriptor, ufxQuery, strlen(ufxQuery));
 
 
         printf("Checking reply\n");
         // Check reply.
-        if (get_brainresponse(brain_descriptor) == ufx_reply)
+        if (getBrainResponse(brainDescriptor) == ufxReply)
         {
             printf("Found UFX card in slot %c\n", slot);
             printf("Sending UFX init commands\n");
-            write(brain_descriptor, ufx_init1, strlen(ufx_init1));
-            write(brain_descriptor, ufx_init2, strlen(ufx_init2));
+            write(brainDescriptor, ufxInit1, strlen(ufxInit1));
+            write(brainDescriptor, ufxInit2, strlen(ufxInit2));
 
             FXCard *card = new FXCard("UFX");
             fxcard = card;
@@ -171,20 +171,20 @@ FXSlot::FXSlot(int brain_descriptor, FXSlotID slot_id) : fxcard(nullptr)
     // Done querying. Update display
     if (get_card() == "empty")
     {
-        std::map<FXSlotID, std::string> display_lookup_table
+        std::map<FXSlotID, std::string> displayLookupTable
         {
             {FX_SLOT_A, "C2"},
             {FX_SLOT_B, "CC"},
             {FX_SLOT_C, "D6"},
             {FX_SLOT_D, "E0"}
         };
-        std::string display_command = display_lookup_table[slot_id] + EMPTY_DISPLAY_BASE;
+        std::string displayCommand = displayLookupTable[slotID] + EMPTY_DISPLAY_BASE;
 
-        write(brain_descriptor, display_command.c_str(), display_command.length());
+        write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
     }
     else
     {
-        std::map<FXSlotID, std::string> display_lookup_table
+        std::map<FXSlotID, std::string> displayLookupTable
         {
             {FX_SLOT_A, "C3"},
             {FX_SLOT_B, "CD"},
@@ -193,22 +193,16 @@ FXSlot::FXSlot(int brain_descriptor, FXSlotID slot_id) : fxcard(nullptr)
         };
         if (get_card() == "MFX")
         {
-            std::string display_command = display_lookup_table[slot_id] + MFX_DISPLAY_BASE;
-            write(brain_descriptor, display_command.c_str(), display_command.length());
+            std::string displayCommand = displayLookupTable[slotID] + MFX_DISPLAY_BASE;
+            write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
         }
         else
         {
-            std::string display_command = display_lookup_table[slot_id] + UFX_DISPLAY_BASE;
-            write(brain_descriptor, display_command.c_str(), display_command.length());
+            std::string displayCommand = displayLookupTable[slotID] + UFX_DISPLAY_BASE;
+            write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
         }
 
     }
-
-
-
-
-
-
 
 
 }
@@ -237,14 +231,14 @@ std::string FXSlot::get_card()
 //     // to "nullptr" in the constructor of this fxslot class, and deleted with the desturctor.
 // }
 
-std::string FXSlot::get_brainresponse(int brain_descriptor)
+std::string FXSlot::getBrainResponse(int brainDescriptor)
 {
     char response = '\0';
-    std::stringstream brain_reply_stream;
+    std::stringstream brainReplyStream;
 
     // while (true)
     // {
-    //     int result = read(brain_descriptor, &response, 1);
+    //     int result = read(brainDescriptor, &response, 1);
     //     if (response == 'l' || response == 'k')
     //     {
     //         printf("got an l or k - end of message.\n");
@@ -252,8 +246,8 @@ std::string FXSlot::get_brainresponse(int brain_descriptor)
     //     }
 
     //     if (result == 1)
-    //         // brain_reply_stream << response;
-    //         brain_reply_stream.put(response);
+    //         // brainReplyStream << response;
+    //         brainReplyStream.put(response);
     //     else if (result < 0)
     //     {
     //         perror("Error reading from file descriptor");
@@ -268,7 +262,7 @@ std::string FXSlot::get_brainresponse(int brain_descriptor)
 
     do
     {
-        int result = read(brain_descriptor, &response, 1);
+        int result = read(brainDescriptor, &response, 1);
         if (result < 1)
         {
             printf("Read returned: %d\n", result);
@@ -277,9 +271,9 @@ std::string FXSlot::get_brainresponse(int brain_descriptor)
         }
 
         if (response != 'l' && response != 'k')
-            brain_reply_stream.put(response);
+            brainReplyStream.put(response);
 
     } while (response != 'l' && response != 'k');
 
-    return brain_reply_stream.str();
+    return brainReplyStream.str();
 }

@@ -18,11 +18,11 @@ private:
 
     FXCard *fxcard;
 
-    std::string get_brainresponse(int brain_descriptor);
+    std::string getBrainResponse(int brainDescriptor);
 
 public:
     // Constructor
-    FXSlot(int brain_descriptor, FXSlotID slot_id);
+    FXSlot(int brainDescriptor, FXSlotID slotID);
     ~FXSlot();
 
     // getter for the card object? or just the name?
