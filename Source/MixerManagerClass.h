@@ -14,6 +14,7 @@
 
 #pragma once
 #include "ChannelClass.h"
+#include "FXSlotClass.h"
 #include "SettingsClass.h"
 #include <array>
 #include <cstdint>
@@ -24,9 +25,16 @@ private:
     static constexpr uint8_t CHANNEL_COUNT = 56;
     std::array<Channel, CHANNEL_COUNT> channels;
 
-    Settings &settings;
+    Settings &settings; // Reference to the Settings singleton.
 
-    MixerManager(); // Constructor
+    // Declare the FX slot objects.
+    FXSlot *fxSlotA;
+    FXSlot *fxSlotB;
+    FXSlot *fxSlotC;
+    FXSlot *fxSlotD;
+
+    MixerManager();  // Constructor
+    ~MixerManager(); // Destructor
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
     MixerManager(const MixerManager &) = delete;
@@ -39,7 +47,7 @@ public:
     const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
 
     // Public method for providing access to the Settings instance
-    //const Settings &getSettings() const;
+    // const Settings &getSettings() const;
 
     bool setBrainPort(std::string deviceString);
     bool setDspPort(std::string deviceString);
@@ -49,8 +57,8 @@ public:
     const std::map<std::string, std::string> getUsbPortMap();
     bool getBrainBoostState();
     void setBrainBoostState(bool);
-    
 
+    void initFXSlot(FXSlot * fxSlotPtr, FXSlotID fxSlotID);
 
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };

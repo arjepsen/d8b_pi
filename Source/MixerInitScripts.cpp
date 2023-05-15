@@ -13,16 +13,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-enum tape
-{
-    TAPE_A,
-    TAPE_B,
-    TAPE_C,
-    ALTIO,
-    DIGI_IO,
-    CLOCK
-};
-
 void initializeMixer()
 {
 
@@ -177,7 +167,6 @@ void initializeMixer()
 
     char buf[BUF_SIZE];
     size_t dspBytesRead = 0;
-    //bytes_read = 0;
     while ((dspBytesRead = fread(buf, 1, BUF_SIZE, dspSlaveWare)) > 0)
     {
         ssize_t dspBytesWritten = write(DSP, buf, dspBytesRead);
@@ -190,29 +179,32 @@ void initializeMixer()
 
     fclose(dspSlaveWare);
 
+    // Clear buffer
+    memset(buf, 0, sizeof(buf));
+
     // A moment of silence.
     sleep(2);
 
     // =================== DSP PLUGINS (Config) ===========================
-    // Write "Loading DSP plugins..."
+    // Display "Loading DSP plugins..."
     write(BRAIN, LOADING_DSP, strlen(LOADING_DSP));
 
     // Now send the config file to DSP ...twice... for some reason..
     FILE *dspConfig = fopen(DSP_CONFIG_FILE, "r");
-    if (dspSlaveWare == NULL)
+    if (dspConfig == NULL)
     {
         fprintf(stderr, "Error opening file: %s\n", strerror(errno));
         exit(1);
     }
 
-    // char buf[BUF_SIZE];
+    // Reusing the buffer and variable from above
     for (int i = 0; i < 2; ++i)
     {
-        size_t brainBytesRead = 0;
-        while ((brainBytesRead = fread(buf, 1, BUF_SIZE, dspConfig)) > 0)
+        dspBytesRead = 0;
+        while ((dspBytesRead = fread(buf, 1, BUF_SIZE, dspConfig)) > 0)
         {
-            ssize_t bytes_written = write(DSP, buf, bytes_read);
-            if (bytes_written < 0)
+            ssize_t dspBytesWritten = write(DSP, buf, dspBytesRead);
+            if (dspBytesWritten < 0)
             {
                 perror("write");
                 exit(1);
@@ -224,6 +216,22 @@ void initializeMixer()
 
     printf("Config sent twice.\n");
 
+    // ############### FX CARDS ##########################
+
+    // Display the FX card list:
+    write(BRAIN, FX_CARD_LIST, strlen(FX_CARD_LIST));
+
+    // Create the FX card slot object pointers.
+    FXSlot *slotA = new FXSlot(BRAIN, FX_SLOT_A);
+    FXSlot *slotB = new FXSlot(BRAIN, FX_SLOT_B);
+    FXSlot *slotC = new FXSlot(BRAIN, FX_SLOT_C);
+    FXSlot *slotD = new FXSlot(BRAIN, FX_SLOT_D);
+
+    // Pass the pointers to the mixermanager
+    mixerManager.initFXSlot(slotA, FX_SLOT_A);
+    mixerManager.initFXSlot(slotB, FX_SLOT_B);
+    mixerManager.initFXSlot(slotC, FX_SLOT_C);
+    mixerManager.initFXSlot(slotD, FX_SLOT_D);
 
 }
 
@@ -389,7 +397,7 @@ std::string getDspResponse(int dspDescriptor)
 // Function for identifying the card in the specified card slot
 // Takes card slot object, and a Brain COM port file descriptor
 // ################################################################################
-std::string identifyIOCard(tape tapeSlot, int brainDescriptor)
+std::string identifyIOCard(ioCardType tapeSlot, int brainDescriptor)
 {
     // Send the query-string for the supplied tape slot.
     switch (tapeSlot)

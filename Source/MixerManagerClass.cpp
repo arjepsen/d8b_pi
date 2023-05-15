@@ -44,6 +44,11 @@ MixerManager::MixerManager() : channels{}, settings(Settings::getInstance())
     settings.printUsbDevices();
 }
 
+MixerManager::~MixerManager()
+{
+    delete fxSlotA;
+}
+
 // ############################### METHODS ####################################
 const Channel &MixerManager::getChannel(uint8_t id) const
 {
@@ -102,17 +107,37 @@ const std::map<std::string, std::string> MixerManager::getUsbPortMap()
     return usbDeviceMap;
 }
 
- bool MixerManager::getBrainBoostState()
- {
+bool MixerManager::getBrainBoostState()
+{
     return settings.settingsGetBrainBoostState();
- }
+}
 
- void MixerManager::setBrainBoostState(bool doWeWantTurbo)
- {
+void MixerManager::setBrainBoostState(bool doWeWantTurbo)
+{
     settings.settingsSetBrainBoostState(doWeWantTurbo);
- }
+}
 
-
+void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
+{
+    switch (fxSlotID)
+    {
+        case FX_SLOT_A:
+            fxSlotA = fxSlotPtr;
+            break;
+        case FX_SLOT_B:
+            fxSlotB = fxSlotPtr;
+            break;
+        case FX_SLOT_C:
+            fxSlotC = fxSlotPtr;
+            break;
+        case FX_SLOT_D:
+            fxSlotD = fxSlotPtr;
+            break;
+        default:
+            printf("INVALID SLOT INIT");
+            exit(1);
+    }
+}
 
 // Other things to be aware of in constructor:
 // Which Bank to select?
