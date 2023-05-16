@@ -35,7 +35,8 @@
                                                                     //[/Comments]
 */
 class SettingsComponent  : public juce::Component,
-                           public juce::ComboBox::Listener
+                           public juce::ComboBox::Listener,
+                           public juce::Button::Listener
 {
 public:
     //==============================================================================
@@ -49,6 +50,7 @@ public:
     void paint (juce::Graphics& g) override;
     void resized() override;
     void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
+    void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
 
 
@@ -67,6 +69,7 @@ private:
     std::unique_ptr<juce::Label> comPortListLabel;
     std::unique_ptr<juce::Label> brainBaudRateLabel;
     std::unique_ptr<juce::ComboBox> brainBaudRateComboBox;
+    std::unique_ptr<juce::TextButton> initMixerBtn;
 
 
     //==============================================================================

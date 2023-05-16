@@ -15,12 +15,12 @@
 #include "FXSlotClass.h"
 
 // For the final program, these files should be in a "Datafiles" folder within the folder that the program file is in.
-#define BRAINWARE_FILE ".Datafiles/control.asc"
+#define BRAINWARE_FILE "./DataFiles/control.asc"
 #define BRAINWARE_FAST_FILE "./DataFiles/controlfast.asc"
-#define DSP_MASTER_FIRMWARE_FILE "./Datafiles/"
-#define DSP_SLAVE_FILE "./Datafiles/slave.asc"
-#define DSP_CONFIG_FILE "./Datafiles/Config.asc"
-#define DSP_CMD1_FILE "./Datafiles/dspCmd1.asc"
+#define DSP_MASTER_FIRMWARE_FILE "./DataFiles/master.asc"
+#define DSP_SLAVE_FILE "./DataFiles/slave.asc"
+#define DSP_CONFIG_FILE "./DataFiles/Config.asc"
+#define DSP_CMD1_FILE "./DataFiles/dspCmd1.asc"
 #define BUF_SIZE 1024
 
 enum ioCardType
@@ -40,3 +40,5 @@ std::string identifyIOCard(ioCardType tapeSlot, int brainDescriptor);
 std::string decodeString(const std::string &input_string);
 std::string getBrainResponse(int brainDescriptor);
 std::string getDspResponse(int dspDescriptor);
+
+void initializeMixer();

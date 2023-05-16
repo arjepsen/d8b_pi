@@ -18,6 +18,7 @@
 #include "SettingsClass.h"
 #include <array>
 #include <cstdint>
+#include "MixerInitScripts.h"
 
 class MixerManager
 {
@@ -59,6 +60,8 @@ public:
     void setBrainBoostState(bool);
 
     void initFXSlot(FXSlot * fxSlotPtr, FXSlotID fxSlotID);
+
+    void initMixer();
 
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };

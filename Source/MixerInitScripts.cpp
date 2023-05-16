@@ -25,9 +25,14 @@ void initializeMixer()
     const char *BRAIN_DEVICE = mixerManager.getBrainPort().c_str();
     const char *DSP_DEVICE = mixerManager.getDspPort().c_str();
 
+    std::cout << "Brainy is: " << BRAIN_DEVICE << std::endl;
+    std::cout << "Dispy is: " << DSP_DEVICE << std::endl;
+
     // Make a file descriptor for the 115200 baud rate brain connection.
-    int BRAIN = openSerialPort(BRAIN_DEVICE, B115200);
+    int BRAIN = openSerialPort(BRAIN_DEVICE, B115200);  // Not const, since it can change to boost later.
     const int DSP = openSerialPort(DSP_DEVICE, B115200);
+
+    std::cout << "Ports should now be inited" << std::endl;
 
     usleep(100000); // Sleep for 100ms
 
@@ -37,19 +42,26 @@ void initializeMixer()
     char replyChar = '\0'; // Initial null terminator.
 
     // Reset DSP and Brain:
-    write(DSP, "R", 1);
+    //write(DSP, "R", 1);
     write(BRAIN, "R", 1);
 
     // Check Brain reply
     while (replyChar != 'R')
     {
         if (read(BRAIN, &replyChar, 1) == 1 && replyChar == 'R')
+        {
             printf("Brain connected.\n");
+            std::cout << "replychar is: " << replyChar << std::endl;
+        }
+        printf("napping....\n");
         usleep(200000); // Sleep 200ms
     }
 
+    printf("Brainy Happy - now write to dsp\n");
     // Same for DSP
+    write(DSP, "R", 1);
     replyChar = '\0'; // Reset for DSP round.
+    printf("Writting - checking response\n");
     while (replyChar != 'R')
     {
         if (read(DSP, &replyChar, 1) == 1 && replyChar == 'R')
@@ -71,28 +83,46 @@ void initializeMixer()
 
     write(BRAIN, WELCOME_STRING, strlen(WELCOME_STRING));
     // usleep(20000); // Sleep for 20ms
-    sleep(3);
+    sleep(4);
 
     // ====================== SEND FIRMWARES =======================================
     // Clear Screen
-    write(BRAIN, "01u", 3);
+    // NOTE - seems like "01u" only works BEFORE brainware is uploaded.
+    write(BRAIN, "01u", 3); 
     usleep(20000);
+
+    printf("sending brain \n");
 
     if (mixerManager.getBrainBoostState())
     {
         // This one goes to 11!
         write(BRAIN, BOOST_MESSAGE, strlen(BOOST_MESSAGE));
-        sendFirmwareFile(BRAINWARE_FILE, BRAIN);
+        sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
         close(BRAIN);
         BRAIN = openSerialPort(BRAIN_DEVICE, B230400);
     }
     else
     {
-        write(BRAIN, UPLOAD_FIRMWARE_MESSAGE, strlen(UPLOAD_FIRMWARE_MESSAGE));
-        sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
+        //write(BRAIN, UPLOAD_FIRMWARE_MESSAGE, strlen(UPLOAD_FIRMWARE_MESSAGE));
+        write(BRAIN, UPLOADING_BRAIN_MESSAGE, strlen(UPLOADING_BRAIN_MESSAGE));
+        sendFirmwareFile(BRAINWARE_FILE, BRAIN);
     }
 
     // Brainware uploaded - now upload DSP firmware.
+    printf("Now sending dspware..\n");
+
+    // Clear Screen
+
+
+    exit(1);
+
+
+    printf("had a nap... cleared the screen... now write new display message\n");
+
+    write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
+
+    printf("dsp display message should be written.. now sending dsp firmware\n");
+
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
     // =================== FIRMWARES ARE ULOADED ================================
@@ -268,7 +298,8 @@ void initializeMixer()
 
     // AFTER THIS IT THE MIXER IS PROBABLY UP AND RUNNING, ALTHOUGH NO CHRISTMAS LIGHTS YET....
     // MAYBE HERE WE SEND THE SAVED CONFIGURATION, AND THEN HAND OVER THINGS TO THE 
-    // CIRCULAR BUFFER MERRY GOAROUND....?
+    // CIRCULAR BUFFER MERRY GOAROUND....?anders
+    
 
 }
 
@@ -282,6 +313,7 @@ void initializeMixer()
 // ###################################################################################
 int openSerialPort(const char *devicePath, speed_t baudRate)
 {
+    std::cout << "opening serial port" << std::endl;
     struct termios options;
     int fd = open(devicePath, O_RDWR | O_NOCTTY);
     if (fd < 0)
@@ -315,6 +347,7 @@ int openSerialPort(const char *devicePath, speed_t baudRate)
     tcflush(fd, TCIOFLUSH);
     tcsetattr(fd, TCSANOW, &options);
 
+    std::cout << "returning" << std::endl;
     return fd;
 }
 
@@ -324,11 +357,13 @@ int openSerialPort(const char *devicePath, speed_t baudRate)
 // ################################################################################
 void sendFirmwareFile(const char *filename, int comPortDescriptor)
 {
+    printf("sendFirmwareFile function - filename: %s\n", filename);
+
     // Set up a file handle (file descriptor)
     FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
-        fprintf(stderr, "Error opening file: %s\n", strerror(errno));
+        fprintf(stderr, "Error in function 'sendFirmwareFile', opening file: %s\n", strerror(errno));
         exit(1);
     }
 
@@ -358,6 +393,7 @@ void sendFirmwareFile(const char *filename, int comPortDescriptor)
     // Free the memory used for the file contents
     delete[] fileContents;
     fclose(file);
+    printf("exiting sendFirmwareFile\n");
 }
 
 // ################################################################################

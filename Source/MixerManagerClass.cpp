@@ -80,7 +80,7 @@ bool MixerManager::setDspPort(std::string deviceString)
     std::string deviceStringStart = "/dev/ttyUSB";
     if (deviceString.substr(0, deviceStringStart.length()) == deviceStringStart)
     {
-        settings.settingSetBrainPort(deviceString);
+        settings.settingSetDspPort(deviceString);
         return true;
     }
     else
@@ -137,6 +137,12 @@ void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
             printf("INVALID SLOT INIT");
             exit(1);
     }
+}
+
+void MixerManager::initMixer()
+{
+    std::cout << "Calling initializemixer from mixermanager" << std::endl;
+    initializeMixer();
 }
 
 // Other things to be aware of in constructor:

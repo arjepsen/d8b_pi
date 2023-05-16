@@ -121,6 +121,13 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
 
     brainBaudRateComboBox->setBounds (8, 248, 150, 24);
 
+    initMixerBtn.reset (new juce::TextButton ("initMixerBtn"));
+    addAndMakeVisible (initMixerBtn.get());
+    initMixerBtn->setButtonText (TRANS("Initialize Mixer"));
+    initMixerBtn->addListener (this);
+
+    initMixerBtn->setBounds (200, 248, 150, 24);
+
 
     //[UserPreSize]
     //[/UserPreSize]
@@ -164,6 +171,7 @@ SettingsComponent::~SettingsComponent()
     comPortListLabel = nullptr;
     brainBaudRateLabel = nullptr;
     brainBaudRateComboBox = nullptr;
+    initMixerBtn = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -201,6 +209,7 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
         //[UserComboBoxCode_brainPortComboBox] -- add your combo box handling code here..
         const std::string portString = brainPortComboBox.get()->getText().toStdString();
         mixerManager.setBrainPort(portString);
+        std::cout << "setting brain to: " << portString << std::endl;
         //[/UserComboBoxCode_brainPortComboBox]
     }
     else if (comboBoxThatHasChanged == dspPortComboBox.get())
@@ -208,6 +217,7 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
         //[UserComboBoxCode_dspPortComboBox] -- add your combo box handling code here..
         const std::string portString = dspPortComboBox.get()->getText().toStdString();
         mixerManager.setDspPort(portString);
+        std::cout << "settings dsp to: " << portString << std::endl;
         //[/UserComboBoxCode_dspPortComboBox]
     }
     else if (comboBoxThatHasChanged == brainBaudRateComboBox.get())
@@ -229,6 +239,22 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 
     //[UsercomboBoxChanged_Post]
     //[/UsercomboBoxChanged_Post]
+}
+
+void SettingsComponent::buttonClicked (juce::Button* buttonThatWasClicked)
+{
+    //[UserbuttonClicked_Pre]
+    //[/UserbuttonClicked_Pre]
+
+    if (buttonThatWasClicked == initMixerBtn.get())
+    {
+        //[UserButtonCode_initMixerBtn] -- add your button handler code here..
+        mixerManager.initMixer();
+        //[/UserButtonCode_initMixerBtn]
+    }
+
+    //[UserbuttonClicked_Post]
+    //[/UserbuttonClicked_Post]
 }
 
 
@@ -303,6 +329,9 @@ BEGIN_JUCER_METADATA
             virtualName="" explicitFocusOrder="0" pos="8 248 150 24" editable="0"
             layout="33" items="115200&#10;230400" textWhenNonSelected=""
             textWhenNoItems="(no choices)"/>
+  <TEXTBUTTON name="initMixerBtn" id="733323d221d57460" memberName="initMixerBtn"
+              virtualName="" explicitFocusOrder="0" pos="200 248 150 24" buttonText="Initialize Mixer"
+              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA
