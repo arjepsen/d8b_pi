@@ -33,6 +33,14 @@ enum ioCardType
     CLOCK
 };
 
+enum initErrorType
+{
+    INIT_SUCCESS,
+    PORT_OPEN_FAILED,
+    RESET_BRAIN_TIMEOUT,
+    RESET_DSP_TIMEOUT,
+    UPLOAD_BRAIN_FAILED
+};
 
 int openSerialPort(const char *device_path, speed_t baud_rate);
 void sendFirmwareFile(const char* filename, int comPortDescriptor);
@@ -41,6 +49,6 @@ std::string decodeString(const std::string &input_string);
 std::string getBrainResponse(int brainDescriptor);
 std::string getDspResponse(int dspDescriptor);
 
-void initializeMixer();
+initErrorType initializeMixer();
 
 void test();

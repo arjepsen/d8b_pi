@@ -21,7 +21,7 @@ void test()
 }
 
 
-void initializeMixer()
+initErrorType initializeMixer()
 {
 
     // ================== SET UP COM PORTS =============================
@@ -40,7 +40,13 @@ void initializeMixer()
     int BRAIN = openSerialPort(BRAIN_DEVICE, B115200);  // Not const, since it can change to boost later.
     const int DSP = openSerialPort(DSP_DEVICE, B115200);
 
-    std::cout << "Ports should now be inited" << std::endl;
+    if (BRAIN == -1 || DSP == -1)
+    {
+        printf("PORT INITIALIZATION FAILED!\n");
+        return PORT_OPEN_FAILED;
+    }
+
+    std::cout << "Ports initialized, ready for communication." << std::endl;
 
     usleep(100000); // Sleep for 100ms
 
@@ -48,34 +54,40 @@ void initializeMixer()
     // Send an 'R' (reset), and wait to get an 'R' back
 
     char replyChar = '\0'; // Initial null terminator.
+    const int MAX_RETRIES = 5;
+    int retries = 0;
 
-    // Reset DSP and Brain:
-    //write(DSP, "R", 1);
+    // Reset Brain:
     write(BRAIN, "R", 1);
 
     // Check Brain reply
     while (replyChar != 'R')
     {
         if (read(BRAIN, &replyChar, 1) == 1 && replyChar == 'R')
-        {
             printf("Brain connected.\n");
-            std::cout << "replychar is: " << replyChar << std::endl;
-        }
-        printf("napping....\n");
+
+        retries++;
         usleep(200000); // Sleep 200ms
+        if (retries >= MAX_RETRIES)
+            return RESET_BRAIN_TIMEOUT;
     }
 
-    printf("Brainy Happy - now write to dsp\n");
     // Same for DSP
     write(DSP, "R", 1);
     replyChar = '\0'; // Reset for DSP round.
-    printf("Writting - checking response\n");
+    retries = 0;
+
     while (replyChar != 'R')
     {
+        retries++;
         if (read(DSP, &replyChar, 1) == 1 && replyChar == 'R')
             printf("DSP connected.\n");
         usleep(200000);
+        if (retries >= MAX_RETRIES)
+            return RESET_DSP_TIMEOUT;
     }
+
+    printf("\n======= Boards Reset finish, displaying welcome ==========\n");
 
     // ================== DISPLAY WELCOME MESSAGE ============================
 
@@ -89,13 +101,12 @@ void initializeMixer()
     write(BRAIN, "0Cu", 3);
     usleep(20000); // Sleep for 20ms
 
+    // Display the welcome message. 
     write(BRAIN, WELCOME_STRING, strlen(WELCOME_STRING));
-    // usleep(20000); // Sleep for 20ms
-    sleep(4);
+    sleep(4);   // Let it stay there a fews secs for admirations sake.
 
     // ====================== SEND FIRMWARES =======================================
     // Clear Screen
-    // NOTE - seems like "01u" only works BEFORE brainware is uploaded.
     write(BRAIN, "01u", 3); 
     usleep(20000);
 
@@ -104,7 +115,9 @@ void initializeMixer()
     if (mixerManager.getBrainBoostState())
     {
         // This one goes to 11!
-        write(BRAIN, BOOST_MESSAGE, strlen(BOOST_MESSAGE));
+        write(BRAIN, BOOST_MESSAGE1, strlen(BOOST_MESSAGE1));
+        sleep(3);
+        write(BRAIN, BOOST_MESSAGE2, strlen(BOOST_MESSAGE2));
         sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
         close(BRAIN);
         BRAIN = openSerialPort(BRAIN_DEVICE, B230400);
@@ -116,11 +129,19 @@ void initializeMixer()
         sendFirmwareFile(BRAINWARE_FILE, BRAIN);
     }
 
-    // Brainware uploaded - now upload DSP firmware.
-    printf("Now sending dspware..\n");
+    // Check response from Brain - we still don't quite know what this string means....
+    // It seems clearing screen doesn't work untill we have read this response from mr. Brain.
+    std::string brainResponse = getBrainResponse(BRAIN);
+    if (brainResponse.substr(0, 3) != "R00")
+        return UPLOAD_BRAIN_FAILED;
+
 
     // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000); // Sleep for 20ms - needed for clear display to finish
 
+    write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
+    sleep(5);
 
     exit(1);
 
@@ -308,7 +329,8 @@ void initializeMixer()
     // MAYBE HERE WE SEND THE SAVED CONFIGURATION, AND THEN HAND OVER THINGS TO THE 
     // CIRCULAR BUFFER MERRY GOAROUND....?anders
     
-
+    // If everything is ok, return true
+    return INIT_SUCCESS;
 }
 
 //
@@ -327,7 +349,8 @@ int openSerialPort(const char *devicePath, speed_t baudRate)
     if (fd < 0)
     {
         perror("Error opening serial device");
-        exit(1);
+        //exit(1);
+        return -1;
     }
 
     // Get current options
@@ -472,6 +495,39 @@ std::string getDspResponse(int dspDescriptor)
         }
     }
     return dspReplyStream.str();
+}
+
+
+// ################################################################################
+// Function for checking the heartbeat of the Brain.
+// Returns true, if the brain sends an l or a k.
+// Returns false , if end of file (empty).
+// Will ignore any other messages
+// ################################################################################
+int getHeartbeat(int brainDescriptor)
+{
+    char response = '\0';
+
+    while (true)
+    {
+        int result = read(brainDescriptor, &response, 1);
+
+        if (result == 1)
+        {
+            if (response == 'l' || response == 'k')
+                return 1;
+        }
+        else if (result < 0)
+        {
+            perror("Error reading from file descriptor");
+            exit(1);
+        }
+        else if (result == 0)   // "EOF"
+        {
+            return 0;
+        }
+        // usleep(10000); // Sleep for 10ms
+    }
 }
 
 // ################################################################################

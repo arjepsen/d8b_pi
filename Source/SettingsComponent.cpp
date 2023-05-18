@@ -137,6 +137,9 @@ SettingsComponent::SettingsComponent(MixerManager &mixerManagerInstance)
     // Add the USB devices to the comboboxes, and populate the deviceListLabel with descriptions
     updatePortInfo();
 
+    // Set Baud Rate to 115200 from the start
+    //brainBaudRateComboBox->setSelectedId(1);
+
     //[/Constructor]
 }
 
@@ -270,23 +273,26 @@ void SettingsComponent::updatePortInfo()
     // Fetch previously chosen ports, if any.
     std::string chosenBrainPort = mixerManager.getBrainPort();
     std::string chosenDspPort = mixerManager.getDspPort();
-    brainPortComboBox->setText(chosenBrainPort);
-    dspPortComboBox->setText(chosenDspPort);
+    int chosenBoostMode = mixerManager.getBrainBoostState() ? 2 : 1;
 
     // Query the usb ports, and get a map of devices.
     std::string deviceInfoText = "";
     for (const auto &device : mixerManager.getUsbPortMap())
     {
         // Add the devices to the comboboxes, BUT only if they are not already chosen in the other box.
-        if (device.first != chosenDspPort)
-            brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
-        if (device.first != chosenBrainPort)
-            dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
+        brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
+        dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
 
         // Add the device to the device list in any case.
         deviceInfoText.append(device.first + ":\n" + device.second + "\n");
     }
     deviceListLabel->setText(deviceInfoText, juce::dontSendNotification);
+
+    // Update the comboboxes
+    brainPortComboBox->setText(chosenBrainPort);
+    dspPortComboBox->setText(chosenDspPort);
+    brainBaudRateComboBox->setSelectedId(chosenBoostMode);
+
 }
 //[/MiscUserCode]
 

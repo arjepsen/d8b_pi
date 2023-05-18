@@ -142,7 +142,6 @@ void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
 void MixerManager::initMixer(juce::Button *initMixerBtn)
 {
     std::cout << "Calling initializemixer from mixermanager" << std::endl;
-    // initializeMixer();
 
     if (isInitializing)
         printf("INITIALIZATION SCRIPT IS ALREADY RUNNING!!!\n");
@@ -152,8 +151,16 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
         juce::Thread::launch([this, initMixerBtn]()
         {
             // Perform Mixer initialization.
-            //initializeMixer();
-            test();
+            initErrorType initResult = initializeMixer();
+            if (initResult != INIT_SUCCESS)
+            {
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
+                                        "Mixer Initialization Error code",
+                                        juce::String(initResult),
+                                        "OK");
+            }
+
+            //test();
             isInitializing = false;
 
             juce::MessageManager::callAsync([initMixerBtn]()
