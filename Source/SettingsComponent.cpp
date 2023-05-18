@@ -138,7 +138,7 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     //[Constructor] You can add your own custom stuff here..
 
     // Add the USB devices to the comboboxes, and populate the deviceListLabel with descriptions
-    updateInfo();
+    updatePortInfo();
 
     // std::string deviceInfoText;
     // for (const auto &device : mixerManager.getSettings().getUSBDevices())
@@ -207,17 +207,24 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     if (comboBoxThatHasChanged == brainPortComboBox.get())
     {
         //[UserComboBoxCode_brainPortComboBox] -- add your combo box handling code here..
+        // If  this option is chosen in the other combobox, reset.
+        if (brainPortComboBox->getSelectedId() == dspPortComboBox->getSelectedId())
+            brainPortComboBox->setSelectedId(0);
+
+        // Get the chosen string, and update our settings.
         const std::string portString = brainPortComboBox.get()->getText().toStdString();
         mixerManager.setBrainPort(portString);
-        std::cout << "setting brain to: " << portString << std::endl;
         //[/UserComboBoxCode_brainPortComboBox]
     }
     else if (comboBoxThatHasChanged == dspPortComboBox.get())
     {
         //[UserComboBoxCode_dspPortComboBox] -- add your combo box handling code here..
+        // If  this option is chosen in the other combobox, reset.
+        if (dspPortComboBox->getSelectedId() == brainPortComboBox->getSelectedId())
+            dspPortComboBox->setSelectedId(0);
+
         const std::string portString = dspPortComboBox.get()->getText().toStdString();
         mixerManager.setDspPort(portString);
-        std::cout << "settings dsp to: " << portString << std::endl;
         //[/UserComboBoxCode_dspPortComboBox]
     }
     else if (comboBoxThatHasChanged == brainBaudRateComboBox.get())
@@ -249,7 +256,16 @@ void SettingsComponent::buttonClicked (juce::Button* buttonThatWasClicked)
     if (buttonThatWasClicked == initMixerBtn.get())
     {
         //[UserButtonCode_initMixerBtn] -- add your button handler code here..
-        mixerManager.initMixer();
+
+        // TODO:
+        // FIRST CHECK IF WE HAVE SET THE USB PORTS!!!!!
+        // IF NOT, LET THE USER KNOW OF THEIR INCOMPETENCE.
+
+
+        initMixerBtn->setEnabled(false);    // Disable the button until init has finished.
+        
+        // Call the init method in mixermanager - provide it with a pointer to the button.
+        mixerManager.initMixer(initMixerBtn.get());
         //[/UserButtonCode_initMixerBtn]
     }
 
@@ -260,21 +276,30 @@ void SettingsComponent::buttonClicked (juce::Button* buttonThatWasClicked)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-void SettingsComponent::updateInfo()
+void SettingsComponent::updatePortInfo()
 {
+    // Fetch previously chosen ports, if any.
+    std::string chosenBrainPort = mixerManager.getBrainPort();
+    std::string chosenDspPort = mixerManager.getDspPort();
+    brainPortComboBox->setText(chosenBrainPort);
+    dspPortComboBox->setText(chosenDspPort);
+
+    // Query the usb ports, and get a map of devices.
     std::string deviceInfoText = "";
     for (const auto &device : mixerManager.getUsbPortMap())
     {
-        // brainPortComboBox->addItem(device.first + " (" + device.second + ")", brainPortComboBox->getNumItems() + 1);
-        // dspPortComboBox->addItem(device.first + " (" + device.second + ")", dspPortComboBox->getNumItems() + 1);
-        brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
-        dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
+        // Add the devices to the comboboxes, BUT only if they are not already chosen in the other box.
+        if (device.first != chosenDspPort)
+            brainPortComboBox->addItem(device.first, brainPortComboBox->getNumItems() + 1);
+        if (device.first != chosenBrainPort)
+            dspPortComboBox->addItem(device.first, dspPortComboBox->getNumItems() + 1);
 
-        // kurt.append(device.first + ": " + device.second + "\n");
-
+        // Add the device to the device list in any case.
         deviceInfoText.append(device.first + ":\n" + device.second + "\n");
     }
     deviceListLabel->setText(deviceInfoText, juce::dontSendNotification);
+
+
 }
 //[/MiscUserCode]
 

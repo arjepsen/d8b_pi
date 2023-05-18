@@ -42,3 +42,5 @@ std::string getBrainResponse(int brainDescriptor);
 std::string getDspResponse(int dspDescriptor);
 
 void initializeMixer();
+
+void test();

@@ -18,6 +18,7 @@
 #include "SettingsClass.h"
 #include <array>
 #include <cstdint>
+#include <JuceHeader.h> // For threading.
 #include "MixerInitScripts.h"
 
 class MixerManager
@@ -34,12 +35,16 @@ private:
     FXSlot *fxSlotC;
     FXSlot *fxSlotD;
 
+    // Flag for avoid starting multiple init threads.
+    bool isInitializing;
+
     MixerManager();  // Constructor
     ~MixerManager(); // Destructor
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
     MixerManager(const MixerManager &) = delete;
     MixerManager &operator=(const MixerManager &) = delete;
+
 
 public:
     static MixerManager &getInstance(); // Returns a reference to the instance.
@@ -61,7 +66,8 @@ public:
 
     void initFXSlot(FXSlot * fxSlotPtr, FXSlotID fxSlotID);
 
-    void initMixer();
+    void initMixer(juce::Button* initMixerBtn);
+
 
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };

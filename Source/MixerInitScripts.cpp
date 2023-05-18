@@ -13,6 +13,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+
+void test()
+{
+    sleep(6);
+    printf("This is the testfunction finishing.\n");
+}
+
+
 void initializeMixer()
 {
 

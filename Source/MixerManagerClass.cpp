@@ -16,7 +16,7 @@
 // ############################ CONSTRUCTOR ####################################
 // std::array automatically initializes elements to default value -
 // so Channel constructor gets called automatically.
-MixerManager::MixerManager() : channels{}, settings(Settings::getInstance())
+MixerManager::MixerManager() : channels{}, settings(Settings::getInstance()), isInitializing(false)
 {
     std::cout << "MixerManger Constructor" << std::endl;
     // assign default values to each channel's members,
@@ -139,10 +139,31 @@ void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
     }
 }
 
-void MixerManager::initMixer()
+void MixerManager::initMixer(juce::Button *initMixerBtn)
 {
     std::cout << "Calling initializemixer from mixermanager" << std::endl;
-    initializeMixer();
+    // initializeMixer();
+
+    if (isInitializing)
+        printf("INITIALIZATION SCRIPT IS ALREADY RUNNING!!!\n");
+    else
+    {
+        isInitializing = true;
+        juce::Thread::launch([this, initMixerBtn]()
+        {
+            // Perform Mixer initialization.
+            //initializeMixer();
+            test();
+            isInitializing = false;
+
+            juce::MessageManager::callAsync([initMixerBtn]()
+            {
+                initMixerBtn->setEnabled(true); // Re-enable the button
+            }); 
+        });
+    }
+
+    // Check if we're already initializing.
 }
 
 // Other things to be aware of in constructor:
