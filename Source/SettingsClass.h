@@ -44,6 +44,7 @@ private:
 
     std::map<std::string, std::string> usbDevicesMap; // Map of connectd USB devices.
     
+    
 };
 
 // "Singleton" - ensure that only one instance of this class is created.

@@ -91,6 +91,9 @@
 // CLOCK CARD:
 #define CLOCK_STRING "C6u43v4Cv4Fv43v4Bv20v43v41v52v44v3Av"
 
+// Response from Brain on "s" command
+#define BRAIN_S_RESPONSE "000001E65288c"
+
 // Overwriting previous text (both rows), and writing "LOADING DSP PLUGINS..."
 #define LOADING_DSP "80u4Cv6Fv61v64v69v6Ev67v20v44v53v50v20v50v6Cv75v67v69v6Ev73v2Ev2Ev2Ev20v20v20vC6u20v20v20v20v20vB4u20v20v20v20v20vD2u20v20v20v20v20v20v"
 

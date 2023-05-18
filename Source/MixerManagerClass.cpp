@@ -151,7 +151,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
         juce::Thread::launch([this, initMixerBtn]()
         {
             // Perform Mixer initialization.
-            initErrorType initResult = initializeMixer();
+            InitErrorType initResult = initializeMixer();
             if (initResult != INIT_SUCCESS)
             {
                 juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,

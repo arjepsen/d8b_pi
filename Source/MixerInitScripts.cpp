@@ -21,8 +21,9 @@ void test()
 }
 
 
-initErrorType initializeMixer()
+InitErrorType initializeMixer()
 {
+    const int MAX_RETRIES = 5;
 
     // ================== SET UP COM PORTS =============================
 
@@ -54,7 +55,6 @@ initErrorType initializeMixer()
     // Send an 'R' (reset), and wait to get an 'R' back
 
     char replyChar = '\0'; // Initial null terminator.
-    const int MAX_RETRIES = 5;
     int retries = 0;
 
     // Reset Brain:
@@ -87,8 +87,6 @@ initErrorType initializeMixer()
             return RESET_DSP_TIMEOUT;
     }
 
-    printf("\n======= Boards Reset finish, displaying welcome ==========\n");
-
     // ================== DISPLAY WELCOME MESSAGE ============================
 
     write(BRAIN, DISPLAY_LOW, strlen(DISPLAY_LOW)); // Display intensity = low (preserve display)
@@ -103,7 +101,7 @@ initErrorType initializeMixer()
 
     // Display the welcome message. 
     write(BRAIN, WELCOME_STRING, strlen(WELCOME_STRING));
-    sleep(4);   // Let it stay there a fews secs for admirations sake.
+    sleep(3);   // Let it stay there a fews secs for admirations sake.
 
     // ====================== SEND FIRMWARES =======================================
     // Clear Screen
@@ -116,7 +114,7 @@ initErrorType initializeMixer()
     {
         // This one goes to 11!
         write(BRAIN, BOOST_MESSAGE1, strlen(BOOST_MESSAGE1));
-        sleep(3);
+        sleep(2);
         write(BRAIN, BOOST_MESSAGE2, strlen(BOOST_MESSAGE2));
         sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
         close(BRAIN);
@@ -129,39 +127,49 @@ initErrorType initializeMixer()
         sendFirmwareFile(BRAINWARE_FILE, BRAIN);
     }
 
-    // Check response from Brain - we still don't quite know what this string means....
-    // It seems clearing screen doesn't work untill we have read this response from mr. Brain.
-    std::string brainResponse = getBrainResponse(BRAIN);
-    if (brainResponse.substr(0, 3) != "R00")
-        return UPLOAD_BRAIN_FAILED;
-
+    // Check response from Brain it should look something like:
+    // R0027v0129v0202v0326v042Fv053Dv0623v073Ev083Cv0918v0A3Fv0B3Cv0C3Ev0D0Cv0E1Av0F2Cv1024v1127v1205v131Fv1419v1524v163Bv1705v1804v1A31v1B2Av1C39v1D37v1E2Dv1F03v2014v
+    //  - we still don't quite know what this string means....
+    retries = 0;
+    while (true)
+    {
+        std::string brainResponse = getBrainResponse(BRAIN);
+        if (brainResponse.substr(0, 3) == "R00")
+            break;
+        retries++;
+        if (retries > MAX_RETRIES)
+            return UPLOAD_BRAIN_FAILED;
+    }
 
     // Clear Screen
     write(BRAIN, "01u", 3);
-    usleep(20000); // Sleep for 20ms - needed for clear display to finish
+    usleep(20000); 
 
-    write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
-    sleep(5);
-
-    exit(1);
-
-
-    printf("had a nap... cleared the screen... now write new display message\n");
-
+    // Display DSP firmware upload message
     write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
 
-    printf("dsp display message should be written.. now sending dsp firmware\n");
-
+    // Send the DSP firmware
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
-    // =================== FIRMWARES ARE ULOADED ================================
-    // Check response
-    // !!!!!!!!!!!!!!!!!!!WE STILL DONT KNOW WHAT THIS DATA MEANS!!!!!!!!!!!!!!!!!
-
-    std::cout << "Brain replied: " << getBrainResponse(BRAIN) << std::endl;
+    // Here the DSP replies "R350D" - maybe we should check that?
+    //std::cout << "DSP replied: " << getDspResponse(DSP) << std::endl;
+    retries = 0;
+    while (true)
+    {
+        std::string dspResponse = getDspResponse(DSP);
+        if (dspResponse.substr(0, 3) == "R35")
+            break;
+        retries++;
+        if (retries > MAX_RETRIES)
+            return UPLOAD_DSP_FAILED;
+    }
 
     // ====================== I/O CARD LIST ====================================
     // This section prints out a list of detected I/O cards.
+
+    // Clear screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
 
     // Print the tape list in the display
     write(BRAIN, TAPE_LIST, strlen(TAPE_LIST));
@@ -204,15 +212,33 @@ initErrorType initializeMixer()
     cardID.insert(0, CLOCK_LOC);
     write(BRAIN, cardID.c_str(), cardID.length());
 
-    // Next, send an "s".... dunno why!
+    // Next, send an "s".... unsure exactly what this command does.
     write(BRAIN, "s", 1);
 
     // Then check response.
-    std::cout << "s Response: " << getBrainResponse(BRAIN) << std::endl;
+    //std::cout << "s Response: " << getBrainResponse(BRAIN) << std::endl;
+
+    retries = 0;
+    while (true)
+    {
+        std::string brainResponse = getBrainResponse(BRAIN);
+        if (brainResponse == BRAIN_S_RESPONSE)
+            break;
+        retries++;
+        if (retries > MAX_RETRIES)
+            return S_RESPONSE_FAILED;
+    }
+
+    sleep(1);
+
 
     // ============== CHECK FIRMWARE RESPONSE FROM DSP =====================
 
     std::cout << "DSP RESPONSE: " << getDspResponse(DSP) << std::endl;
+
+
+    exit(1);
+
 
     // ===================== SEND SLAVE PART OF DSP FIRMWARE ==================
     std::cout << "Sending DSP Slave part" << std::endl;
@@ -436,10 +462,11 @@ std::string getBrainResponse(int brainDescriptor)
 {
     char response = '\0';
     std::stringstream brainReplyStream;
-
+    printf("\n==========================\n");
     while (true)
     {
         int result = read(brainDescriptor, &response, 1);
+        printf("%c", response);
         if (response == 'l' || response == 'k')
         {
             printf("got an l or k - end of message.\n");
@@ -456,12 +483,12 @@ std::string getBrainResponse(int brainDescriptor)
         }
         else if (result == 0)
         {
-            std::cout << "END OF FIIIIIILE!" << std::endl;
+            std::cout << "\nEOF" << std::endl;
             break;
         }
         // usleep(10000); // Sleep for 10ms
     }
-
+    printf("\n==========================\n");
     return brainReplyStream.str();
 }
 
@@ -472,10 +499,11 @@ std::string getDspResponse(int dspDescriptor)
 {
     char response = '\0';
     std::stringstream dspReplyStream;
-
+    printf("\n==========================\n");
     while (true)
     {
         int result = read(dspDescriptor, &response, 1);
+        printf("%c", response);
         if (result == 1)
         {
             if (response == 'd')
@@ -494,6 +522,7 @@ std::string getDspResponse(int dspDescriptor)
             exit(1);
         }
     }
+    printf("\n==========================\n");
     return dspReplyStream.str();
 }
 
@@ -534,7 +563,7 @@ int getHeartbeat(int brainDescriptor)
 // Function for identifying the card in the specified card slot
 // Takes card slot object, and a Brain COM port file descriptor
 // ################################################################################
-std::string identifyIOCard(ioCardType tapeSlot, int brainDescriptor)
+std::string identifyIOCard(IoCardSlotType tapeSlot, int brainDescriptor)
 {
     // Send the query-string for the supplied tape slot.
     switch (tapeSlot)

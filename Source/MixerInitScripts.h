@@ -23,7 +23,7 @@
 #define DSP_CMD1_FILE "./DataFiles/dspCmd1.asc"
 #define BUF_SIZE 1024
 
-enum ioCardType
+enum IoCardSlotType
 {
     TAPE_A,
     TAPE_B,
@@ -33,22 +33,24 @@ enum ioCardType
     CLOCK
 };
 
-enum initErrorType
+enum InitErrorType
 {
     INIT_SUCCESS,
     PORT_OPEN_FAILED,
     RESET_BRAIN_TIMEOUT,
     RESET_DSP_TIMEOUT,
-    UPLOAD_BRAIN_FAILED
+    UPLOAD_BRAIN_FAILED,
+    UPLOAD_DSP_FAILED,
+    S_RESPONSE_FAILED
 };
 
 int openSerialPort(const char *device_path, speed_t baud_rate);
 void sendFirmwareFile(const char* filename, int comPortDescriptor);
-std::string identifyIOCard(ioCardType tapeSlot, int brainDescriptor);
+std::string identifyIOCard(IoCardSlotType tapeSlot, int brainDescriptor);
 std::string decodeString(const std::string &input_string);
 std::string getBrainResponse(int brainDescriptor);
 std::string getDspResponse(int dspDescriptor);
 
-initErrorType initializeMixer();
+InitErrorType initializeMixer();
 
 void test();
