@@ -165,7 +165,7 @@ InitErrorType initializeMixer()
     }
 
     // ====================== I/O CARD LIST ====================================
-    // This section prints out a list of detected I/O cards.
+    // This section detects and prints out a list of I/O cards.
 
     // Clear screen
     write(BRAIN, "01u", 3);
@@ -176,19 +176,19 @@ InitErrorType initializeMixer()
 
     // Poke IO card slots, and write their identifier in display:
     std::string cardID = identifyIOCard(TAPE_A, BRAIN);
-    cardID.insert(0, TAPE_A_LOC);
+    cardID.insert(0, TAPE_A_DISPLAY_LOCATION);
     write(BRAIN, cardID.c_str(), cardID.length());
 
     cardID = identifyIOCard(TAPE_B, BRAIN);
-    cardID.insert(0, TAPE_B_LOC);
+    cardID.insert(0, TAPE_B_DISPLAY_LOCATION);
     write(BRAIN, cardID.c_str(), cardID.length());
 
     cardID = identifyIOCard(TAPE_C, BRAIN);
-    cardID.insert(0, TAPE_C_LOC);
+    cardID.insert(0, TAPE_C_DISPLAY_LOCATION);
     write(BRAIN, cardID.c_str(), cardID.length());
 
     cardID = identifyIOCard(ALTIO, BRAIN);
-    cardID.insert(0, ALTIO_LOC);
+    cardID.insert(0, ALTIO_DISPLAY_LOCATION);
     write(BRAIN, cardID.c_str(), cardID.length());
 
     sleep(2);
@@ -205,11 +205,11 @@ InitErrorType initializeMixer()
     tcflush(BRAIN, TCIOFLUSH);
 
     cardID = identifyIOCard(DIGI_IO, BRAIN);
-    cardID.insert(0, DIGICARD_LOC);
+    cardID.insert(0, DIGICARD_DISPLAY_LOCATION);
     write(BRAIN, cardID.c_str(), cardID.length());
 
     cardID = identifyIOCard(CLOCK, BRAIN);
-    cardID.insert(0, CLOCK_LOC);
+    cardID.insert(0, CLOCK_DISPLAY_LOCATION);
     write(BRAIN, cardID.c_str(), cardID.length());
 
     // Next, send an "s".... unsure exactly what this command does.

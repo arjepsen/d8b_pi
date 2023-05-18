@@ -72,20 +72,21 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
-  $(JUCE_OBJDIR)/SettingsClass_e17fe7f6.o \
-  $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
   $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o \
-  $(JUCE_OBJDIR)/MixerManagerClass_34f257d5.o \
+  $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
   $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o \
   $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o \
   $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o \
   $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o \
+  $(JUCE_OBJDIR)/IOSlotClass_f67f5815.o \
   $(JUCE_OBJDIR)/Main_90ebc5c2.o \
   $(JUCE_OBJDIR)/MainComponent_a6ffb4a5.o \
   $(JUCE_OBJDIR)/MenuBar_49511495.o \
-  $(JUCE_OBJDIR)/SettingsWindow_d17777fc.o \
-  $(JUCE_OBJDIR)/SettingsComponent_119b047b.o \
   $(JUCE_OBJDIR)/MixerInitScripts_86ba9d18.o \
+  $(JUCE_OBJDIR)/MixerManagerClass_34f257d5.o \
+  $(JUCE_OBJDIR)/SettingsClass_e17fe7f6.o \
+  $(JUCE_OBJDIR)/SettingsComponent_119b047b.o \
+  $(JUCE_OBJDIR)/SettingsWindow_d17777fc.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
   $(JUCE_OBJDIR)/include_juce_events_fd7d695.o \
@@ -105,24 +106,14 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(RESOURCES)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
 
-$(JUCE_OBJDIR)/SettingsClass_e17fe7f6.o: ../../Source/SettingsClass.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling SettingsClass.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o: ../../Source/BrainMessageHandlers.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling BrainMessageHandlers.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
 $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o: ../../Source/BrainLookupTable.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling BrainLookupTable.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/MixerManagerClass_34f257d5.o: ../../Source/MixerManagerClass.cpp
+$(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o: ../../Source/BrainMessageHandlers.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling MixerManagerClass.cpp"
+	@echo "Compiling BrainMessageHandlers.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o: ../../Source/ChannelClass.cpp
@@ -145,6 +136,11 @@ $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o: ../../Source/FXSlotClass.cpp
 	@echo "Compiling FXSlotClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/IOSlotClass_f67f5815.o: ../../Source/IOSlotClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling IOSlotClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/Main_90ebc5c2.o: ../../Source/Main.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling Main.cpp"
@@ -160,9 +156,19 @@ $(JUCE_OBJDIR)/MenuBar_49511495.o: ../../Source/MenuBar.cpp
 	@echo "Compiling MenuBar.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/SettingsWindow_d17777fc.o: ../../Source/SettingsWindow.cpp
+$(JUCE_OBJDIR)/MixerInitScripts_86ba9d18.o: ../../Source/MixerInitScripts.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling SettingsWindow.cpp"
+	@echo "Compiling MixerInitScripts.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/MixerManagerClass_34f257d5.o: ../../Source/MixerManagerClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling MixerManagerClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/SettingsClass_e17fe7f6.o: ../../Source/SettingsClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling SettingsClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/SettingsComponent_119b047b.o: ../../Source/SettingsComponent.cpp
@@ -170,9 +176,9 @@ $(JUCE_OBJDIR)/SettingsComponent_119b047b.o: ../../Source/SettingsComponent.cpp
 	@echo "Compiling SettingsComponent.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/MixerInitScripts_86ba9d18.o: ../../Source/MixerInitScripts.cpp
+$(JUCE_OBJDIR)/SettingsWindow_d17777fc.o: ../../Source/SettingsWindow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling MixerInitScripts.cpp"
+	@echo "Compiling SettingsWindow.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp

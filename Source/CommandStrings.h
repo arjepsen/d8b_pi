@@ -70,12 +70,12 @@
 
 // These commands are used to write the card ID under the specific TAPE in list.
 // Locations:
-#define TAPE_A_LOC "C2u"
-#define TAPE_B_LOC "CCu"
-#define TAPE_C_LOC "D6u"
-#define ALTIO_LOC "E0u"
-#define DIGICARD_LOC "92u"
-#define CLOCK_LOC "D2u"
+#define TAPE_A_DISPLAY_LOCATION "C2u"
+#define TAPE_B_DISPLAY_LOCATION "CCu"
+#define TAPE_C_DISPLAY_LOCATION "D6u"
+#define ALTIO_DISPLAY_LOCATION "E0u"
+#define DIGICARD_DISPLAY_LOCATION "92u"
+#define CLOCK_DISPLAY_LOCATION "D2u"
 
 // I/O Card names.
 #define OPT8_STRING "4Fv50v54v2Dv38v"            // "OPT-8"
