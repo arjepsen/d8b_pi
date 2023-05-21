@@ -33,6 +33,8 @@
 
 //"80u55v70v6Cv6Fv61v64v69v6Ev67v20v44v53v50v20v46v69v72v6Dv77v61v72v65v20v"
 #define UPLOADING_DSP_MESSAGE "80u55v70v6Cv6Fv61v64v69v6Ev67v20v44v53v50v20v46v69v72v6Dv77v61v72v65v20v28v4Dv61v73v74v65v72v29v"
+#define UPLOADING_DSP_SLAVE_MESSAGE "80u55v70v6Cv6Fv61v64v69v6Ev67v20v44v53v50v20v46v69v72v6Dv77v61v72v65v20v28v53v6Cv61v76v65v29v"
+
 
 // This is the response from the brain, after receiving firmware.
 // R0027v0129v0202v0326v042Fv053Dv0623v073Dv083Cv0918v0A3Fv0B3Cv0C3Ev0D0Cv0E1Av0F2Cv1024v1127v1205v131Fv1419v1524v163Bv1705v1804v1A31v1B2Av1C39v1D37v1E2Dv1F03v2014v
@@ -40,16 +42,19 @@
 
 // This writes: "TAPE A   TAPE B   TAPE C   ALTIO" with a dash under each.
 // (it will overwrite the welcome string text, and includes spaces)
-#define TAPE_LIST "81u54v41v50v45v86u41v8Bu54v41v50v45v90u42v20v20v94u20v54v41v50v45v9Au43vA0u41v4Cv54v49v4FvC4u2DvCDu20v2Dv20v20v20v20vD4u20v20v20v20v2Dv20v20vE2u2Dv"
+//#define TAPE_LIST "81u54v41v50v45v86u41v8Bu54v41v50v45v90u42v20v20v94u20v54v41v50v45v9Au43vA0u41v4Cv54v49v4FvC4u2DvCDu20v2Dv20v20v20v20vD4u20v20v20v20v2Dv20v20vE2u2Dv"
+// New define without whitespaces - so clear screen first.
+// #define TAPE_LIST "81u54v41v50v45v86u41v8Bu54v41v50v45v90u42v95u54v41v50v45v9Au43vA0u41v4Cv54v49v4FvC4u2DvCEu2DvD8u2DvE2u2Dv"
 
 
 
-#define QUERY_TAPE_A "80p"
-#define QUERY_TAPE_B "81p"
-#define QUERY_TAPE_C "82p"
-#define QUERY_ALTIO "83p"
-#define QUERY_DIGI_SLOT "84p"
-#define QUERY_CLOCK "80o"
+
+// #define QUERY_TAPE_A "80p"
+// #define QUERY_TAPE_B "81p"
+// #define QUERY_TAPE_C "82p"
+// #define QUERY_ALTIO "83p"
+// #define QUERY_DIGI_SLOT "84p"
+// #define QUERY_CLOCK "80o"
 
 // These are the possible IO card replies to queries.
 // Please note, there are other cards than these, but I do not have their id's
@@ -68,31 +73,31 @@
 // (C) 1997 Mackie Designs {Apogee Low Jitter Sync Card}
 #define APOGEE_CLOCK_REPLY "28o43o29o20o31o39o39o37o20o4Do61o63o6Bo69o65o20o44o65o73o69o67o6Eo73o20o7Bo41o70o6Fo67o65o65o20o4Co6Fo77o20o4Ao69o74o74o65o72o20o53o79o6Eo63o20o43o61o72o64o7Do0Do"
 
-// These commands are used to write the card ID under the specific TAPE in list.
-// Locations:
-#define TAPE_A_DISPLAY_LOCATION "C2u"
-#define TAPE_B_DISPLAY_LOCATION "CCu"
-#define TAPE_C_DISPLAY_LOCATION "D6u"
-#define ALTIO_DISPLAY_LOCATION "E0u"
-#define DIGICARD_DISPLAY_LOCATION "92u"
-#define CLOCK_DISPLAY_LOCATION "D2u"
+// // These commands are used to write the card ID under the specific TAPE in list.
+// // Locations:
+// #define TAPE_A_DISPLAY_LOCATION "C2u"
+// #define TAPE_B_DISPLAY_LOCATION "CCu"
+// #define TAPE_C_DISPLAY_LOCATION "D6u"
+// #define ALTIO_DISPLAY_LOCATION "E0u"
+// #define DIGICARD_DISPLAY_LOCATION "92u"
+// #define CLOCK_DISPLAY_LOCATION "D2u"
 
-// I/O Card names.
-#define OPT8_STRING "4Fv50v54v2Dv38v"            // "OPT-8"
-#define AIO8_STRING "41v49v4Fv2Dv38v"            // "AIO-8"
-#define AES_STRING "41v45v53v2Fv45v42v55v"       // "AES/EBU"
-#define MACKIE_CLOCK_STRING "4Dv41v43v4Bv49v45v" // "MACKIE"
-#define APOGEE_CLOCK_STRING "41v50v4Fv47v45v45v" // "APOGEE"
-#define EMPTY_SLOT_STRING "65v6Dv70v74v79v"      // "empty"
+// // I/O Card names.
+// #define AIO8_DISPLAY_STRING "41v49v4Fv2Dv38v"            // "AIO-8"
+// #define OPT8_DISPLAY_STRING "4Fv50v54v2Dv38v"            // "OPT-8"
+// #define AES_DISPLAY_STRING "41v45v53v2Fv45v42v55v"       // "AES/EBU"
+// #define MACKIE_CLOCK_DISPLAY_STRING "4Dv41v43v4Bv49v45v" // "MACKIE"
+// #define APOGEE_CLOCK_DISPLAY_STRING "41v50v4Fv47v45v45v" // "APOGEE"
+// #define EMPTY_SLOT_DISPLAY_STRING "65v6Dv70v74v79v"      // "empty"
 
-// DIGITAL I/O CARD:
-#define DIGITAL_IO_STRING "80u44v49v47v49v54v41v4Cv20v49v2Fv4Fv20v43v41v52v44v3Av20v"
+// // DIGITAL I/O CARD:
+// #define DIGITAL_IO_STRING "80u44v49v47v49v54v41v4Cv20v49v2Fv4Fv20v43v41v52v44v3Av20v"
 
-// CLOCK CARD:
-#define CLOCK_STRING "C6u43v4Cv4Fv43v4Bv20v43v41v52v44v3Av"
+// // CLOCK CARD:
+// #define CLOCK_STRING "C6u43v4Cv4Fv43v4Bv20v43v41v52v44v3Av"
 
-// Response from Brain on "s" command
-#define BRAIN_S_RESPONSE "000001E65288c"
+// // Response from Brain on "s" command
+// #define BRAIN_S_RESPONSE "000001E65288c"
 
 // Overwriting previous text (both rows), and writing "LOADING DSP PLUGINS..."
 #define LOADING_DSP "80u4Cv6Fv61v64v69v6Ev67v20v44v53v50v20v50v6Cv75v67v69v6Ev73v2Ev2Ev2Ev20v20v20vC6u20v20v20v20v20vB4u20v20v20v20v20vD2u20v20v20v20v20v20v"

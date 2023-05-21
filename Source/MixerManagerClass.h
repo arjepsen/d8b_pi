@@ -14,6 +14,7 @@
 
 #pragma once
 #include "ChannelClass.h"
+#include "IOSlotClass.h"
 #include "FXSlotClass.h"
 #include "SettingsClass.h"
 #include <array>
@@ -28,6 +29,14 @@ private:
     std::array<Channel, CHANNEL_COUNT> channels;
 
     Settings &settings; // Reference to the Settings singleton.
+
+    // Declare the IO slot objects.
+    IOSlot *ioSlotA;
+    IOSlot *ioSlotB;
+    IOSlot *ioSlotC;
+    IOSlot *ioSlotAlt;
+    IOSlot *ioSlotClock;
+    IOSlot *ioSlotDigital;
 
     // Declare the FX slot objects.
     FXSlot *fxSlotA;
@@ -64,6 +73,7 @@ public:
     bool getBrainBoostState();
     void setBrainBoostState(bool);
 
+    void initIOSlot(IOSlot * ioSlotPtr, IOSlotID ioSlotID);
     void initFXSlot(FXSlot * fxSlotPtr, FXSlotID fxSlotID);
 
     void initMixer(juce::Button* initMixerBtn);

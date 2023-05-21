@@ -117,6 +117,36 @@ void MixerManager::setBrainBoostState(bool doWeWantTurbo)
     settings.settingsSetBrainBoostState(doWeWantTurbo);
 }
 
+void MixerManager::initIOSlot(IOSlot *ioSlotPtr, IOSlotID ioSlotID)
+{
+    switch (ioSlotID)
+    {
+        case TAPEIO_SLOT_A:
+            ioSlotA = ioSlotPtr;
+            break;
+        case TAPEIO_SLOT_B:
+            ioSlotB = ioSlotPtr;
+            break;
+        case TAPEIO_SLOT_C:
+            ioSlotC = ioSlotPtr;
+            break;
+        case TAPEIO_SLOT_ALTIO:
+            ioSlotAlt = ioSlotPtr;
+            break;
+        case CLOCK_IO_SLOT:
+            ioSlotClock = ioSlotPtr;
+            break;
+        case DIGITAL_IO_SLOT:
+            ioSlotDigital = ioSlotPtr;
+            break;
+
+        default:
+            printf("INVALID IO SLOT INIT");
+            exit(1);
+    }
+}
+
+
 void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
 {
     switch (fxSlotID)
