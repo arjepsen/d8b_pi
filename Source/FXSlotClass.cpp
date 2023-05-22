@@ -56,13 +56,15 @@
 #define MFX_REPLY_BASE "F0q00q00q0Bq00q4Xq58q00qF7q"
 #define UFX_REPLY_BASE "F0q00q00q50q0Yq4Yq58q05q00q00q00qF7q"
 #define UFX_INIT_BASE "F0q00q00q50q00q4Zq4FqF7q"
-#define MFX_DISPLAY_BASE "u4Dv46v58v"
-#define UFX_DISPLAY_BASE "u55v46v58v"
-#define EMPTY_DISPLAY_BASE "u65v6Dv70v74v79v"
+
+
+// #define MFX_DISPLAY_BASE "u4Dv46v58v"
+// #define UFX_DISPLAY_BASE "u55v46v58v"
+// #define EMPTY_DISPLAY_BASE "u65v6Dv70v74v79v"
 
 
 // Constructor (initialization list)
-FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID) : fxcard(nullptr)
+FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID)  // : fxcard(nullptr)
 {
     // Setup commands, depending on slot:
     char mfxQuery[] = MFX_QUERY_BASE;
@@ -87,6 +89,7 @@ FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID) : fxcard(nullptr)
     // Clear queue of l's and k's
     tcflush(brainDescriptor, TCIOFLUSH);
 
+    // Send the query string.
     write(brainDescriptor, mfxQuery, strlen(mfxQuery));
 
     // Check reply
@@ -94,9 +97,11 @@ FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID) : fxcard(nullptr)
     {
         printf("Found MFX card in slot %c\n", slot);
         
-        // Create FX card obect.
-        FXCard *card = new FXCard("MFX");
-        fxcard = card;
+        fxCardID = MFX_CARD;
+
+        // // Create FX card obect.
+        // FXCard *card = new FXCard("MFX");
+        // fxcard = card;
 
         // // Set up display command.
         // char display_mfx_cmd[] = MFX_DISPLAY_BASE;
@@ -138,9 +143,7 @@ FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID) : fxcard(nullptr)
         ufxInit2[13] = ufxInit2[16] = ufxLookupTable[slotID] + 2;
 
         // Send UFX Query.
-        printf("mr. UFX.... are you there?\n");
         write(brainDescriptor, ufxQuery, strlen(ufxQuery));
-
 
         printf("Checking reply\n");
         // Check reply.
@@ -151,71 +154,76 @@ FXSlot::FXSlot(int brainDescriptor, FXSlotID slotID) : fxcard(nullptr)
             write(brainDescriptor, ufxInit1, strlen(ufxInit1));
             write(brainDescriptor, ufxInit2, strlen(ufxInit2));
 
-            FXCard *card = new FXCard("UFX");
-            fxcard = card;
+            fxCardID = UFX_CARD;
+
+            // FXCard *card = new FXCard("UFX");
+            // fxcard = card;
             // SEND DISPLAY COMMAND
             //return;
         }
         else
         {
             printf("No FX card in slot %c\n. Truly a sad day!\n", slot);
-            FXCard *card = new FXCard("empty");
-            fxcard = card;
+
+            fxCardID = FX_EMPTY;
+
+            // FXCard *card = new FXCard("empty");
+            // fxcard = card;
             // SEND DISPLAY COMMAND
         }
     }
 
-    printf("Checking get_card function:\n");
-    printf("%s\n", get_card().c_str());
+    // printf("Checking get_card function:\n");
+    // printf("%s\n", get_card().c_str());
 
-    // Done querying. Update display
-    if (get_card() == "empty")
-    {
-        std::map<FXSlotID, std::string> displayLookupTable
-        {
-            {FX_SLOT_A, "C2"},
-            {FX_SLOT_B, "CC"},
-            {FX_SLOT_C, "D6"},
-            {FX_SLOT_D, "E0"}
-        };
-        std::string displayCommand = displayLookupTable[slotID] + EMPTY_DISPLAY_BASE;
+    // // Done querying. Update display
+    // if (get_card() == "empty")
+    // {
+    //     std::map<FXSlotID, std::string> displayLookupTable
+    //     {
+    //         {FX_SLOT_A, "C2"},
+    //         {FX_SLOT_B, "CC"},
+    //         {FX_SLOT_C, "D6"},
+    //         {FX_SLOT_D, "E0"}
+    //     };
+    //     std::string displayCommand = displayLookupTable[slotID] + EMPTY_DISPLAY_BASE;
 
-        write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
-    }
-    else
-    {
-        std::map<FXSlotID, std::string> displayLookupTable
-        {
-            {FX_SLOT_A, "C3"},
-            {FX_SLOT_B, "CD"},
-            {FX_SLOT_C, "D7"},
-            {FX_SLOT_D, "E1"}
-        };
-        if (get_card() == "MFX")
-        {
-            std::string displayCommand = displayLookupTable[slotID] + MFX_DISPLAY_BASE;
-            write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
-        }
-        else
-        {
-            std::string displayCommand = displayLookupTable[slotID] + UFX_DISPLAY_BASE;
-            write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
-        }
+    //     write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+    // }
+    // else
+    // {
+    //     std::map<FXSlotID, std::string> displayLookupTable
+    //     {
+    //         {FX_SLOT_A, "C3"},
+    //         {FX_SLOT_B, "CD"},
+    //         {FX_SLOT_C, "D7"},
+    //         {FX_SLOT_D, "E1"}
+    //     };
+    //     if (get_card() == "MFX")
+    //     {
+    //         std::string displayCommand = displayLookupTable[slotID] + MFX_DISPLAY_BASE;
+    //         write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+    //     }
+    //     else
+    //     {
+    //         std::string displayCommand = displayLookupTable[slotID] + UFX_DISPLAY_BASE;
+    //         write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+    //     }
 
-    }
+    // }
 
 
 }
 
-FXSlot::~FXSlot()
-{
-    delete fxcard;
-}
+// FXSlot::~FXSlot()
+// {
+//     delete fxcard;
+// }
 
-std::string FXSlot::get_card()
-{
-    return fxcard->get_type();
-}
+// std::string FXSlot::get_card()
+// {
+//     return fxcard->get_type();
+// }
 
 // void FXSlot::init()
 // {
@@ -276,4 +284,9 @@ std::string FXSlot::getBrainResponse(int brainDescriptor)
     } while (response != 'l' && response != 'k');
 
     return brainReplyStream.str();
+}
+
+FXCardID FXSlot::getCardID()
+{
+    return fxCardID;
 }

@@ -9,17 +9,15 @@
 */
 
 #include "MixerInitScripts.h"
-#include "CommandStrings.h"
+// #include "CommandStrings.h"
 #include <fcntl.h>
 #include <unistd.h>
-
 
 void test()
 {
     sleep(6);
     printf("This is the testfunction finishing.\n");
 }
-
 
 InitErrorType initializeMixer()
 {
@@ -38,7 +36,7 @@ InitErrorType initializeMixer()
     std::cout << "Dispy is: " << DSP_DEVICE << std::endl;
 
     // Make a file descriptor for the 115200 baud rate brain connection.
-    int BRAIN = openSerialPort(BRAIN_DEVICE, B115200);  // Not const, since it can change to boost later.
+    int BRAIN = openSerialPort(BRAIN_DEVICE, B115200); // Not const, since it can change to boost later.
     const int DSP = openSerialPort(DSP_DEVICE, B115200);
 
     if (BRAIN == -1 || DSP == -1)
@@ -99,13 +97,13 @@ InitErrorType initializeMixer()
     write(BRAIN, "0Cu", 3);
     usleep(20000); // Sleep for 20ms
 
-    // Display the welcome message. 
+    // Display the welcome message.
     write(BRAIN, WELCOME_STRING, strlen(WELCOME_STRING));
-    sleep(3);   // Let it stay there a fews secs for admirations sake.
+    sleep(3); // Let it stay there a fews secs for admirations sake.
 
     // ====================== SEND BRAIN FIRMWARE =======================================
     // Clear Screen
-    write(BRAIN, "01u", 3); 
+    write(BRAIN, "01u", 3);
     usleep(20000);
 
     printf("sending brain \n");
@@ -122,7 +120,7 @@ InitErrorType initializeMixer()
     }
     else
     {
-        //write(BRAIN, UPLOAD_FIRMWARE_MESSAGE, strlen(UPLOAD_FIRMWARE_MESSAGE));
+        // write(BRAIN, UPLOAD_FIRMWARE_MESSAGE, strlen(UPLOAD_FIRMWARE_MESSAGE));
         write(BRAIN, UPLOADING_BRAIN_MESSAGE, strlen(UPLOADING_BRAIN_MESSAGE));
         sendFirmwareFile(BRAINWARE_FILE, BRAIN);
     }
@@ -141,21 +139,19 @@ InitErrorType initializeMixer()
             return UPLOAD_BRAIN_FAILED;
     }
 
-
     // #########################################################
-    // UPLOADING DSP FIRMWARE RIGHT BEFORE POKING IO CARDS 
+    // UPLOADING DSP FIRMWARE RIGHT BEFORE POKING IO CARDS
     // SEEMS TO PREVENT IO CARD RESPONSE.
 
     // // Clear Screen
     // write(BRAIN, "01u", 3);
-    // usleep(20000); 
-
+    // usleep(20000);
 
     // Display DSP firmware upload message
-    //write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
+    // write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
 
     // Send the DSP firmware
-    //sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
+    // sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
     // // Here the DSP replies "R350D" - maybe we should check that?
     // retries = 0;
@@ -174,7 +170,6 @@ InitErrorType initializeMixer()
     // }
     // ############################################################
 
-
     // ====================== I/O CARD LIST ====================================
     // This section detects and prints out a list of I/O cards.
 
@@ -190,16 +185,16 @@ InitErrorType initializeMixer()
     // Create the IO card slot object pointers. (Constructor initializes card).
     // Then use function to display ID code.
     IOSlot *tapeA = new IOSlot(BRAIN, TAPEIO_SLOT_A);
-    writeCardIdDisplayCode(BRAIN, tapeA, TAPE_A_DISPLAY_LOCATION);
+    writeIOCardIdDisplayCode(BRAIN, tapeA, TAPE_A_DISPLAY_LOCATION);
 
     IOSlot *tapeB = new IOSlot(BRAIN, TAPEIO_SLOT_B);
-    writeCardIdDisplayCode(BRAIN, tapeB, TAPE_B_DISPLAY_LOCATION);
+    writeIOCardIdDisplayCode(BRAIN, tapeB, TAPE_B_DISPLAY_LOCATION);
 
     IOSlot *tapeC = new IOSlot(BRAIN, TAPEIO_SLOT_C);
-    writeCardIdDisplayCode(BRAIN, tapeC, TAPE_C_DISPLAY_LOCATION);
+    writeIOCardIdDisplayCode(BRAIN, tapeC, TAPE_C_DISPLAY_LOCATION);
 
     IOSlot *altIO = new IOSlot(BRAIN, TAPEIO_SLOT_ALTIO);
-    writeCardIdDisplayCode(BRAIN, altIO, ALTIO_DISPLAY_LOCATION);
+    writeIOCardIdDisplayCode(BRAIN, altIO, ALTIO_DISPLAY_LOCATION);
 
     // Admire the beauty of it.
     sleep(2);
@@ -218,10 +213,10 @@ InitErrorType initializeMixer()
 
     // Identify Digital card and Clock.
     IOSlot *digiIO = new IOSlot(BRAIN, DIGITAL_IO_SLOT);
-    writeCardIdDisplayCode(BRAIN, digiIO, DIGICARD_DISPLAY_LOCATION);
+    writeIOCardIdDisplayCode(BRAIN, digiIO, DIGICARD_DISPLAY_LOCATION);
 
     IOSlot *clockIO = new IOSlot(BRAIN, CLOCK_IO_SLOT);
-    writeCardIdDisplayCode(BRAIN, clockIO, CLOCK_DISPLAY_LOCATION);
+    writeIOCardIdDisplayCode(BRAIN, clockIO, CLOCK_DISPLAY_LOCATION);
 
     // Admire the beauty of it.
     sleep(2);
@@ -233,7 +228,7 @@ InitErrorType initializeMixer()
     write(BRAIN, "s", 1);
 
     // Then check response.
-    //std::cout << "s Response: " << getBrainResponse(BRAIN) << std::endl;
+    // std::cout << "s Response: " << getBrainResponse(BRAIN) << std::endl;
 
     retries = 0;
     while (true)
@@ -248,17 +243,15 @@ InitErrorType initializeMixer()
 
     sleep(1);
 
-
     // ============== UPLOAD DSP FIRMWARE =====================
 
     // Trying sending dsp firmware here
     // Clear Screen
     write(BRAIN, "01u", 3);
-    usleep(20000); 
-
+    usleep(20000);
 
     // Display DSP firmware upload message
-    write(BRAIN, UPLOADING_DSP_MESSAGE, strlen(UPLOADING_DSP_MESSAGE));
+    write(BRAIN, UPLOADING_DSP_FIRMWARE_MESSAGE, strlen(UPLOADING_DSP_FIRMWARE_MESSAGE));
 
     // Send the DSP firmware
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
@@ -274,102 +267,63 @@ InitErrorType initializeMixer()
             break;
         }
         else
-        retries++;
+            retries++;
         if (retries > MAX_RETRIES)
             return UPLOAD_DSP_FAILED;
     }
-
 
     // ===================== SEND SLAVE PART OF DSP FIRMWARE ==================
     std::cout << "Sending DSP Slave part" << std::endl;
 
     // Clear Screen
     write(BRAIN, "01u", 3);
-    usleep(20000); 
+    usleep(20000);
 
     write(BRAIN, UPLOADING_DSP_SLAVE_MESSAGE, strlen(UPLOADING_DSP_SLAVE_MESSAGE));
 
     sendFirmwareFile(DSP_SLAVE_FIRMWARE_FILE, DSP);
 
-    // FILE *dspSlaveWare = fopen(DSP_SLAVE_FILE, "r");
-    // if (dspSlaveWare == NULL)
-    // {
-    //     fprintf(stderr, "Error opening file: %s\n", strerror(errno));
-    //     exit(1);
-    // }
-
-    // char buf[BUF_SIZE];
-    // size_t dspBytesRead = 0;
-    // while ((dspBytesRead = fread(buf, 1, BUF_SIZE, dspSlaveWare)) > 0)
-    // {
-    //     ssize_t dspBytesWritten = write(DSP, buf, dspBytesRead);
-    //     if (dspBytesWritten < 0)
-    //     {
-    //         perror("write");
-    //         exit(1);
-    //     }
-    // }
-
-    // fclose(dspSlaveWare);
-
-    // // Clear buffer
-    // memset(buf, 0, sizeof(buf));
-
     // A moment of silence.
     sleep(2);
 
-    exit(1);
-
-    // =================== DSP PLUGINS (Config) ===========================
+    // =================== DSP PLUGINS (Config.asc file) ===========================
     // Clear Screen
     write(BRAIN, "01u", 3);
-    usleep(20000); 
-    
+    usleep(20000);
+
     // Display "Loading DSP plugins..."
-    write(BRAIN, LOADING_DSP, strlen(LOADING_DSP));
+    write(BRAIN, LOADING_DSP_PLUGINS, strlen(LOADING_DSP_PLUGINS));
+    write(BRAIN, CONFIG_FILE_INFO, strlen(CONFIG_FILE_INFO));
 
-    // Now send the config file to DSP ...twice... for some reason..
-    FILE *dspConfig = fopen(DSP_CONFIG_FILE, "r");
-    if (dspConfig == NULL)
-    {
-        fprintf(stderr, "Error opening file: %s\n", strerror(errno));
-        exit(1);
-    }
-
-
-    char buf[BUF_SIZE];
-    size_t dspBytesRead = 0;
-
-    for (int i = 0; i < 2; ++i)
-    {
-        dspBytesRead = 0;
-        while ((dspBytesRead = fread(buf, 1, BUF_SIZE, dspConfig)) > 0)
-        {
-            ssize_t dspBytesWritten = write(DSP, buf, dspBytesRead);
-            if (dspBytesWritten < 0)
-            {
-                perror("write");
-                exit(1);
-            }
-        }
-    }
-
-    fclose(dspConfig);
+    // For some reason, the config file is sent twice... not sure why.
+    sendFirmwareFile(DSP_CONFIG_FILE, DSP);
+    sendFirmwareFile(DSP_CONFIG_FILE, DSP);
 
     printf("Config sent twice.\n");
 
-    exit(1);
+    sleep(1);
 
     // =========================== INIT FX CARDS =============================
+    // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
 
     // Display the FX card list:
     write(BRAIN, FX_CARD_LIST, strlen(FX_CARD_LIST));
+    tcflush(BRAIN, TCIOFLUSH);
 
     // Create the FX card slot object pointers.
     FXSlot *fxSlotA = new FXSlot(BRAIN, FX_SLOT_A);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotA, FX_SLOT_A);
+
     FXSlot *fxSlotB = new FXSlot(BRAIN, FX_SLOT_B);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotB, FX_SLOT_B);
+
     FXSlot *fxSlotC = new FXSlot(BRAIN, FX_SLOT_C);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotC, FX_SLOT_C);
+
     FXSlot *fxSlotD = new FXSlot(BRAIN, FX_SLOT_D);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotD, FX_SLOT_D);
 
     // Pass the pointers to the mixermanager
     mixerManager.initFXSlot(fxSlotA, FX_SLOT_A);
@@ -378,6 +332,10 @@ InitErrorType initializeMixer()
     mixerManager.initFXSlot(fxSlotD, FX_SLOT_D);
 
 
+    sleep(1);
+    exit(1);
+    
+
     // ==================== Send some 7x2$... ================================
     // Some further configuration.....
     // Unsure what this does - but it does it for all the channels.
@@ -385,6 +343,10 @@ InitErrorType initializeMixer()
 
     // Open the file for reading
     printf("Sending 7x2$....\n");
+
+    char buf[BUF_SIZE];
+    size_t dspBytesRead = 0;
+
     FILE *dspCmd1 = fopen(DSP_CMD1_FILE, "r");
     if (dspCmd1 == NULL)
     {
@@ -409,11 +371,10 @@ InitErrorType initializeMixer()
     // Should there be a reponse?
     std::cout << getDspResponse(DSP) << std::endl;
 
-
     // AFTER THIS IT THE MIXER IS PROBABLY UP AND RUNNING, ALTHOUGH NO CHRISTMAS LIGHTS YET....
-    // MAYBE HERE WE SEND THE SAVED CONFIGURATION, AND THEN HAND OVER THINGS TO THE 
+    // MAYBE HERE WE SEND THE SAVED CONFIGURATION, AND THEN HAND OVER THINGS TO THE
     // CIRCULAR BUFFER MERRY GOAROUND....?anders
-    
+
     // If everything is ok, return true
     return INIT_SUCCESS;
 }
@@ -434,7 +395,7 @@ int openSerialPort(const char *devicePath, speed_t baudRate)
     if (fd < 0)
     {
         perror("Error opening serial device");
-        //exit(1);
+        // exit(1);
         return -1;
     }
 
@@ -585,7 +546,6 @@ std::string getDspResponse(int dspDescriptor)
     return dspReplyStream.str();
 }
 
-
 // ################################################################################
 // Function for checking the heartbeat of the Brain.
 // Returns true, if the brain sends an l or a k.
@@ -610,7 +570,7 @@ int getHeartbeat(int brainDescriptor)
             perror("Error reading from file descriptor");
             exit(1);
         }
-        else if (result == 0)   // "EOF"
+        else if (result == 0) // "EOF"
         {
             return 0;
         }
@@ -621,20 +581,18 @@ int getHeartbeat(int brainDescriptor)
 // ###############################################################################
 // Helper function for retrieving the display string command for a given ioCard ID
 // ###############################################################################
-void writeCardIdDisplayCode(int brainDesriptor, IOSlot* ioSlot, std::string locationCode)
+void writeIOCardIdDisplayCode(int brainDescriptor, IOSlot *ioSlot, std::string locationCode)
 {
     printf("\n== getting code for ID: %s\n", ioSlot->getCardID().c_str());
-    
+
     // Correlation map for ID's and display codes.
-    std::map<std::string, std::string> cardIdStrings
-    {
+    std::map<std::string, std::string> cardIdStrings{
         {AIO8_ID_STRING, AIO8_DISPLAY_CODE},
         {OPT8_ID_STRING, OPT8_DISPLAY_CODE},
         {AES_ID_STRING, AES_DISPLAY_CODE},
         {MACKIE_CLOCK_ID_STRING, MACKIE_CLOCK_DISPLAY_CODE},
         {APOGEE_CLOCK_ID_STRING, APOGEE_CLOCK_DISPLAY_CODE},
-        {EMPTY_IOSLOT_ID_STRING, EMPTY_SLOT_DISPLAY_CODE}
-    };
+        {EMPTY_IOSLOT_ID_STRING, EMPTY_SLOT_DISPLAY_CODE}};
 
     // Get the ID strings for each slot, and write in the display
     std::string cardIdDisplayCode = "";
@@ -644,77 +602,123 @@ void writeCardIdDisplayCode(int brainDesriptor, IOSlot* ioSlot, std::string loca
     printf("The ID code string is: %s\n", cardIdDisplayCode.c_str());
 
     // Write to display
-    write(brainDesriptor, cardIdDisplayCode.c_str(), cardIdDisplayCode.length());
+    write(brainDescriptor, cardIdDisplayCode.c_str(), cardIdDisplayCode.length());
 }
 
 
-
-
-
-
-// ################################################################################
-// Function for identifying the card in the specified card slot
-// Takes card slot object, and a Brain COM port file descriptor
-// ################################################################################
-std::string identifyIOCard(IoCardSlotType tapeSlot, int brainDescriptor)
+// ###############################################################################
+// Helper function for retrieving the display string command for a given ioCard ID
+// ###############################################################################
+void writeFXCardIdDisplayCode(int brainDescriptor, FXSlot* fxSlot, FXSlotID slotID)
 {
-    // Send the query-string for the supplied tape slot.
-    switch (tapeSlot)
+    // Check card ID, put command together, write to display.
+    std::string displayCommand = "";
+
+    if (fxSlot->getCardID() == FX_EMPTY)
     {
-        case TAPE_A:
-            printf("poking A\n");
-            write(brainDescriptor, QUERY_TAPE_A, 3);
-            break;
-        case TAPE_B:
-            printf("poking B\n");
-            write(brainDescriptor, QUERY_TAPE_B, 3);
-            break;
-        case TAPE_C:
-            printf("poking C\n");
-            write(brainDescriptor, QUERY_TAPE_C, 3);
-            break;
-        case ALTIO:
-            printf("poking ALTIO\n");
-            write(brainDescriptor, QUERY_ALTIO, 3);
-            break;
-        case DIGI_IO:
-            printf("poking DIGI\n");
-            write(brainDescriptor, QUERY_DIGI_SLOT, 3);
-            break;
-        case CLOCK:
-            printf("poking CLOCK\n");
-            write(brainDescriptor, QUERY_CLOCK, 3);
-            break;
-        default:
-            perror("that tape slot does not exist.");
-            exit(1);
+        std::map<FXSlotID, std::string> emptyFxLookupTable
+        {
+            {FX_SLOT_A, "C2"},
+            {FX_SLOT_B, "CC"},
+            {FX_SLOT_C, "D6"},
+            {FX_SLOT_D, "E0"}
+        };
+        displayCommand = emptyFxLookupTable[slotID] + EMPTY_DISPLAY_BASE;
+
+        //write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
     }
-
-    // Check the repsonse
-    std::string iocardID = getBrainResponse(brainDescriptor);
-    std::cout << "Card hex: " << iocardID << std::endl;
-
-    std::cout << "Slot " << tapeSlot << ": " << decodeString(iocardID) << std::endl;
-
-    // std::string returnString;
-    if (iocardID == AIO8_REPLY)
-        return std::string(AIO8_DISPLAY_CODE);
-    else if (iocardID == OPT8_REPLY)
-        return std::string(OPT8_DISPLAY_CODE);
-    else if (iocardID == AES_REPLY)
-        return std::string(AES_DISPLAY_CODE);
-    else if (iocardID == MACKIE_CLOCK_REPLY)
-        return std::string(MACKIE_CLOCK_DISPLAY_CODE);
-    else if (iocardID == APOGEE_CLOCK_REPLY)
-        return std::string(APOGEE_CLOCK_DISPLAY_CODE);
-    else if (iocardID.length() == 0)
-        return std::string(EMPTY_SLOT_DISPLAY_CODE);
     else
     {
-        perror("Response on tape query didnt match any known card");
-        exit(1);
+        std::map<FXSlotID, std::string> loadedFxLookupTable
+        {
+            {FX_SLOT_A, "C3"},
+            {FX_SLOT_B, "CD"},
+            {FX_SLOT_C, "D7"},
+            {FX_SLOT_D, "E1"}
+        };
+        if (fxSlot->getCardID() == MFX_CARD)
+        {
+            std::string displayCommand = loadedFxLookupTable[slotID] + MFX_DISPLAY_BASE;
+            //write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+        }
+        else
+        {
+            std::string displayCommand = loadedFxLookupTable[slotID] + UFX_DISPLAY_BASE;
+            //write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+        }
+
     }
+    write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+
+/////////////////////////////////////////////////////////////////////////
 }
+
+
+
+
+// // ################################################################################
+// // Function for identifying the card in the specified card slot
+// // Takes card slot object, and a Brain COM port file descriptor
+// // ################################################################################
+// std::string identifyIOCard(IoCardSlotType tapeSlot, int brainDescriptor)
+// {
+//     // Send the query-string for the supplied tape slot.
+//     switch (tapeSlot)
+//     {
+//         case TAPE_A:
+//             printf("poking A\n");
+//             write(brainDescriptor, QUERY_TAPE_A, 3);
+//             break;
+//         case TAPE_B:
+//             printf("poking B\n");
+//             write(brainDescriptor, QUERY_TAPE_B, 3);
+//             break;
+//         case TAPE_C:
+//             printf("poking C\n");
+//             write(brainDescriptor, QUERY_TAPE_C, 3);
+//             break;
+//         case ALTIO:
+//             printf("poking ALTIO\n");
+//             write(brainDescriptor, QUERY_ALTIO, 3);
+//             break;
+//         case DIGI_IO:
+//             printf("poking DIGI\n");
+//             write(brainDescriptor, QUERY_DIGI_SLOT, 3);
+//             break;
+//         case CLOCK:
+//             printf("poking CLOCK\n");
+//             write(brainDescriptor, QUERY_CLOCK, 3);
+//             break;
+//         default:
+//             perror("that tape slot does not exist.");
+//             exit(1);
+//     }
+
+//     // Check the repsonse
+//     std::string iocardID = getBrainResponse(brainDescriptor);
+//     std::cout << "Card hex: " << iocardID << std::endl;
+
+//     std::cout << "Slot " << tapeSlot << ": " << decodeString(iocardID) << std::endl;
+
+//     // // std::string returnString;
+//     // if (iocardID == AIO8_REPLY)
+//     //     return std::string(AIO8_DISPLAY_CODE);
+//     // else if (iocardID == OPT8_REPLY)
+//     //     return std::string(OPT8_DISPLAY_CODE);
+//     // else if (iocardID == AES_REPLY)
+//     //     return std::string(AES_DISPLAY_CODE);
+//     // else if (iocardID == MACKIE_CLOCK_REPLY)
+//     //     return std::string(MACKIE_CLOCK_DISPLAY_CODE);
+//     // else if (iocardID == APOGEE_CLOCK_REPLY)
+//     //     return std::string(APOGEE_CLOCK_DISPLAY_CODE);
+//     // else if (iocardID.length() == 0)
+//     //     return std::string(EMPTY_SLOT_DISPLAY_CODE);
+//     // else
+//     // {
+//     //     perror("Response on tape query didnt match any known card");
+//     //     exit(1);
+//     // }
+// }
 
 // ################################################################################
 // Function for decoding the ascii hex outputs
