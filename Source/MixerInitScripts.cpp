@@ -108,22 +108,29 @@ InitErrorType initializeMixer()
 
     printf("sending brain \n");
 
-    if (mixerManager.getBrainBoostState())
-    {
-        // This one goes to 11!
-        write(BRAIN, BOOST_MESSAGE1, strlen(BOOST_MESSAGE1));
-        sleep(2);
-        write(BRAIN, BOOST_MESSAGE2, strlen(BOOST_MESSAGE2));
-        sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
-        close(BRAIN);
-        BRAIN = openSerialPort(BRAIN_DEVICE, B230400);
-    }
-    else
-    {
-        // write(BRAIN, UPLOAD_FIRMWARE_MESSAGE, strlen(UPLOAD_FIRMWARE_MESSAGE));
-        write(BRAIN, UPLOADING_BRAIN_MESSAGE, strlen(UPLOADING_BRAIN_MESSAGE));
-        sendFirmwareFile(BRAINWARE_FILE, BRAIN);
-    }
+//////////////////////////////////////////////////////////////
+    // Send the DSP firmware
+    //sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
+    sendFirmwareFile(BRAINWARE_FILE, BRAIN);
+///////////////////////////////////////////////////////////////////
+
+
+    // if (mixerManager.getBrainBoostState())
+    // {
+    //     // This one goes to 11!
+    //     write(BRAIN, BOOST_MESSAGE1, strlen(BOOST_MESSAGE1));
+    //     sleep(2);
+    //     write(BRAIN, BOOST_MESSAGE2, strlen(BOOST_MESSAGE2));
+    //     sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
+    //     close(BRAIN);
+    //     BRAIN = openSerialPort(BRAIN_DEVICE, B230400);
+    // }
+    // else
+    // {
+    //     // write(BRAIN, UPLOAD_FIRMWARE_MESSAGE, strlen(UPLOAD_FIRMWARE_MESSAGE));
+    //     write(BRAIN, UPLOADING_BRAIN_MESSAGE, strlen(UPLOADING_BRAIN_MESSAGE));
+    //     sendFirmwareFile(BRAINWARE_FILE, BRAIN);
+    // }
 
     // Check response from Brain it should look something like:
     // R0027v0129v0202v0326v042Fv053Dv0623v073Ev083Cv0918v0A3Fv0B3Cv0C3Ev0D0Cv0E1Av0F2Cv1024v1127v1205v131Fv1419v1524v163Bv1705v1804v1A31v1B2Av1C39v1D37v1E2Dv1F03v2014v
@@ -253,7 +260,7 @@ InitErrorType initializeMixer()
     // Display DSP firmware upload message
     write(BRAIN, UPLOADING_DSP_FIRMWARE_MESSAGE, strlen(UPLOADING_DSP_FIRMWARE_MESSAGE));
 
-    // Send the DSP firmware
+    // // Send the DSP firmware
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
     // Here the DSP replies "R350D" - maybe we should check that?
@@ -280,9 +287,14 @@ InitErrorType initializeMixer()
     usleep(20000);
 
     write(BRAIN, UPLOADING_DSP_SLAVE_MESSAGE, strlen(UPLOADING_DSP_SLAVE_MESSAGE));
+    
+    // printf("\n\nWAITING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+    // sleep(10);
 
     sendFirmwareFile(DSP_SLAVE_FIRMWARE_FILE, DSP);
 
+    // printf("\nSLAVE DONE!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    // sleep(10);
     // A moment of silence.
     sleep(2);
 
@@ -300,6 +312,9 @@ InitErrorType initializeMixer()
     sendFirmwareFile(DSP_CONFIG_FILE, DSP);
 
     printf("Config sent twice.\n");
+    // printf("RESOONSE;");
+    // std::cout << getDspResponse(DSP) << std::endl;
+
 
     sleep(1);
 
@@ -331,15 +346,23 @@ InitErrorType initializeMixer()
     mixerManager.initFXSlot(fxSlotC, FX_SLOT_C);
     mixerManager.initFXSlot(fxSlotD, FX_SLOT_D);
 
-
     sleep(1);
-    exit(1);
-    
 
-    // ==================== Send some 7x2$... ================================
+    // ==================== SEND 7x2$... CODES ================================
     // Some further configuration.....
     // Unsure what this does - but it does it for all the channels.
     // Command is similar to the filter for each channel, but slightly different.
+
+    // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    // Display more config stuff message
+    write(BRAIN, MORE_CONFIG_MESSAGE, strlen(MORE_CONFIG_MESSAGE));
+
+    // Send the dspCmd1.asc file
+    //sendFirmwareFile(DSP_CMD1_FILE, DSP);
+
 
     // Open the file for reading
     printf("Sending 7x2$....\n");
@@ -369,11 +392,55 @@ InitErrorType initializeMixer()
     fclose(dspCmd1);
 
     // Should there be a reponse?
-    std::cout << getDspResponse(DSP) << std::endl;
+    int cycles = 30;
+    for (int i = 0; i < cycles; i++)
+    {
+        std::cout << getDspResponse(DSP) << std::endl;
+    }
+
+        printf("EEEEEND");
+
+
+
+    ///////////////////////////////////////////////////////
+    // pan 9 Left
+    write(DSP, "0AdFEFFX0OFDFFXP", strlen("0AdFEFFX0OFDFFXP"));
+
+    // pan 10 right
+    write(DSP, "22dFEFFXFEOFDFFXP", strlen("22dFEFFXFEOFDFFXP"));
+
+    // Set both channels to unity
+    write(DSP, "0AcXC1Q", strlen("0AcXC1Q"));
+    write(DSP,"22cXC1Q", strlen("22cXC1Q"));
+
+    // Turn up master
+    write(DSP, "4Cc9X70QAX70Q", strlen("4Cc9X70QAX70Q"));
+
+
+    // After this there should be sound out on Masters.
+    // lets activate some control room outs.
+    // Activate Master L-R (deactivate digital... I think...)
+ 
+    write(BRAIN, "67d66e", strlen("67d66e"));
+
+    // Activate Control room Mains:
+    write(BRAIN, "5Fd", 3);
+
+    // Set speaker level
+    write(BRAIN, "BC0w", 4);
+
+
+    sleep(5);
+
+
+    ///////////////////////////////////////////////////////////
 
     // AFTER THIS IT THE MIXER IS PROBABLY UP AND RUNNING, ALTHOUGH NO CHRISTMAS LIGHTS YET....
     // MAYBE HERE WE SEND THE SAVED CONFIGURATION, AND THEN HAND OVER THINGS TO THE
-    // CIRCULAR BUFFER MERRY GOAROUND....?anders
+    // CIRCULAR BUFFER MERRY GOAROUND....?
+
+    // Actually... here we should probably send a final config file....
+    // The initial startup settings....
 
     // If everything is ok, return true
     return INIT_SUCCESS;
@@ -482,11 +549,10 @@ std::string getBrainResponse(int brainDescriptor)
 {
     char response = '\0';
     std::stringstream brainReplyStream;
-    printf("\n==========================\n");
     while (true)
     {
         int result = read(brainDescriptor, &response, 1);
-        printf("%c", response);
+        //printf("%c", response);
         if (response == 'l' || response == 'k')
         {
             printf("got an l or k - end of message.\n");
@@ -508,7 +574,6 @@ std::string getBrainResponse(int brainDescriptor)
         }
         // usleep(10000); // Sleep for 10ms
     }
-    printf("\n==========================\n");
     return brainReplyStream.str();
 }
 
@@ -519,11 +584,10 @@ std::string getDspResponse(int dspDescriptor)
 {
     char response = '\0';
     std::stringstream dspReplyStream;
-    printf("\n==========================\n");
     while (true)
     {
         int result = read(dspDescriptor, &response, 1);
-        printf("%c", response);
+        //printf("%c", response);
         if (result == 1)
         {
             if (response == 'd')
@@ -542,7 +606,6 @@ std::string getDspResponse(int dspDescriptor)
             exit(1);
         }
     }
-    printf("\n==========================\n");
     return dspReplyStream.str();
 }
 
@@ -599,8 +662,6 @@ void writeIOCardIdDisplayCode(int brainDescriptor, IOSlot *ioSlot, std::string l
     cardIdDisplayCode.append(locationCode);
     cardIdDisplayCode.append(cardIdStrings[ioSlot->getCardID()]);
 
-    printf("The ID code string is: %s\n", cardIdDisplayCode.c_str());
-
     // Write to display
     write(brainDescriptor, cardIdDisplayCode.c_str(), cardIdDisplayCode.length());
 }
@@ -624,8 +685,6 @@ void writeFXCardIdDisplayCode(int brainDescriptor, FXSlot* fxSlot, FXSlotID slot
             {FX_SLOT_D, "E0"}
         };
         displayCommand = emptyFxLookupTable[slotID] + EMPTY_DISPLAY_BASE;
-
-        //write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
     }
     else
     {
@@ -638,22 +697,16 @@ void writeFXCardIdDisplayCode(int brainDescriptor, FXSlot* fxSlot, FXSlotID slot
         };
         if (fxSlot->getCardID() == MFX_CARD)
         {
-            std::string displayCommand = loadedFxLookupTable[slotID] + MFX_DISPLAY_BASE;
-            //write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+            displayCommand = loadedFxLookupTable[slotID] + MFX_DISPLAY_BASE;
         }
         else
         {
-            std::string displayCommand = loadedFxLookupTable[slotID] + UFX_DISPLAY_BASE;
-            //write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
+            displayCommand = loadedFxLookupTable[slotID] + UFX_DISPLAY_BASE;
         }
 
     }
     write(brainDescriptor, displayCommand.c_str(), displayCommand.length());
-
-/////////////////////////////////////////////////////////////////////////
 }
-
-
 
 
 // // ################################################################################
