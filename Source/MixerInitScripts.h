@@ -15,15 +15,6 @@
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define DEBUG_MESSAGES
-
-#ifdef DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf(format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
-
 
 // For the final program, these files should be in a "Datafiles" folder within the folder that the program file is in.
 #define BRAINWARE_FILE "../DataFiles/control.asc"

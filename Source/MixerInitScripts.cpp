@@ -12,6 +12,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define INIT_DEBUG_MESSAGES
+
+#ifdef INIT_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("INIT_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
+
+
 InitErrorType initializeMixer()
 {
     const int MAX_RETRIES = 5;  // Used for defining how many retries various attempts will have.

@@ -15,10 +15,20 @@
 #include <unistd.h>
 #include <iostream>
 
+
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define IO_INIT_DEBUG_MESSAGES
+
+#ifdef IO_INIT_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("IO_INIT_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
+
 // Constructor (initialization list)
 IOSlot::IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery) //: ioCard(nullptr)
 {
-    printf("\n======== Start IO constructor ========\n");
+    DEBUG_MSG("\n======== Start IO constructor ========\n");
     // Query the specified slot
     switch (slotIDtoQuery)
     {
@@ -48,12 +58,9 @@ IOSlot::IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery) //: ioCard(nullptr)
     // Get the response (This will be a ascii hex string with a p or o delimiter)
     std::string ioSlotResponse = getSlotResponse(brainDescriptor);
 
-    //printf("Query response: %s\n", ioSlotResponse);
-    //std::cout << "query response: " << ioSlotResponse << std::endl;
-
     // Convert to regular text, and save member.
     ioCardString = decodeString(ioSlotResponse);
-    printf("\nIO card found: %s\n", ioCardString.c_str());
+    DEBUG_MSG("IO card found:\n  ---> %s\n", ioCardString.c_str());
 
     // Set up short Card-ID
     if (ioCardString == "")
@@ -82,7 +89,8 @@ IOSlot::IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery) //: ioCard(nullptr)
         
 
     }
-    printf("IO card ID: %s\n", ioCardID.c_str());
+    DEBUG_MSG("IO card ID: %s\n", ioCardID.c_str());
+    DEBUG_MSG("\n      === End of constructor ===\n\n");
 }
 
 // ####################################################################
@@ -92,7 +100,7 @@ IOSlot::IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery) //: ioCard(nullptr)
 // ####################################################################
 std::string IOSlot::getSlotResponse(int brainDescriptor)
 {
-    printf("\n === Gettings slot response ===\n");
+    DEBUG_MSG("-- Gettings slot response....  \n");
     char response = '\0';
     std::stringstream brainReplyStream;
 
@@ -103,7 +111,7 @@ std::string IOSlot::getSlotResponse(int brainDescriptor)
         // If "l" or "k" (heartbeat) it's end of message.
         if (response == 'l' || response == 'k')
         {
-            printf("got an l or k - end of message.\n");
+            DEBUG_MSG("Got heartbeat - end of message.\n");
             break;
         }
 
@@ -117,7 +125,7 @@ std::string IOSlot::getSlotResponse(int brainDescriptor)
         }
         else if (result == 0)
         {
-            printf("\nEOF\n");
+            DEBUG_MSG("\nEOF\n");
             break;
         }
     }
