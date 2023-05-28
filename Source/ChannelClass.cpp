@@ -10,12 +10,35 @@
 
 #include "ChannelClass.h"
 
-uint8_t Channel::nextID = 0;
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define CHANNEL_DEBUG_MESSAGES
 
-// Constructor
+#ifdef CHANNEL_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("IO_INIT_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
+
+// Set first channel ID. This will increment with every channel object constructed.
+uint8_t Channel::nextID = 0;  
+
+// Constructor.
 Channel::Channel() : channelID{nextID++}
 {
-  // Initialize other member variables to default values...
+    DEBUG_MSG("\n=============== CHANNEL CONSTRUCTOR =====================\n");
+
+    // VALUE COMMANDS ARE STILL SENT AS HEX STRINGS..... WHEN SHOULD A CONVERSION FROM INT TO CHAR HAPPEN?
+
+    volume = 0;
+    mute = false;
+    solo = false;
+
+    pan = 127;  // Center (0x7F)
+
+    assignments[0] = true;  // Assign to L-R. All others should default to false.
+
+
+    // Initialize other member variables to default values...
 }
 
 // Implement other member functions...

@@ -13,12 +13,23 @@
 #include <numeric>
 #include <stdexcept>
 
+
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define MANAGER_DEBUG_MESSAGES
+
+#ifdef MANAGER_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("MNGR_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
+
 // ############################ CONSTRUCTOR ####################################
 // std::array automatically initializes elements to default value -
 // so Channel constructor gets called automatically.
 MixerManager::MixerManager() : channels{}, settings(Settings::getInstance()), isInitializing(false)
 {
     std::cout << "MixerManger Constructor" << std::endl;
+    DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
     // assign default values to each channel's members,
     // And at the same time, send the corresponding commands to the mixer.
     // When this program runs, and this constructor is run, we can have had
@@ -190,7 +201,29 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                                         "OK");
             }
 
-            //test();
+            // The init script only initializes the console. 
+            // Now we should do the channel, routing, etc setup using the various classes.
+
+            // Channels are already constructed by now, so they should have their default values already.
+            // This means that we should select bank 1 (ch1-24). This is equivalent to pushing that button, which
+            // will load channel 1-24 settings to the channel strips.
+
+            // Run a for loop over all channels, and send their dsp values.
+            for (auto channel : channels)
+            {
+                uint8_t channelVolume = channel.getVolume();
+                
+            }
+
+
+
+            // run a for loop over channelstrips. This is boot, so assign channel 1-24 to channelstrips, then load their settings to the strip.
+
+
+
+
+
+
             isInitializing = false;
 
             juce::MessageManager::callAsync([initMixerBtn]()

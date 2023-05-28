@@ -5,6 +5,7 @@
     Created: 16 Apr 2023 8:49:27pm
     Author:  anders
 
+    This is a map of the messages that can be received from the Brain board.
   ==============================================================================
 */
 

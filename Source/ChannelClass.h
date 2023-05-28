@@ -17,21 +17,28 @@
 #include <string>
 #include <array>
 
+
+
+
 class Channel
 {
 private:
     const uint8_t channelID; // unique ID for each channel (1 - 48)
-    uint8_t volume;          // Fader volume level. (0 - FF (hex)/ 0 - 255)
-    uint8_t pan;             // (0 - FE) - weird things on "FF". 
+    uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
+    uint8_t pan;             // (0 - FE) - weird things happen on "FF". 
     
     bool mute;               // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
     bool solo;               // maybe there should be a general list of soloed channels somewhere?
-    bool phase;
-    bool gate;
-    bool compressor;
-    bool eq;
 
-    bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R)
+
+
+    // These should probably be made to classes.... Not sure... see below.
+    bool phaseReversed;
+    bool gateOn;
+    bool compressorOn;
+    bool eqOn;
+
+    bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R) (L-R = index 0)
 
     std::array<char, 8> label;          // channel label.
 
@@ -43,6 +50,8 @@ private:
 public:
     // Constructor
     Channel();
+    uint8_t getVolume() { return volume; }
+
 };
 
 

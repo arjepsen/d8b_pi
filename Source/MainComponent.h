@@ -3,7 +3,7 @@
 #include "ChannelStripComponent.h"
 #include "MenuBar.h"
 #include "MixerManagerClass.h"
-//#include "SettingsWindowComponent.h"
+#include "MasterStripComponent.h"
 #include <JuceHeader.h>
 
 //#include "SettingsWindow.h"
@@ -67,6 +67,8 @@ private:
     ChannelStripComponent channelStrip22;
     ChannelStripComponent channelStrip23;
     ChannelStripComponent channelStrip24;
+
+    MasterStripComponent masterStrip;
 
     // Messing around, trying to handle a documentwindow with a safepionter:
     //SafePointer<juce::DocumentWindow> documentWindow;

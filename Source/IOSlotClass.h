@@ -43,14 +43,6 @@ enum IOSlotID
     DIGITAL_IO_SLOT
 };
 
-// enum IOCardID
-// {
-//     AIO8,
-//     OPT8,
-//     AES,
-//     MACKIE_CLOCK,
-//     APOGEE_CLOCK
-// };
 
 // IO slot class declaration.
 class IOSlot
@@ -59,9 +51,10 @@ private:
     // TODO:
     // Should we use a secondary class as the io card itself?
     // Or simply host whatever functions are needed as member?
-    // For now, use members - expand to class later if it makes sense.
+    // For now, using members - expand to class later if it makes sense.
 
     //IOCard *ioCard;
+    
     std::string ioCardString;   // Long descriptsion - (C) 1997 Mackie Designs {Mackie Stereo AES/EBU interface}
     std::string ioCardID;   // Short description - OPT-8, AIO-8, etc..
 
@@ -73,9 +66,6 @@ public:
     IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery);
     ~IOSlot();
 
-    // getter for the card object? or just the name?
-    // init, which queries the slot, creates a card object, and puts it in private storage.
-    //std::string get_card();
     std::string getCardString();
     std::string getCardID();
 };

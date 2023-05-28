@@ -40,6 +40,9 @@ MainComponent::MainComponent()
     addAndMakeVisible(channelStrip23);
     addAndMakeVisible(channelStrip24);
 
+    // Show MasterStrip
+    addAndMakeVisible(masterStrip);
+
     // Show MenuBar.
     addAndMakeVisible(menuBar);
 
@@ -72,9 +75,6 @@ void MainComponent::resized()
 
     menuBar.setBounds(0, 0, getWidth(), 30);
 
-    
-
-
     // Channelstrip placements.
     channelStrip1.setBounds(0, 28, 75, 1024);
     channelStrip2.setBounds(75, 28, 75, 1024);
@@ -100,4 +100,8 @@ void MainComponent::resized()
     channelStrip22.setBounds(1575, 28, 75, 1024);
     channelStrip23.setBounds(1650, 28, 75, 1024);
     channelStrip24.setBounds(1725, 28, 75, 1024);
+
+    // Master strip placement
+    masterStrip.setBounds(1800, 28,120,1024);
+
 }

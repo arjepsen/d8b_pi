@@ -35,6 +35,10 @@
       <FILE id="XN9V5Z" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="dvH6xz" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
+      <FILE id="Rqvv3H" name="MasterStripComponent.cpp" compile="1" resource="0"
+            file="Source/MasterStripComponent.cpp"/>
+      <FILE id="y8tVOU" name="MasterStripComponent.h" compile="0" resource="0"
+            file="Source/MasterStripComponent.h"/>
       <FILE id="RTo9y5" name="MenuBar.cpp" compile="1" resource="0" file="Source/MenuBar.cpp"/>
       <FILE id="f9zfpk" name="MenuBar.h" compile="0" resource="0" file="Source/MenuBar.h"/>
       <FILE id="pukK2Y" name="MixerInitScripts.cpp" compile="1" resource="0"

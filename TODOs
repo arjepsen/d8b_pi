@@ -1,0 +1,8 @@
+- Where do we set ch-strip1 select on boot?
+
+- messages & commands are sent and received as char strings, so there is a conversion from value to string.
+Where is the best place to convert? Just before sending? or saved value in objects?
+
+- if initscript is succesfull, close settings window.
+
+- Channelstrips and master strip has some comboboxes, where the selected plugin is listed in a label above the combobox, instead of IN the combobox. (f.ex the Master L/R inserts.) Either we stay with standard combobox functionality, or we edit it so the combobox always shows "INSERT R", and the chosen item is shown in the label....

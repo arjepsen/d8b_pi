@@ -261,6 +261,7 @@ void SettingsComponent::buttonClicked (juce::Button* buttonThatWasClicked)
             initMixerBtn->setEnabled(false);
 
             // Call the init method in mixermanager - provide it with a pointer to the button.
+            // This is so we can disable the button, while the init script runs.
             mixerManager.initMixer(initMixerBtn.get());
         }
 
