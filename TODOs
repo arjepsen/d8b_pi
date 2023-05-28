@@ -6,3 +6,7 @@ Where is the best place to convert? Just before sending? or saved value in objec
 - if initscript is succesfull, close settings window.
 
 - Channelstrips and master strip has some comboboxes, where the selected plugin is listed in a label above the combobox, instead of IN the combobox. (f.ex the Master L/R inserts.) Either we stay with standard combobox functionality, or we edit it so the combobox always shows "INSERT R", and the chosen item is shown in the label....
+
+- Maybe the communications can be made a bit more robust? Maybe do more with the information -1, 0 and 1 returned as number of read chars?
+
+- DSP message lookup table and handlers

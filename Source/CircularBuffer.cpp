@@ -17,6 +17,9 @@ void CircularBuffer::push(const char *message)
     strncpy(buffer_[head_].data(), message, BUFFER_WIDTH - 1);
     buffer_[head_][BUFFER_WIDTH - 1] = '\0'; // Ensure null-termination
     head_ = next_head;
+
+    msgCount++;
+
     lock.unlock();
     condVar_.notify_one(); // Notify reader
 }
@@ -26,6 +29,7 @@ std::string CircularBuffer::pop()
     std::unique_lock<std::mutex> lock(mutex_);
     // If head and tail points to the same, the buffer is empty.
     // Then put the thread to sleep, until signaled. (use while, for spurious wakeups)
+
     while (head_ == tail_)
     {
         condVar_.wait(lock);
@@ -34,6 +38,10 @@ std::string CircularBuffer::pop()
     std::string message(buffer_[tail_].data(), BUFFER_WIDTH);
     tail_ = next_index(tail_);
 
+    msgCount--;
+    printf("POP - messages in queue: %d\n", msgCount);
+
+    printf("returning %s\n", message.c_str());
     lock.unlock();
     return message;
 }

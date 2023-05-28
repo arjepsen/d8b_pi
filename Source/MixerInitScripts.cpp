@@ -105,12 +105,38 @@ InitErrorType initializeMixer()
 
 
     // ====================== SEND BRAIN FIRMWARE =======================================
+
     // Clear Screen
     write(BRAIN, "01u", 3);
     usleep(20000);
 
+    // Upload firmware (check for boost)
+    if (mixerManager.getBrainBoostState())
+    {
+        // Display fast firmware message
+        write(BRAIN, BOOST_MESSAGE1, strlen(BOOST_MESSAGE1));
+        sleep(1);
+        write(BRAIN, BOOST_MESSAGE2, strlen(BOOST_MESSAGE2));
+
+        // Upload fast firmware.
+        sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
+        
+        // Close the old slow filedescriptor of yestoreyore:
+        close(BRAIN);
+
+        // Initialize new connection speed:
+        BRAIN = openSerialPort(BRAIN_DEVICE, B230400);
+    }
+    else
+    {
+        // Guess we will stay with old slow speed then. 
+        write(BRAIN, UPLOAD_FIRMWARE_MESSAGE1, strlen(UPLOAD_FIRMWARE_MESSAGE1));
+        write(BRAIN, UPLOAD_FIRMWARE_MESSAGE2, strlen(UPLOAD_FIRMWARE_MESSAGE2));
+        sendFirmwareFile(BRAINWARE_FILE, BRAIN);
+    }
+
     DEBUG_MSG("sending brain \n");
-    sendFirmwareFile(BRAINWARE_FILE, BRAIN);
+    
 
     // Check response from Brain it should look something like:
     // R0027v0129v0202v0326v042Fv053Dv0623v073Ev083Cv0918v0A3Fv0B3Cv0C3Ev0D0Cv0E1Av0F2Cv1024v1127v1205v131Fv1419v1524v163Bv1705v1804v1A31v1B2Av1C39v1D37v1E2Dv1F03v2014v
@@ -322,14 +348,26 @@ InitErrorType initializeMixer()
         dspReply = getDspResponse(DSP);
         DEBUG_MSG("DSP reply: %s\n", dspReply.c_str());
     } while (dspReply != "8000");
-    std::cout << getDspResponse(DSP) << std::endl;
-    std::cout << getDspResponse(DSP) << std::endl;
+
+    sleep(1);
+    // Sometimes it seems DSP is sending numbers decreasing to 0000.. wait till it stops sending:
+    getDspResponse(DSP);
+    getDspResponse(DSP);
+    getDspResponse(DSP);
+    getDspResponse(DSP);
+    do
+    {
+        dspReply = getDspResponse(DSP);
+        DEBUG_MSG("DSP reply: %s\n", dspReply.c_str());
+    } while (dspReply != "");
 
     sleep(1);
 
-    // ==================== Load Standard config.. or some user choice =================
 
-    // For now, for testing, just open a pair of channels.
+
+    // // ==================== Load Standard config.. or some user choice =================
+
+    // // For now, for testing, just open a pair of channels.
 
     // pan 9 Left
     write(DSP, "0AdFEFFX0OFDFFXP", strlen("0AdFEFFX0OFDFFXP"));
@@ -356,7 +394,7 @@ InitErrorType initializeMixer()
     // Set speaker level
     write(BRAIN, "BC0w", 4);
 
-    sleep(5);
+    // sleep(5);
 
     ///////////////////////////////////////////////////////////
 
@@ -367,7 +405,11 @@ InitErrorType initializeMixer()
     // Actually... here we should probably send a final config file....
     // The initial startup settings....
 
-    // If everything is ok, return true
+    // If everything is ok, close file descriptors and return true
+
+    close(BRAIN);
+    close(DSP);
+
     return INIT_SUCCESS;
 }
 

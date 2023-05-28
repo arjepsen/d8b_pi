@@ -383,15 +383,8 @@ int main()
     std::thread dspThread(dspToBuffer, std::ref(circBuffer));
     std::thread popperThread(reader_thread, std::ref(circBuffer));
 
-
-
     brainThread.join();
     popperThread.join();
-
-
-
-
-
 
     // Set up non-blocking I/O for reading from serial
     fcntl(BRAIN, F_SETFL, O_NONBLOCK);

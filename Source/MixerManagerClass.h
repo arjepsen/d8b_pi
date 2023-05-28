@@ -19,8 +19,10 @@
 #include "SettingsClass.h"
 #include <array>
 #include <cstdint>
-#include <JuceHeader.h> // For threading.
+#include <JuceHeader.h> 
+#include <termios.h>
 #include "MixerInitScripts.h"
+#include "CircularBuffer.h"
 
 class MixerManager
 {
@@ -44,8 +46,10 @@ private:
     FXSlot *fxSlotC;
     FXSlot *fxSlotD;
 
-    // Flag for avoid starting multiple init threads.
-    bool isInitializing;
+    // Create the circular buffer object.
+    CircularBuffer circBuffer;
+
+    bool isInitializing;  // Flag for avoid starting multiple init threads.
 
     MixerManager();  // Constructor
     ~MixerManager(); // Destructor
@@ -54,6 +58,48 @@ private:
     MixerManager(const MixerManager &) = delete;
     MixerManager &operator=(const MixerManager &) = delete;
 
+    // Communication threads
+    std::thread brainReceiverThread;
+    std::thread dspReceiverThread;
+    std::thread bufferMessageHandlerThread;
+
+    // Thread methods
+    void brainMessageReceiver();
+    void dspMessageReceiver();
+    void bufferMessageHandler();
+
+    // Other Methods
+    int openSerialPort(const char *devicePath, speed_t baudRate);
+    void heartBeatReceived();
+
+    // Brain Message Lookup Table Conversion Map
+    std::unordered_map<std::string, std::string> channelMap =
+    {
+      {"00", "06"}, // Channel strip 1
+      {"01", "1E"}, // Channel strip 2 etc....
+      {"02", "07"},
+      {"03", "1F"},
+      {"04", "08"},
+      {"05", "20"},
+      {"06", "09"},
+      {"07", "21"},
+      {"08", "0A"},
+      {"09", "22"},
+      {"10", "0B"},
+      {"11", "23"},
+      {"12", "00"}, // Here it changes... channel Strip 13
+      {"13", "18"},
+      {"14", "01"},
+      {"15", "19"},
+      {"16", "02"},
+      {"17", "1A"},
+      {"18", "03"},
+      {"19", "1B"},
+      {"20", "04"},
+      {"21", "1C"},
+      {"22", "05"},
+      {"23", "1D"}
+    };
 
 public:
     static MixerManager &getInstance(); // Returns a reference to the instance.

@@ -10,9 +10,11 @@
 
 #include "MixerManagerClass.h"
 #include <algorithm>
+#include <fcntl.h>
 #include <numeric>
 #include <stdexcept>
-
+//#include <termios.h>
+#include <unistd.h>
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define MANAGER_DEBUG_MESSAGES
@@ -22,6 +24,9 @@
 #else
 #define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
 #endif
+
+#define WELCOME_STRING "90u44v38v42v94u36v2Ev30v20v28v61v6Cv70v68v61v29vCDu4Dv41v43v4Bv49v45vD4u44v49v47v49v54v41v4Cv"
+
 
 // ############################ CONSTRUCTOR ####################################
 // std::array automatically initializes elements to default value -
@@ -157,7 +162,6 @@ void MixerManager::initIOSlot(IOSlot *ioSlotPtr, IOSlotID ioSlotID)
     }
 }
 
-
 void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
 {
     switch (fxSlotID)
@@ -182,61 +186,254 @@ void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
 
 void MixerManager::initMixer(juce::Button *initMixerBtn)
 {
-    std::cout << "Calling initializemixer from mixermanager" << std::endl;
+    // The method will create a separate thread in which the mixer initialization script will be run.
+    // This is to preserve a responsive UI, although the user shouldn't really mess around untill 
+    // inits are done.
 
     if (isInitializing)
         printf("INITIALIZATION SCRIPT IS ALREADY RUNNING!!!\n");
     else
     {
         isInitializing = true;
-        juce::Thread::launch([this, initMixerBtn]()
-        {
-            // Perform Mixer initialization.
-            InitErrorType initResult = initializeMixer();
-            if (initResult != INIT_SUCCESS)
+
+        // Run the init script within it's own thread.
+
+        juce::Thread::launch(
+            [this, initMixerBtn]()
             {
-                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
-                                        "Mixer Initialization Error code",
-                                        juce::String(initResult),
-                                        "OK");
-            }
+                // Perform Mixer initialization.
+                InitErrorType initResult = initializeMixer();
 
-            // The init script only initializes the console. 
-            // Now we should do the channel, routing, etc setup using the various classes.
+                // Check if an error returned
+                if (initResult != INIT_SUCCESS)
+                {
+                    juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
+                                                           "Mixer Initialization Error code",
+                                                           juce::String(initResult),
+                                                           "OK");
+                }
 
-            // Channels are already constructed by now, so they should have their default values already.
-            // This means that we should select bank 1 (ch1-24). This is equivalent to pushing that button, which
-            // will load channel 1-24 settings to the channel strips.
+                // The init script only initializes the console.
+                // Now we should do the channel, routing, etc setup using the various classes.
 
-            // Run a for loop over all channels, and send their dsp values.
-            for (auto channel : channels)
-            {
-                uint8_t channelVolume = channel.getVolume();
-                
-            }
+                // First initialize up the communication threads.
+                brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
+                dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
+                bufferMessageHandlerThread = std::thread(&MixerManager::bufferMessageHandler, this);
 
+                printf("Threads should be running now.\n");
 
+                // Channels are already constructed by now, so they should have their default values already.
+                // This means that we should select bank 1 (ch1-24). This is equivalent to pushing that button, which
+                // will load channel 1-24 settings to the channel strips.
 
-            // run a for loop over channelstrips. This is boot, so assign channel 1-24 to channelstrips, then load their settings to the strip.
+                // Run a for loop over all channels, and send their dsp values.
+                for (auto channel : channels)
+                {
+                    uint8_t channelVolume = channel.getVolume();
+                }
+                // run a for loop over channelstrips. This is boot, so assign channel 1-24 to channelstrips, then load their settings to the strip.
 
+                isInitializing = false;
 
-
-
-
-
-            isInitializing = false;
-
-            juce::MessageManager::callAsync([initMixerBtn]()
-            {
-                initMixerBtn->setEnabled(true); // Re-enable the button
-            }); 
-        });
+                // All the way at the end of the thread, re-enable the init button.
+                juce::MessageManager::callAsync([initMixerBtn]()
+                                                {
+                                                    initMixerBtn->setEnabled(true); // Re-enable the button
+                                                });
+            });
     }
-
-    // Check if we're already initializing.
 }
 
-// Other things to be aware of in constructor:
-// Which Bank to select?
-// config file
-//
+// ###################################################################################
+// Method that opens a serial port for communication. It returns a file descriptor.
+// ###################################################################################
+int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
+{
+    DEBUG_MSG("Opening Serial port for %s @ %d\n", devicePath, baudRate);
+    struct termios options;
+    int fd = open(devicePath, O_RDWR | O_NOCTTY);
+    if (fd < 0)
+    {
+        perror("Error opening serial device");
+        // exit(1);
+        return -1;
+    }
+
+    // Get current options
+    tcgetattr(fd, &options);
+
+    // Set baud rate
+    cfsetispeed(&options, baudRate);
+    cfsetospeed(&options, baudRate);
+
+    // Set terminal mode
+    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    options.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+    options.c_oflag &= ~(OPOST | ONLCR);
+
+    // Set data format
+    options.c_cflag &= ~(PARENB | PARODD | CMSPAR | CSTOPB | CSIZE);
+    options.c_cflag |= CS8;
+
+    // Set input control options
+    options.c_iflag &= ~(INPCK | IXOFF | IUCLC | IXANY | IMAXBEL | IUTF8);
+    options.c_cc[VMIN] = 0;
+    options.c_cc[VTIME] = 5;
+
+    // Apply the new settings
+    tcflush(fd, TCIOFLUSH);
+    tcsetattr(fd, TCSANOW, &options);
+
+    // Return the file descriptor for the port.
+    return fd;
+}
+
+// ###############################################################################
+// This method sets up the loop for the thread that reads messages from the Brain.
+// The method assumes that ALL messages end with a lower case letter, and also
+// assumes, that a message always is sent in full, and are NOT "split" by the
+// heartbeats ('l / 'k').
+// ###############################################################################
+void MixerManager::brainMessageReceiver()
+{
+    // Set up a new filedescriptor for the brain board. Use the saved settings for port and baudrate.
+    const int BRAIN = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
+
+    // Clear screen before entering loop.
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    char recvChar = '\0';
+    std::string message = "";
+    int result;
+
+    // Clear com buffer for starting out
+    tcflush(BRAIN, TCIOFLUSH);
+
+    DEBUG_MSG("running brain message loop\n");
+    // Run the infinite loop.
+    while (true)
+    {
+        result = read(BRAIN, &recvChar, 1);
+
+        if (result == 1) // One char was recevied.
+        {
+            message += recvChar;
+
+            // A lower case letter means message complete.
+            if (recvChar >= 'a' && recvChar <= 'z')
+            {
+                //printf("brain message: %s\n", message.c_str());
+
+                if (recvChar == 'l' || recvChar == 'k')
+                {
+                    printf("hearbeat: %c\n", recvChar);
+                    heartBeatReceived();
+                }
+                else
+                    circBuffer.push(message.c_str()); // Push message to the circular buffer.
+                message = "";                     // Reset message string.
+            }
+        }
+
+        else if (result < 0)
+        {
+            perror("Error reading from file descriptor");
+            exit(1);
+        }
+        else if (result == 0) // 0 chars recevied - EOF
+        {
+            // Should we add any special functionality here??
+        }
+    }
+
+    // We probably shouldn't get here... but just in case.
+    printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
+    close(BRAIN);
+}
+
+void MixerManager::dspMessageReceiver()
+{
+    // Set up the file descriptor for the DSP port.
+    const int DSP = openSerialPort(getDspPort().c_str(), B115200);
+
+    char recvChar = '\0';
+    std::string message = "";
+    int result;
+
+    // Clear com buffer for starting out
+    tcflush(DSP, TCIOFLUSH);
+
+    DEBUG_MSG("Running dsp message loop\n");
+    while (true)
+    {
+        result = read(DSP, &recvChar, 1);
+
+        if (result == 1)
+        {
+            message += recvChar;
+            if (recvChar >= 'a' && recvChar <= 'z')
+            {
+                printf("dsp message: %s\n", message.c_str());
+                // Lower case letter received, message complete. push to buffer.
+                circBuffer.push(message.c_str());
+                message = "";
+            }
+        }
+
+        else if (result < 0)
+        {
+            perror("Error reading from file descriptor");
+            exit(1);
+        }
+        else if (result == 0)
+        {
+            // EOF
+            // should any handling happen here?
+        }
+    }
+
+    // This should not happen
+    printf("\n\n############### DSP READER THREAD EXITED!!!!\n");
+    close(DSP);
+}
+
+
+void MixerManager::bufferMessageHandler()
+{
+    DEBUG_MSG("Running reader thread\n");
+    while (true)
+    {
+        std::string message = circBuffer.pop();
+        std::cout << "READER POP: " << message << std::endl;
+
+        // Check last char for message Category:
+        char msgCategory = message.back();
+        
+        switch (msgCategory)
+        {
+            case 'f':   // Fader move.
+                // Send dsp volume command.
+                
+
+                // update UI.
+                break;
+            case 'v':   // V-Pot turned
+                // Decipher which pot.
+                // Send relevant DSP command.
+                // Send relevant Brain command (led's)
+                // update UI
+                break;
+        }
+    }
+
+}
+
+// ########################################################################################
+// Heartbeat handler method - this is invoked when an "l" or "k" is received from the Brain
+// ########################################################################################
+void MixerManager::heartBeatReceived()
+{
+    // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
+}
