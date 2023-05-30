@@ -35,7 +35,10 @@ std::string CircularBuffer::pop()
         condVar_.wait(lock);
     }
 
-    std::string message(buffer_[tail_].data(), BUFFER_WIDTH);
+    // Find acutal length of message
+    //size_t messageLength = strnlen(buffer_[tail_].data(), BUFFER_WIDTH);
+
+    std::string message(buffer_[tail_].data(), strnlen(buffer_[tail_].data(), BUFFER_WIDTH));
     tail_ = next_index(tail_);
 
     msgCount--;

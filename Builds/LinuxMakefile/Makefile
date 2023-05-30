@@ -72,6 +72,10 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
+  $(JUCE_OBJDIR)/BankMastersMessageHandlerClass_b6fa6ec9.o \
+  $(JUCE_OBJDIR)/BankEffectsMessageHandlerClass_ee7520f8.o \
+  $(JUCE_OBJDIR)/BankLineMessageHandlerClass_a2c5f366.o \
+  $(JUCE_OBJDIR)/BankTapeMessageHandlerClass_66e47a78.o \
   $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o \
   $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
   $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o \
@@ -106,6 +110,26 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(RESOURCES)
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/BankMastersMessageHandlerClass_b6fa6ec9.o: ../../Source/BankMastersMessageHandlerClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling BankMastersMessageHandlerClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/BankEffectsMessageHandlerClass_ee7520f8.o: ../../Source/BankEffectsMessageHandlerClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling BankEffectsMessageHandlerClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/BankLineMessageHandlerClass_a2c5f366.o: ../../Source/BankLineMessageHandlerClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling BankLineMessageHandlerClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/BankTapeMessageHandlerClass_66e47a78.o: ../../Source/BankTapeMessageHandlerClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling BankTapeMessageHandlerClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o: ../../Source/BrainLookupTable.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)

@@ -5,6 +5,22 @@
               maxBinaryFileSize="20971520">
   <MAINGROUP id="hHfYNg" name="d8b_pi">
     <GROUP id="{2A1B8560-4155-ED71-CEB1-417F6F169C9F}" name="Source">
+      <FILE id="rYFCQ3" name="BankMastersMessageHandlerClass.cpp" compile="1"
+            resource="0" file="Source/BankMastersMessageHandlerClass.cpp"/>
+      <FILE id="yWsvt6" name="BankMastersMessageHandlerClass.h" compile="0"
+            resource="0" file="Source/BankMastersMessageHandlerClass.h"/>
+      <FILE id="NqbSLb" name="BankEffectsMessageHandlerClass.cpp" compile="1"
+            resource="0" file="Source/BankEffectsMessageHandlerClass.cpp"/>
+      <FILE id="sSiSxy" name="BankEffectsMessageHandlerClass.h" compile="0"
+            resource="0" file="Source/BankEffectsMessageHandlerClass.h"/>
+      <FILE id="juF9JJ" name="BankLineMessageHandlerClass.cpp" compile="1"
+            resource="0" file="Source/BankLineMessageHandlerClass.cpp"/>
+      <FILE id="a3O7tl" name="BankLineMessageHandlerClass.h" compile="0"
+            resource="0" file="Source/BankLineMessageHandlerClass.h"/>
+      <FILE id="YzCs2K" name="BankTapeMessageHandlerClass.cpp" compile="1"
+            resource="0" file="Source/BankTapeMessageHandlerClass.cpp"/>
+      <FILE id="SYLUc0" name="BankTapeMessageHandlerClass.h" compile="0"
+            resource="0" file="Source/BankTapeMessageHandlerClass.h"/>
       <FILE id="YfKxsQ" name="BrainLookupTable.cpp" compile="1" resource="0"
             file="Source/BrainLookupTable.cpp"/>
       <FILE id="kXOAo8" name="BrainLookupTable.h" compile="0" resource="0"
@@ -41,6 +57,8 @@
             file="Source/MasterStripComponent.h"/>
       <FILE id="RTo9y5" name="MenuBar.cpp" compile="1" resource="0" file="Source/MenuBar.cpp"/>
       <FILE id="f9zfpk" name="MenuBar.h" compile="0" resource="0" file="Source/MenuBar.h"/>
+      <FILE id="V4Ep7C" name="MessageHandlerInterface.h" compile="0" resource="0"
+            file="Source/MessageHandlerInterface.h"/>
       <FILE id="pukK2Y" name="MixerInitScripts.cpp" compile="1" resource="0"
             file="Source/MixerInitScripts.cpp"/>
       <FILE id="mNGqLu" name="MixerInitScripts.h" compile="0" resource="0"

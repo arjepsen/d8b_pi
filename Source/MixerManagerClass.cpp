@@ -31,7 +31,11 @@
 // ############################ CONSTRUCTOR ####################################
 // std::array automatically initializes elements to default value -
 // so Channel constructor gets called automatically.
-MixerManager::MixerManager() : channels{}, settings(Settings::getInstance()), isInitializing(false)
+MixerManager::MixerManager() 
+    : channels{}, 
+    settings(Settings::getInstance()), 
+    isInitializing(false),
+    messageHandler(&lineBankMessageHandler)
 {
     std::cout << "MixerManger Constructor" << std::endl;
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
@@ -213,15 +217,24 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                                                            "OK");
                 }
 
-                // The init script only initializes the console.
-                // Now we should do the channel, routing, etc setup using the various classes.
+                // ==== MIXER INITIALIZED ====
+                // Now we need to set up everything else
 
-                // First initialize up the communication threads.
+                // Set up the communication ports for further communication
+                brainDescriptor = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
+                dspDescriptor = openSerialPort(getDspPort().c_str(), B115200);
+                
+                // Forward the descriptors to the handlers
+                lineBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                tapeBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                effectsBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                mastersBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+
+                // Start the communication threads.
                 brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
                 dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
-                bufferMessageHandlerThread = std::thread(&MixerManager::bufferMessageHandler, this);
+                messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
 
-                printf("Threads should be running now.\n");
 
                 // Channels are already constructed by now, so they should have their default values already.
                 // This means that we should select bank 1 (ch1-24). This is equivalent to pushing that button, which
@@ -297,11 +310,8 @@ int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
 // ###############################################################################
 void MixerManager::brainMessageReceiver()
 {
-    // Set up a new filedescriptor for the brain board. Use the saved settings for port and baudrate.
-    const int BRAIN = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
-
     // Clear screen before entering loop.
-    write(BRAIN, "01u", 3);
+    write(brainDescriptor, "01u", 3);
     usleep(20000);
 
     char recvChar = '\0';
@@ -309,13 +319,13 @@ void MixerManager::brainMessageReceiver()
     int result;
 
     // Clear com buffer for starting out
-    tcflush(BRAIN, TCIOFLUSH);
+    tcflush(brainDescriptor, TCIOFLUSH);
 
     DEBUG_MSG("running brain message loop\n");
     // Run the infinite loop.
     while (true)
     {
-        result = read(BRAIN, &recvChar, 1);
+        result = read(brainDescriptor, &recvChar, 1);
 
         if (result == 1) // One char was recevied.
         {
@@ -350,25 +360,28 @@ void MixerManager::brainMessageReceiver()
 
     // We probably shouldn't get here... but just in case.
     printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
-    close(BRAIN);
 }
 
+
+// ###############################################################################
+// Like the brainMessageReceiver... same... but different...
+// ###############################################################################
 void MixerManager::dspMessageReceiver()
 {
     // Set up the file descriptor for the DSP port.
-    const int DSP = openSerialPort(getDspPort().c_str(), B115200);
+    //const int DSP = openSerialPort(getDspPort().c_str(), B115200);
 
     char recvChar = '\0';
     std::string message = "";
     int result;
 
     // Clear com buffer for starting out
-    tcflush(DSP, TCIOFLUSH);
+    tcflush(dspDescriptor, TCIOFLUSH);
 
     DEBUG_MSG("Running dsp message loop\n");
     while (true)
     {
-        result = read(DSP, &recvChar, 1);
+        result = read(dspDescriptor, &recvChar, 1);
 
         if (result == 1)
         {
@@ -396,38 +409,21 @@ void MixerManager::dspMessageReceiver()
 
     // This should not happen
     printf("\n\n############### DSP READER THREAD EXITED!!!!\n");
-    close(DSP);
 }
 
-
-void MixerManager::bufferMessageHandler()
+// #################################################################################
+// This method is a "dispatcher" sort of thing, which is called
+// and run in a thread. It continually pops messages off the buffer, and 
+// sends them to the current selected handler (depending on which bank is selected.)
+// #################################################################################
+void MixerManager::handleBufferMessage()
 {
-    DEBUG_MSG("Running reader thread\n");
+    printf("Running Reader Thread\n");
     while (true)
     {
         std::string message = circBuffer.pop();
-        std::cout << "READER POP: " << message << std::endl;
-
-        // Check last char for message Category:
-        char msgCategory = message.back();
-        
-        switch (msgCategory)
-        {
-            case 'f':   // Fader move.
-                // Send dsp volume command.
-                
-
-                // update UI.
-                break;
-            case 'v':   // V-Pot turned
-                // Decipher which pot.
-                // Send relevant DSP command.
-                // Send relevant Brain command (led's)
-                // update UI
-                break;
-        }
+        messageHandler->handleMessage(message);
     }
-
 }
 
 // ########################################################################################
@@ -436,4 +432,32 @@ void MixerManager::bufferMessageHandler()
 void MixerManager::heartBeatReceived()
 {
     // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
+}
+
+// #########################################################################################
+// This method is used for switching bank message handler.
+// The Brain will send the same messages on various activity (fader move, etc..), regardless
+// of which bank is selected, so we need to assign a specific message handler, depending on
+// which bank is currently selected.
+// #########################################################################################
+void MixerManager::setBank(Bank bank)
+{
+    switch (bank)
+    {
+        case LINE_BANK:
+            messageHandler = &lineBankMessageHandler;
+            break;
+        case TAPE_BANK:
+            messageHandler = &tapeBankMessageHandler;
+            break;
+        case EFFECTS_BANK:
+            messageHandler = &effectsBankMessageHandler;
+            break;
+        case MASTERS_BANK:
+            messageHandler = &mastersBankMessageHandler;
+            break;
+        default:
+            ;
+            // Handle invalid bank input.
+    }
 }

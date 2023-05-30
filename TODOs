@@ -10,3 +10,11 @@ Where is the best place to convert? Just before sending? or saved value in objec
 - Maybe the communications can be made a bit more robust? Maybe do more with the information -1, 0 and 1 returned as number of read chars?
 
 - DSP message lookup table and handlers
+
+- MixerManager buffer message handler - we need to handle messages according to chosen bank. 
+What's smartest: Seperate methods for each bank, or one method, that checks bank selection for every single message?
+
+- Setting volume for master fader is a command like: 4Cc9XC1QAXC1Q for unity.
+This might be seperated like: 4Cc - 9XyyQ - AXyyQ, with yy being the volume value.
+Check the truth of this, if pan is used.
+handle different volume levels for L/R.

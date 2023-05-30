@@ -13,23 +13,25 @@
 */
 
 #pragma once
+#include "BankEffectsMessageHandlerClass.h"
+#include "BankLineMessageHandlerClass.h"
+#include "BankMastersMessageHandlerClass.h"
+#include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
-#include "IOSlotClass.h"
+#include "CircularBuffer.h"
 #include "FXSlotClass.h"
+#include "IOSlotClass.h"
+#include "MessageHandlerInterface.h"
+#include "MixerInitScripts.h"
 #include "SettingsClass.h"
+#include <JuceHeader.h>
 #include <array>
 #include <cstdint>
-#include <JuceHeader.h> 
 #include <termios.h>
-#include "MixerInitScripts.h"
-#include "CircularBuffer.h"
 
 class MixerManager
 {
 private:
-    static constexpr uint8_t CHANNEL_COUNT = 56;
-    std::array<Channel, CHANNEL_COUNT> channels;
-
     Settings &settings; // Reference to the Settings singleton.
 
     // Declare the IO slot objects.
@@ -49,7 +51,27 @@ private:
     // Create the circular buffer object.
     CircularBuffer circBuffer;
 
-    bool isInitializing;  // Flag for avoid starting multiple init threads.
+    // MessageHandler objects
+    MessageHandler *messageHandler;
+    LineBankMessageHandler lineBankMessageHandler;
+    TapeBankMessageHandler tapeBankMessageHandler;
+    EffectsBankMessageHandler effectsBankMessageHandler;
+    MastersBankMessageHandler mastersBankMessageHandler;
+
+    // Various members/variables
+    static constexpr uint8_t CHANNEL_COUNT = 56;
+    std::array<Channel, CHANNEL_COUNT> channels;
+    bool isInitializing; // Flag for avoid starting multiple init threads.
+	int brainDescriptor;
+	int dspDescriptor;
+
+    enum Bank
+    {
+        LINE_BANK,
+        TAPE_BANK,
+        EFFECTS_BANK,
+        MASTERS_BANK
+    };
 
     MixerManager();  // Constructor
     ~MixerManager(); // Destructor
@@ -61,45 +83,16 @@ private:
     // Communication threads
     std::thread brainReceiverThread;
     std::thread dspReceiverThread;
-    std::thread bufferMessageHandlerThread;
+    std::thread messageHandlerThread;
 
     // Thread methods
     void brainMessageReceiver();
     void dspMessageReceiver();
-    void bufferMessageHandler();
+    void handleBufferMessage();
 
     // Other Methods
     int openSerialPort(const char *devicePath, speed_t baudRate);
     void heartBeatReceived();
-
-    // Brain Message Lookup Table Conversion Map
-    std::unordered_map<std::string, std::string> channelMap =
-    {
-      {"00", "06"}, // Channel strip 1
-      {"01", "1E"}, // Channel strip 2 etc....
-      {"02", "07"},
-      {"03", "1F"},
-      {"04", "08"},
-      {"05", "20"},
-      {"06", "09"},
-      {"07", "21"},
-      {"08", "0A"},
-      {"09", "22"},
-      {"10", "0B"},
-      {"11", "23"},
-      {"12", "00"}, // Here it changes... channel Strip 13
-      {"13", "18"},
-      {"14", "01"},
-      {"15", "19"},
-      {"16", "02"},
-      {"17", "1A"},
-      {"18", "03"},
-      {"19", "1B"},
-      {"20", "04"},
-      {"21", "1C"},
-      {"22", "05"},
-      {"23", "1D"}
-    };
 
 public:
     static MixerManager &getInstance(); // Returns a reference to the instance.
@@ -119,11 +112,12 @@ public:
     bool getBrainBoostState();
     void setBrainBoostState(bool);
 
-    void initIOSlot(IOSlot * ioSlotPtr, IOSlotID ioSlotID);
-    void initFXSlot(FXSlot * fxSlotPtr, FXSlotID fxSlotID);
+    void initIOSlot(IOSlot *ioSlotPtr, IOSlotID ioSlotID);
+    void initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID);
 
-    void initMixer(juce::Button* initMixerBtn);
+    void initMixer(juce::Button *initMixerBtn);
 
+    void setBank(Bank bank);
 
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };

@@ -1,0 +1,72 @@
+/*
+  ==============================================================================
+
+    BankLineMessageHandlerClass.cpp
+    Created: 29 May 2023 7:13:13pm
+    Author:  anders
+
+  ==============================================================================
+*/
+
+#include "BankLineMessageHandlerClass.h"
+#include <unistd.h>
+// #include <termios.h>
+
+#include <iostream>
+#include <string>
+
+void LineBankMessageHandler::handleMessage(const std::string &message)
+{
+
+    printf("LineBank recieved: %s\n", message.c_str());
+
+    // Check last char for message Category:
+    char msgCategory = message.back(); // Might need to make a check to ensure message is not empty....?
+
+    switch (msgCategory)
+    {
+        case 'f': // FADER MOVED.
+        {
+            // Send a channel volume command to the DSP
+            // The command has the form "xxcXyyQ", where xx is the channel ID, and yy is the value.
+            // Note that yy can be a single digit, like 0. Max is FF.
+            // Also note, that the master fader has a different command to send out (4Cc9XyyQAXyyQ) - likely this is stereo (9XyyQ / AXyyQ)
+
+            std::string channel = message.substr(0, 2); // Get channel
+            std::string value = message.substr(2, 2);
+
+            // Build the full command in one go.
+            std::string faderDspCommand;
+            if (channel == "18") // Master fader
+            {
+                faderDspCommand = channelMap[channel] + "c9X" + value + "QAX" + value + "Q";
+            }
+            else
+            {
+                faderDspCommand = channelMap[channel] + "cX" + value + "Q";
+            }
+
+            // Send the command
+            write(dsp, faderDspCommand.c_str(), faderDspCommand.length());
+
+            // update UI.
+
+			
+            break;
+        }
+        case 'v': // V-Pot turned
+        {
+            // Decipher which pot.
+            // Send relevant DSP command.
+            // Send relevant Brain command (led's)
+            // update UI
+            break;
+        }
+    }
+};
+
+void LineBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+{
+    brain = brainDescriptor;
+    dsp = dspDescriptor;
+}
