@@ -30,12 +30,12 @@ Channel::Channel() : channelID{nextID++}
     // VALUE COMMANDS ARE STILL SENT AS HEX STRINGS..... WHEN SHOULD A CONVERSION FROM INT TO CHAR HAPPEN?
 
     volume = 0;
-    mute = false;
-    solo = false;
+    // mute = false;
+    // solo = false;
 
-    pan = 127;  // Center (0x7F)
+    //pan = 127;  // Center (0x7F)
 
-    assignments[0] = true;  // Assign to L-R. All others should default to false.
+    // assignments[0] = true;  // Assign to L-R. All others should default to false.
 
 
     // Initialize other member variables to default values...

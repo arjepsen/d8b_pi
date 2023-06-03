@@ -13,8 +13,12 @@
 #include <fcntl.h>
 #include <numeric>
 #include <stdexcept>
-//#include <termios.h>
 #include <unistd.h>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define MANAGER_DEBUG_MESSAGES
@@ -27,46 +31,23 @@
 
 #define WELCOME_STRING "90u44v38v42v94u36v2Ev30v20v28v61v6Cv70v68v61v29vCDu4Dv41v43v4Bv49v45vD4u44v49v47v49v54v41v4Cv"
 
-
 // ############################ CONSTRUCTOR ####################################
-// std::array automatically initializes elements to default value -
-// so Channel constructor gets called automatically.
-MixerManager::MixerManager() 
-    : channels{}, 
-    settings(Settings::getInstance()), 
-    isInitializing(false),
-    messageHandler(&lineBankMessageHandler)
+MixerManager::MixerManager()
+    : settings(Settings::getInstance()),
+      isInitializing(false),
+      messageHandler(&lineBankMessageHandler)
 {
     std::cout << "MixerManger Constructor" << std::endl;
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
-    // assign default values to each channel's members,
-    // And at the same time, send the corresponding commands to the mixer.
-    // When this program runs, and this constructor is run, we can have had
-    // The initial bootscript run already.
-    // ALSO - we might want this constructor to read a saved configuration file, from last "session"
-    // So the user starts out where he left?
-    for (auto &channel : channels)
-    {
-        // Initialize channel member variables to their default (OR saved) values
-        // For example:
-        // channel.setVolume(defaultVolume);
-        // channel.setPan(defaultPan);
-        // ...
-        // ... or maybe: channel.setDefaults() / channel.initialize.
+    // std::array automatically initializes elements to default value -
+    // so Channel constructor gets called automatically.
+    // So the channel objects are ready for when we instantiate the map of channelstrips after mixer init script.
 
-        // Send the corresponding commands to the mixer
-        // For example:
-        // sendVolumeCommand(channel.getChannelID(), defaultVolume);
-        // sendPanCommand(channel.getChannelID(), defaultPan);
-        // ...
-    }
-    // Just for laughs - print out usb devices
-    settings.printUsbDevices();
 }
 
 MixerManager::~MixerManager()
 {
-    delete fxSlotA;
+    //delete fxSlotA;
 }
 
 // ############################### METHODS ####################################
@@ -77,11 +58,6 @@ const Channel &MixerManager::getChannel(uint8_t id) const
     throw std::out_of_range("Invalid channel ID");
 }
 
-// Fetch the settings object
-// const Settings &MixerManager::getSettings() const
-// {
-//     return settings;
-// }
 
 bool MixerManager::setBrainPort(std::string deviceString)
 {
@@ -191,7 +167,7 @@ void MixerManager::initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID)
 void MixerManager::initMixer(juce::Button *initMixerBtn)
 {
     // The method will create a separate thread in which the mixer initialization script will be run.
-    // This is to preserve a responsive UI, although the user shouldn't really mess around untill 
+    // This is to preserve a responsive UI, although the user shouldn't really mess around untill
     // inits are done.
 
     if (isInitializing)
@@ -217,13 +193,13 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                                                            "OK");
                 }
 
-                // ==== MIXER INITIALIZED ====
+                // ============= MIXER INITIALIZED ===============
                 // Now we need to set up everything else
 
                 // Set up the communication ports for further communication
                 brainDescriptor = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
                 dspDescriptor = openSerialPort(getDspPort().c_str(), B115200);
-                
+
                 // Forward the descriptors to the handlers
                 lineBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
                 tapeBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
@@ -235,10 +211,22 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
                 messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
 
-
                 // Channels are already constructed by now, so they should have their default values already.
-                // This means that we should select bank 1 (ch1-24). This is equivalent to pushing that button, which
-                // will load channel 1-24 settings to the channel strips.
+                // We need a way to send all the settings in a channel, and here do it for all channels.
+
+
+                // So now, add 24 objects to the channelstripmap, which will run their constructor.
+                // Set their KEY in the map as the hex code (00 - 17) corresponding to the brain messages.
+                for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
+                {
+                    std::stringstream stream;
+                    stream << std::hex << std::setw(2) << std::setfill('0') << i;
+                    std::string hexCode = stream.str();
+                    
+                    // Instantiate a ChannelStrip object as value to this key.
+                    channelStripMap[hexCode] = ChannelStrip();
+                }
+
 
                 // Run a for loop over all channels, and send their dsp values.
                 for (auto channel : channels)
@@ -334,7 +322,7 @@ void MixerManager::brainMessageReceiver()
             // A lower case letter means message complete.
             if (recvChar >= 'a' && recvChar <= 'z')
             {
-                //printf("brain message: %s\n", message.c_str());
+                // printf("brain message: %s\n", message.c_str());
 
                 if (recvChar == 'l' || recvChar == 'k')
                 {
@@ -343,7 +331,7 @@ void MixerManager::brainMessageReceiver()
                 }
                 else
                     circBuffer.push(message.c_str()); // Push message to the circular buffer.
-                message = "";                     // Reset message string.
+                message = "";                         // Reset message string.
             }
         }
 
@@ -362,14 +350,13 @@ void MixerManager::brainMessageReceiver()
     printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
 }
 
-
 // ###############################################################################
 // Like the brainMessageReceiver... same... but different...
 // ###############################################################################
 void MixerManager::dspMessageReceiver()
 {
     // Set up the file descriptor for the DSP port.
-    //const int DSP = openSerialPort(getDspPort().c_str(), B115200);
+    // const int DSP = openSerialPort(getDspPort().c_str(), B115200);
 
     char recvChar = '\0';
     std::string message = "";
@@ -413,7 +400,7 @@ void MixerManager::dspMessageReceiver()
 
 // #################################################################################
 // This method is a "dispatcher" sort of thing, which is called
-// and run in a thread. It continually pops messages off the buffer, and 
+// and run in a thread. It continually pops messages off the buffer, and
 // sends them to the current selected handler (depending on which bank is selected.)
 // #################################################################################
 void MixerManager::handleBufferMessage()
@@ -456,8 +443,18 @@ void MixerManager::setBank(Bank bank)
         case MASTERS_BANK:
             messageHandler = &mastersBankMessageHandler;
             break;
-        default:
-            ;
+        default:;
             // Handle invalid bank input.
     }
+}
+
+void MixerManager::messageHandlerCallback(const MessageData& messageData)
+{
+    // Handle the message data:
+
+    // Read the channelstrip number, retrieve audio channel from map/array.
+    // Use that info to figure out which channel object to use
+    // Call the specific channels method for sending messages.
+
+    // WHERE DO WE HANDLE THE UI CHANGES? HERE? IN CHANNEL? IN MSGHANDLER????
 }

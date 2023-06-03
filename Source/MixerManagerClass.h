@@ -18,6 +18,7 @@
 #include "BankMastersMessageHandlerClass.h"
 #include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
+#include "ChannelStripClass.h"
 #include "CircularBuffer.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
@@ -28,6 +29,8 @@
 #include <array>
 #include <cstdint>
 #include <termios.h>
+#include <unordered_map>
+#include "BankEnum.h"
 
 class MixerManager
 {
@@ -58,20 +61,19 @@ private:
     EffectsBankMessageHandler effectsBankMessageHandler;
     MastersBankMessageHandler mastersBankMessageHandler;
 
-    // Various members/variables
-    static constexpr uint8_t CHANNEL_COUNT = 56;
+    // Channel and Channelstrip
+    static constexpr uint8_t CHANNEL_COUNT = 48;
+	static constexpr uint8_t CHANNEL_STRIP_COUNT = 24;
     std::array<Channel, CHANNEL_COUNT> channels;
+	std::unordered_map<std::string, Channel*> channelStripMap;
+
+
+
+	// Various members/variables
     bool isInitializing; // Flag for avoid starting multiple init threads.
 	int brainDescriptor;
 	int dspDescriptor;
 
-    enum Bank
-    {
-        LINE_BANK,
-        TAPE_BANK,
-        EFFECTS_BANK,
-        MASTERS_BANK
-    };
 
     MixerManager();  // Constructor
     ~MixerManager(); // Destructor
@@ -93,6 +95,9 @@ private:
     // Other Methods
     int openSerialPort(const char *devicePath, speed_t baudRate);
     void heartBeatReceived();
+
+	// Callback function for handling the message structures from the message handlers
+	void messageHandlerCallback(const MessageData& messageData);
 
 public:
     static MixerManager &getInstance(); // Returns a reference to the instance.

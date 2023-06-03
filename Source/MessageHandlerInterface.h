@@ -11,11 +11,26 @@
 #pragma once
 
 #include <string>
+#include <functional>
+#include "BankEnum.h"
+
+struct MessageData
+{
+	int channelStrip;
+	Bank bank;
+	int value;
+};
 
 class MessageHandler
 {
 public:
+	// Define the callback function type
+	typedef std::function<void(const MessageData&)> CallbackFunction;
+
     virtual ~MessageHandler() {}
     virtual void handleMessage(const std::string &message) = 0;
     virtual void setComDescriptors(int brainDescriptor, int dspDescriptor) = 0;
+
+	// Virtual method to set the callback function
+	virtual void setCallbackFunction(CallbackFunction callback) = 0;
 };

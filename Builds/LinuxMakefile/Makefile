@@ -79,6 +79,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o \
   $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
   $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o \
+  $(JUCE_OBJDIR)/ChannelStripClass_9e933684.o \
   $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o \
   $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o \
   $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o \
@@ -144,6 +145,11 @@ $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o: ../../Source/BrainMessageHandler
 $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o: ../../Source/ChannelClass.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling ChannelClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/ChannelStripClass_9e933684.o: ../../Source/ChannelStripClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling ChannelStripClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o: ../../Source/ChannelStripComponent.cpp

@@ -32,6 +32,20 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
             // Note that yy can be a single digit, like 0. Max is FF.
             // Also note, that the master fader has a different command to send out (4Cc9XyyQAXyyQ) - likely this is stereo (9XyyQ / AXyyQ)
 
+			// MUST RETHINK IT!
+			// In each bank, a channelstrip can be assigned different channels!
+			// Maybe make 2 or more arrays with pointers to the configured channel?
+
+			// So here we would call a public method in mixermanager.....
+			// something like chStripFaderMove(strip-index, value)... then this should pass that to the object?
+			// Where should we then send the command from? Channel object? Mixermanager? all the way back here?
+
+			// One way is, that the communication is kept in this class.....
+			// So it will query mixermanager for the command info to send?
+			// but... technically this object should not even knowthat mixermanager exists....
+
+
+
             std::string channel = message.substr(0, 2); // Get channel
             std::string value = message.substr(2, 2);
 
@@ -51,7 +65,7 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
 
             // update UI.
 
-			
+
             break;
         }
         case 'v': // V-Pot turned

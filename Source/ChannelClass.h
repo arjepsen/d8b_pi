@@ -18,32 +18,30 @@
 #include <array>
 
 
-
-
 class Channel
 {
 private:
-    const uint8_t channelID; // unique ID for each channel (1 - 48)
+    const uint8_t channelID; // unique ID for each channel (1 - 48) ( actually up to 56)
     uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
-    uint8_t pan;             // (0 - FE) - weird things happen on "FF". 
+    //uint8_t pan;             // (0 - FE) - weird things happen on "FF". 
     
-    bool mute;               // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
-    bool solo;               // maybe there should be a general list of soloed channels somewhere?
+    // bool mute;               // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
+                          // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
 
-
+    //bool solo;               // maybe there should be a general list of soloed channels somewhere?
 
     // These should probably be made to classes.... Not sure... see below.
-    bool phaseReversed;
-    bool gateOn;
-    bool compressorOn;
-    bool eqOn;
+    //bool phaseReversed;
+    //bool gateOn;
+    //bool compressorOn;
+    //bool eqOn;
 
-    bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R) (L-R = index 0)
+    //bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R) (L-R = index 0)
 
-    std::array<char, 8> label;          // channel label.
+    //std::array<char, 8> label;          // channel label.
 
-    uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
-    bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
+    //uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
+    //bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
 
     static uint8_t nextID; // Static variable to keept track of next object's ID
 
@@ -51,6 +49,8 @@ public:
     // Constructor
     Channel();
     uint8_t getVolume() { return volume; }
+
+    std::string setVolumeCmd();
 
 };
 
