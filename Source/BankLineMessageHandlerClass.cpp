@@ -45,9 +45,16 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
 			// but... technically this object should not even knowthat mixermanager exists....
 
 
-
             std::string channel = message.substr(0, 2); // Get channel
             std::string value = message.substr(2, 2);
+
+			MessageData msgStruct;
+			msgStruct.channelStrip = 88;
+			msgStruct.bank = LINE_BANK;
+			msgStruct.value = 4398;
+
+			callback(msgStruct);
+
 
             // // Build the full command in one go.
             // std::string faderDspCommand;

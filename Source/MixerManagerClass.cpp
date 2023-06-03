@@ -43,6 +43,9 @@ MixerManager::MixerManager()
     // so Channel constructor gets called automatically.
     // So the channel objects are ready for when we instantiate the map of channelstrips after mixer init script.
 
+    // Pass the callback function to the message handlers.
+    lineBankMessageHandler.setCallbackFunction([this](const MessageData& messageData) { this->messageHandlerCallback(messageData); });
+    // Same for the other four.
 }
 
 MixerManager::~MixerManager()
