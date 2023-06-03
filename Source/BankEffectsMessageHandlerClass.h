@@ -17,9 +17,11 @@ class EffectsBankMessageHandler : public MessageHandler
 {
 public:
     void handleMessage(const std::string &message) override;
-    void setComDescriptors(int brainDescriptor, int dspDescriptor) override;
+	void setCallbackFunction(std::function<void(const MessageData&)> callbackFunction) override;
+    //void setComDescriptors(int brainDescriptor, int dspDescriptor) override;
 
 private:
-    int brain;
-    int dsp;
+	std::function<void(const MessageData&)> callback;
+    // int brain;
+    // int dsp;
 };

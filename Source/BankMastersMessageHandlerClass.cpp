@@ -15,8 +15,12 @@ void MastersBankMessageHandler::handleMessage(const std::string &message)
 
 }
 
-void MastersBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+void MastersBankMessageHandler::setCallbackFunction(std::function<void(const MessageData&)> callbackFunction)
 {
-	brain = brainDescriptor;
-	dsp = dspDescriptor;
+  callback = callbackFunction;
 }
+// void MastersBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+// {
+// 	brain = brainDescriptor;
+// 	dsp = dspDescriptor;
+// }

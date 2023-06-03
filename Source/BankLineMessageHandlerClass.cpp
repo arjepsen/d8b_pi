@@ -49,19 +49,19 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
             std::string channel = message.substr(0, 2); // Get channel
             std::string value = message.substr(2, 2);
 
-            // Build the full command in one go.
-            std::string faderDspCommand;
-            if (channel == "18") // Master fader
-            {
-                faderDspCommand = channelMap[channel] + "c9X" + value + "QAX" + value + "Q";
-            }
-            else
-            {
-                faderDspCommand = channelMap[channel] + "cX" + value + "Q";
-            }
+            // // Build the full command in one go.
+            // std::string faderDspCommand;
+            // if (channel == "18") // Master fader
+            // {
+            //     faderDspCommand = channelMap[channel] + "c9X" + value + "QAX" + value + "Q";
+            // }
+            // else
+            // {
+            //     faderDspCommand = channelMap[channel] + "cX" + value + "Q";
+            // }
 
-            // Send the command
-            write(dsp, faderDspCommand.c_str(), faderDspCommand.length());
+            // // Send the command
+            // write(dsp, faderDspCommand.c_str(), faderDspCommand.length());
 
             // update UI.
 
@@ -79,8 +79,14 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
     }
 };
 
-void LineBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+// void LineBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+// {
+//     brain = brainDescriptor;
+//     dsp = dspDescriptor;
+// }
+
+
+void LineBankMessageHandler::setCallbackFunction(std::function<void(const MessageData&)> callbackFunction)
 {
-    brain = brainDescriptor;
-    dsp = dspDescriptor;
+	callback = callbackFunction;
 }

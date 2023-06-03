@@ -15,8 +15,13 @@ void TapeBankMessageHandler::handleMessage(const std::string &message)
 
 }
 
-void TapeBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+void TapeBankMessageHandler::setCallbackFunction(std::function<void(const MessageData&)> callbackFunction)
 {
-	brain = brainDescriptor;
-	dsp = dspDescriptor;
+  callback = callbackFunction;
 }
+
+// void TapeBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+// {
+// 	brain = brainDescriptor;
+// 	dsp = dspDescriptor;
+// }

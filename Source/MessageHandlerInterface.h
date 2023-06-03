@@ -29,7 +29,7 @@ public:
 
     virtual ~MessageHandler() {}
     virtual void handleMessage(const std::string &message) = 0;
-    virtual void setComDescriptors(int brainDescriptor, int dspDescriptor) = 0;
+    //virtual void setComDescriptors(int brainDescriptor, int dspDescriptor) = 0;
 
 	// Virtual method to set the callback function
 	virtual void setCallbackFunction(CallbackFunction callback) = 0;

@@ -16,8 +16,13 @@ void EffectsBankMessageHandler::handleMessage(const std::string &message)
 
 }
 
-void EffectsBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+void EffectsBankMessageHandler::setCallbackFunction(std::function<void(const MessageData&)> callbackFunction)
 {
-	brain = brainDescriptor;
-	dsp = dspDescriptor;
+  callback = callbackFunction;
 }
+
+// void EffectsBankMessageHandler::setComDescriptors(int brainDescriptor, int dspDescriptor)
+// {
+// 	brain = brainDescriptor;
+// 	dsp = dspDescriptor;
+// }

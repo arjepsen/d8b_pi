@@ -13,15 +13,17 @@
 #pragma once
 
 #include "MessageHandlerInterface.h"
-//#include "unordered_map"
 
 class LineBankMessageHandler : public MessageHandler
 {
 public:
     void handleMessage(const std::string &message) override;
-    void setComDescriptors(int brainDescriptor, int dspDescriptor) override;
+    //void setComDescriptors(int brainDescriptor, int dspDescriptor) override;
+    void setCallbackFunction(std::function<void(const MessageData&)> callbackFunction) override;
 
 private:
+
+	std::function<void(const MessageData&)> callback;
 
 	int brain;
 	int dsp;

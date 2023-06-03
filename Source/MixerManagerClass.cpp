@@ -200,11 +200,11 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 brainDescriptor = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
                 dspDescriptor = openSerialPort(getDspPort().c_str(), B115200);
 
-                // Forward the descriptors to the handlers
-                lineBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-                tapeBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-                effectsBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-                mastersBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                // // Forward the descriptors to the handlers
+                // lineBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                // tapeBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                // effectsBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
+                // mastersBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
 
                 // Start the communication threads.
                 brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
@@ -215,18 +215,19 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 // We need a way to send all the settings in a channel, and here do it for all channels.
 
 
-                // So now, add 24 objects to the channelstripmap, which will run their constructor.
-                // Set their KEY in the map as the hex code (00 - 17) corresponding to the brain messages.
-                for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
-                {
-                    std::stringstream stream;
-                    stream << std::hex << std::setw(2) << std::setfill('0') << i;
-                    std::string hexCode = stream.str();
+                // // So now, add 24 objects to the channelstripmap, which will run their constructor.
+                // // Set their KEY in the map as the hex code (00 - 17) corresponding to the brain messages.
+                // for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
+                // {
+                //     std::stringstream stream;
+                //     stream << std::hex << std::setw(2) << std::setfill('0') << i;
+                //     std::string hexCode = stream.str();
                     
-                    // Instantiate a ChannelStrip object as value to this key.
-                    channelStripMap[hexCode] = ChannelStrip();
-                }
+                //     // Instantiate a ChannelStrip object as value to this key.
+                //     channelStripMap[hexCode] = ChannelStrip();
+                // }
 
+                // DO THE ARRAY OR MAP INSTEAD
 
                 // Run a for loop over all channels, and send their dsp values.
                 for (auto channel : channels)
@@ -450,6 +451,8 @@ void MixerManager::setBank(Bank bank)
 
 void MixerManager::messageHandlerCallback(const MessageData& messageData)
 {
+    DEBUG_MSG("Callback Function in MixerManager called.\n");
+
     // Handle the message data:
 
     // Read the channelstrip number, retrieve audio channel from map/array.
