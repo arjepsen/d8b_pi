@@ -1225,7 +1225,10 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-
+void ChannelStripComponent::setFaderVolume(double value)
+{
+    fader.get()->setValue(value);
+}
 //[/MiscUserCode]
 
 

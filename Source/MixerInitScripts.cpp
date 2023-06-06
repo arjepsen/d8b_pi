@@ -372,11 +372,14 @@ InitErrorType initializeMixer()
     // pan 9 Left
     write(DSP, "0AdFEFFX0OFDFFXP", strlen("0AdFEFFX0OFDFFXP"));
 
-    // pan 10 right
-    write(DSP, "22dFEFFXFEOFDFFXP", strlen("22dFEFFXFEOFDFFXP"));
+    // pan 10 left
+    write(DSP, "22dFEFFX0OFDFFXP", strlen("22dFEFFX0OFDFFXP"));
+
+    // pan 11 right
+    write(DSP, "0BdFEFFXFEOFDFFXP", strlen("0BdFEFFXFEOFDFFXP"));
 
     // Set both channels to unity
-    write(DSP, "0AcXC1Q", strlen("0AcXC1Q"));
+    write(DSP, "0BcXC1Q", strlen("0BcXC1Q"));
     write(DSP, "22cXC1Q", strlen("22cXC1Q"));
 
     // Turn up master

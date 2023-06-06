@@ -18,6 +18,8 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <cmath>
+
 
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
@@ -44,8 +46,22 @@ MixerManager::MixerManager()
     // So the channel objects are ready for when we instantiate the map of channelstrips after mixer init script.
 
     // Pass the callback function to the message handlers.
+    // MAKE DIFFERENT CALLBAKCS FOR EACH BRAIN MESSAGE (fader, vpot, btndwn, btnup)
     lineBankMessageHandler.setCallbackFunction([this](const MessageData& messageData) { this->messageHandlerCallback(messageData); });
-    // Same for the other four.
+    // SAME FOR THE OTHER FOUR
+
+
+    // Set up channelstrip map of pointers to channel objects. (initially Line bank, ch. 1-24)
+    for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
+    {   
+        // Create the 2-digit hex code for the channelstrip.
+        std::stringstream stream;
+        stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << i;
+        std::string hexCode = stream.str();
+        
+        // Create an element in the map
+        channelStripMap[hexCode] = &channels[i];
+    }
 }
 
 MixerManager::~MixerManager()
@@ -218,7 +234,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 // We need a way to send all the settings in a channel, and here do it for all channels.
 
 
-                // // So now, add 24 objects to the channelstripmap, which will run their constructor.
+                // // So now, add 24 objects to the channelstripmap. 
                 // // Set their KEY in the map as the hex code (00 - 17) corresponding to the brain messages.
                 // for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
                 // {
@@ -230,13 +246,21 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 //     channelStripMap[hexCode] = ChannelStrip();
                 // }
 
+
+                // Set up the 
+                // for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
+                // {
+                //     //channelStripMap[dspChannelIDs[i]] = &channels[i];
+                //     channelStripMap[]
+                // }
+
+                // channelStripMap["00"] = &channels[0];
+
                 // DO THE ARRAY OR MAP INSTEAD
 
                 // Run a for loop over all channels, and send their dsp values.
-                for (auto channel : channels)
-                {
-                    uint8_t channelVolume = channel.getVolume();
-                }
+                // Or what? Do we need to?
+
                 // run a for loop over channelstrips. This is boot, so assign channel 1-24 to channelstrips, then load their settings to the strip.
 
                 isInitializing = false;
@@ -456,11 +480,46 @@ void MixerManager::messageHandlerCallback(const MessageData& messageData)
 {
     DEBUG_MSG("Callback Function in MixerManager called.\n");
 
-    // Handle the message data:
+    // FIGURE OUT WHAT TYPE OF MESSAGE, WHICH WILL TELL US WHERE TO SEND IT.
+    // Then update ui...
 
-    // Read the channelstrip number, retrieve audio channel from map/array.
-    // Use that info to figure out which channel object to use
-    // Call the specific channels method for sending messages.
+    // REDO, AS SPECIFIC CALLLS FOR EACH TYPE OF BRAIN MESSAGE (fader, vpot, btn, etc.)
+
+    // Use the pointer in the channelstrip map to call the actual channel object
+    channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
+
+    double uiValue = mapToSliderScale(messageData.value);
+
+    int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
+
+    chStripComponents[channelStripIndex].setFaderVolume(uiValue);
+    
 
     // WHERE DO WE HANDLE THE UI CHANGES? HERE? IN CHANNEL? IN MSGHANDLER????
+}
+
+void MixerManager::faderMessageCallback(const MessageData& messageData)
+{
+    // Use channelStrip map to call channel object
+    channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
+
+    // Update UI
+
+}
+
+// Method to let the MainComponent hand over a pointer to the channel Strip Component array.
+void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripArray)
+{
+    chStripComponents = chStripArray;
+}
+
+
+// Map the value to the slider scale
+double MixerManager::mapToSliderScale(std::string hexValue) 
+{
+    int decimalValue = std::stoi(hexValue, nullptr, 16);
+
+    double returnValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
+ 
+    return returnValue;
 }

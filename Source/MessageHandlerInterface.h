@@ -16,9 +16,9 @@
 
 struct MessageData
 {
-	int channelStrip;
+	std::string channelStrip;
 	Bank bank;
-	int value;
+	std::string value;
 };
 
 class MessageHandler

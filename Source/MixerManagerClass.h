@@ -31,6 +31,8 @@
 #include <termios.h>
 #include <unordered_map>
 #include "BankEnum.h"
+#include "ChannelIDMap.h"
+#include "ChannelStripComponent.h"
 
 class MixerManager
 {
@@ -67,12 +69,17 @@ private:
     std::array<Channel, CHANNEL_COUNT> channels;
 	std::unordered_map<std::string, Channel*> channelStripMap;
 
+    // Component pointers
+    ChannelStripComponent *chStripComponents;
+
 
 
 	// Various members/variables
     bool isInitializing; // Flag for avoid starting multiple init threads.
 	int brainDescriptor;
 	int dspDescriptor;
+
+    const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
 
 
     MixerManager();  // Constructor
@@ -95,9 +102,14 @@ private:
     // Other Methods
     int openSerialPort(const char *devicePath, speed_t baudRate);
     void heartBeatReceived();
+    double mapToSliderScale(std::string hexValue);
 
 	// Callback function for handling the message structures from the message handlers
 	void messageHandlerCallback(const MessageData& messageData);
+    void faderMessageCallback(const MessageData& messageData);
+    // void vPotMessageHandlerCallback(const MessageData& messageData);
+    // void ButtonDwnMessageHandlerCallback(const MessageData& messageData);
+    // void ButtonUpMessageHandlerCallback(const MessageData& messageData);
 
 public:
     static MixerManager &getInstance(); // Returns a reference to the instance.
@@ -123,6 +135,9 @@ public:
     void initMixer(juce::Button *initMixerBtn);
 
     void setBank(Bank bank);
+
+    void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
+
 
     // TODO: Add methods to handle communication with the Brain and DSP boards
 };

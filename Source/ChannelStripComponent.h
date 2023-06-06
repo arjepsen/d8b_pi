@@ -52,6 +52,7 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
+    void setFaderVolume(double value);
 
     //[/UserMethods]
 

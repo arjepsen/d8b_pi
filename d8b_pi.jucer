@@ -33,6 +33,9 @@
       <FILE id="Cc2BbQ" name="ChannelClass.cpp" compile="1" resource="0"
             file="Source/ChannelClass.cpp"/>
       <FILE id="Sie6ux" name="ChannelClass.h" compile="0" resource="0" file="Source/ChannelClass.h"/>
+      <FILE id="osOdaM" name="ChannelIDMap.cpp" compile="1" resource="0"
+            file="Source/ChannelIDMap.cpp"/>
+      <FILE id="PvY3LR" name="ChannelIDMap.h" compile="0" resource="0" file="Source/ChannelIDMap.h"/>
       <FILE id="Plz3N3" name="ChannelStripClass.cpp" compile="1" resource="0"
             file="Source/ChannelStripClass.cpp"/>
       <FILE id="UubuZp" name="ChannelStripClass.h" compile="0" resource="0"

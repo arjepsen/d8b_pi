@@ -34,44 +34,38 @@ public:
 private:
     //==============================================================================
 
-    MixerManager &mixerManager;
-
-
-    //SettingsWindowComponent kurt;
-
-    //SettingsWindow settingsWindow;
-
     MenuBar menuBar;
 
-    ChannelStripComponent channelStrip1;
-    ChannelStripComponent channelStrip2;
-    ChannelStripComponent channelStrip3;
-    ChannelStripComponent channelStrip4;
-    ChannelStripComponent channelStrip5;
-    ChannelStripComponent channelStrip6;
-    ChannelStripComponent channelStrip7;
-    ChannelStripComponent channelStrip8;
-    ChannelStripComponent channelStrip9;
-    ChannelStripComponent channelStrip10;
-    ChannelStripComponent channelStrip11;
-    ChannelStripComponent channelStrip12;
-    ChannelStripComponent channelStrip13;
-    ChannelStripComponent channelStrip14;
-    ChannelStripComponent channelStrip15;
-    ChannelStripComponent channelStrip16;
-    ChannelStripComponent channelStrip17;
-    ChannelStripComponent channelStrip18;
-    ChannelStripComponent channelStrip19;
-    ChannelStripComponent channelStrip20;
-    ChannelStripComponent channelStrip21;
-    ChannelStripComponent channelStrip22;
-    ChannelStripComponent channelStrip23;
-    ChannelStripComponent channelStrip24;
+    ChannelStripComponent chStrips[24];
+
+    // ChannelStripComponent channelStrip1;
+    // ChannelStripComponent channelStrip2;
+    // ChannelStripComponent channelStrip3;
+    // ChannelStripComponent channelStrip4;
+    // ChannelStripComponent channelStrip5;
+    // ChannelStripComponent channelStrip6;
+    // ChannelStripComponent channelStrip7;
+    // ChannelStripComponent channelStrip8;
+    // ChannelStripComponent channelStrip9;
+    // ChannelStripComponent channelStrip10;
+    // ChannelStripComponent channelStrip11;
+    // ChannelStripComponent channelStrip12;
+    // ChannelStripComponent channelStrip13;
+    // ChannelStripComponent channelStrip14;
+    // ChannelStripComponent channelStrip15;
+    // ChannelStripComponent channelStrip16;
+    // ChannelStripComponent channelStrip17;
+    // ChannelStripComponent channelStrip18;
+    // ChannelStripComponent channelStrip19;
+    // ChannelStripComponent channelStrip20;
+    // ChannelStripComponent channelStrip21;
+    // ChannelStripComponent channelStrip22;
+    // ChannelStripComponent channelStrip23;
+    // ChannelStripComponent channelStrip24;
 
     MasterStripComponent masterStrip;
 
-    // Messing around, trying to handle a documentwindow with a safepionter:
-    //SafePointer<juce::DocumentWindow> documentWindow;
+    MixerManager &mixerManager;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)

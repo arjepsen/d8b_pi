@@ -21,11 +21,13 @@
 class Channel
 {
 private:
-    const uint8_t channelID; // unique ID for each channel (1 - 48) ( actually up to 56)
-    uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
+    const uint8_t channelNumber; 
+    const std::string channelID;  // unique ID for each channel (1 - 48) ( actually up to 56)
+    std::string volume;
+    //uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     //uint8_t pan;             // (0 - FE) - weird things happen on "FF". 
     
-    // bool mute;               // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
+    bool mute;               // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
                           // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
 
     //bool solo;               // maybe there should be a general list of soloed channels somewhere?
@@ -43,14 +45,15 @@ private:
     //uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
     //bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
 
-    static uint8_t nextID; // Static variable to keept track of next object's ID
+    static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
 public:
     // Constructor
     Channel();
-    uint8_t getVolume() { return volume; }
+    //uint8_t getVolume() { return volume; }
 
-    std::string setVolumeCmd();
+    void setVolume(std::string, int dspDescriptor);
+    std::string getID();
 
 };
 
