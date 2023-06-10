@@ -26,12 +26,23 @@
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 
+// Set first channel ID. This will increment with every channel object constructed.
+int ChannelStripComponent::nextChannelStripComponentID = 0;
+
 //[/MiscUserDefs]
 
 //==============================================================================
 ChannelStripComponent::ChannelStripComponent ()
 {
     //[Constructor_pre] You can add your own custom stuff here..
+
+    // Give each new channelStripComponent a unique hex ID, from "00" and upwards.
+    std::stringstream stream;
+    stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
+    channelStripComponentID = stream.str();
+
+    // Increment the static counter.
+    nextChannelStripComponentID++;
 
     //[/Constructor_pre]
 
@@ -322,7 +333,7 @@ ChannelStripComponent::ChannelStripComponent ()
     postEqInsertLabel->setBounds (2, 292, 71, 20);
 
     chLabel.reset (new juce::Label ("Channel Label",
-                                    TRANS("Ch. 1")));
+                                    juce::String()));
     addAndMakeVisible (chLabel.get());
     chLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     chLabel->setJustificationType (juce::Justification::centred);
@@ -545,6 +556,10 @@ ChannelStripComponent::ChannelStripComponent ()
 
 
     //[Constructor] You can add your own custom stuff here..
+
+    // Set initial channel strip label (nextID incremented, so fits now.)
+    chLabel->setText("Ch. " + (juce::String)nextChannelStripComponentID, juce::dontSendNotification);
+
 
     //[/Constructor]
 }
@@ -950,6 +965,12 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     {
         //[UserSliderCode_fader] -- add your slider handling code here..
 
+        // Fader was moved in the UI.
+        float newFaderValue = sliderThatWasMoved->getValue();
+
+        // Use callback to send value to MainComponent
+        faderMoveCallback(channelStripComponentID, newFaderValue);
+
         //[/UserSliderCode_fader]
     }
     else if (sliderThatWasMoved == channelPan.get())
@@ -1225,10 +1246,24 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-void ChannelStripComponent::setFaderVolume(double value)
+
+// #################################################################################################
+// This method is called, when a fader is moved on the physical mixer.
+// We want to avoid a cyclic effect, where moving a fader on the mixer, means that an update
+// command gets sent back, obstructing the fader move
+// #################################################################################################
+void ChannelStripComponent::setFaderPosition(double value)
 {
-    fader.get()->setValue(value);
+    fader.get()->setValue(value, juce::dontSendNotification);
 }
+
+void ChannelStripComponent::setFaderMoveCallbackFunction(std::function<void(std::string, float)> callbackFunction)
+{
+	faderMoveCallback = callbackFunction;
+}
+
+
+
 //[/MiscUserCode]
 
 
@@ -1438,7 +1473,7 @@ BEGIN_JUCER_METADATA
          italic="0" justification="36"/>
   <LABEL name="Channel Label" id="3a62e9f911e17b0e" memberName="chLabel"
          virtualName="" explicitFocusOrder="0" pos="2 764 71 20" outlineCol="ff000000"
-         edTextCol="ff000000" edBkgCol="0" labelText="Ch. 1" editableSingleClick="1"
+         edTextCol="ff000000" edBkgCol="0" labelText="" editableSingleClick="1"
          editableDoubleClick="1" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="36"/>
   <GENERICCOMPONENT name="place_holder_for_eq_show" id="79f8c2206c8d1951" memberName="eqThumbnail"

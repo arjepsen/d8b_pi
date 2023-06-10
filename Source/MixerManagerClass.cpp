@@ -492,7 +492,7 @@ void MixerManager::messageHandlerCallback(const MessageData& messageData)
 
     int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
 
-    chStripComponents[channelStripIndex].setFaderVolume(uiValue);
+    chStripComponents[channelStripIndex].setFaderPosition(uiValue);
     
 
     // WHERE DO WE HANDLE THE UI CHANGES? HERE? IN CHANNEL? IN MSGHANDLER????
@@ -500,21 +500,32 @@ void MixerManager::messageHandlerCallback(const MessageData& messageData)
 
 void MixerManager::faderMessageCallback(const MessageData& messageData)
 {
-    // Use channelStrip map to call channel object
+    // Use channelStrip map to call channel object's setvolume mehod
     channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
 
+    // Calculate the UI fader value to show
+    double uiValue = mapToSliderScale(messageData.value);
+
+    // Get the integer index of the channelstrip that was moved
+    int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
+
     // Update UI
+    chStripComponents[channelStripIndex].setFaderPosition(uiValue);
 
 }
 
-// Method to let the MainComponent hand over a pointer to the channel Strip Component array.
+// #########################################################################################
+// Method to a pointer to the channel Strip Component array from the MainComponent.
+// #########################################################################################
 void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripArray)
 {
     chStripComponents = chStripArray;
 }
 
-
-// Map the value to the slider scale
+// ###############################################################################
+// Faders sends a hex value (byte) on a linear scale. 
+// This method calculates the corresponding value to show in the ui.
+// ###############################################################################
 double MixerManager::mapToSliderScale(std::string hexValue) 
 {
     int decimalValue = std::stoi(hexValue, nullptr, 16);
@@ -523,3 +534,26 @@ double MixerManager::mapToSliderScale(std::string hexValue)
  
     return returnValue;
 }
+
+
+void MixerManager::handleUiFaderMove(std::string channelStripComponentID, float newFaderValue)
+{
+    // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
+    float x = 28.3f * powf(10.0f, 0.01f * newFaderValue + 0.9f) - 28.3f;
+    //int roundedX = static_cast<int>(std::round(x));   // using std::round
+    int roundedX = static_cast<int>(x + 0.5f);
+
+    // Convert to 2-digit hex string
+    std::stringstream stream;
+    stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
+    std::string faderHexValue = stream.str();
+
+    // Tell channel object to send volume command, and update it's record.
+    // IF BANK == LINE BANK:
+    channelStripMap[channelStripComponentID]->setVolume(faderHexValue, dspDescriptor);
+
+    // Send fader command to the Brain:
+    std::string brainCommand = channelStripComponentID + faderHexValue + "f";
+    write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
+}
+

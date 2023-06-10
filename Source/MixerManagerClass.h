@@ -13,12 +13,14 @@
 */
 
 #pragma once
+
+
 #include "BankEffectsMessageHandlerClass.h"
 #include "BankLineMessageHandlerClass.h"
 #include "BankMastersMessageHandlerClass.h"
 #include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
-#include "ChannelStripClass.h"
+//#include "ChannelStripClass.h"
 #include "CircularBuffer.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
@@ -137,6 +139,7 @@ public:
     void setBank(Bank bank);
 
     void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
+    void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);
 
 
     // TODO: Add methods to handle communication with the Brain and DSP boards

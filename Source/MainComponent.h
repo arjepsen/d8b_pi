@@ -31,6 +31,10 @@ public:
     void paint(juce::Graphics &) override;
     void resized() override;
 
+    // My stuff
+    void faderMoveCallback(const std::string channelStripComponentID, float newValue);
+
+
 private:
     //==============================================================================
 

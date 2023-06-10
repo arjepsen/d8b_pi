@@ -18,3 +18,11 @@ What's smartest: Seperate methods for each bank, or one method, that checks bank
 This might be seperated like: 4Cc - 9XyyQ - AXyyQ, with yy being the volume value.
 Check the truth of this, if pan is used.
 handle different volume levels for L/R.
+
+
+-ChannelIDMap.... should they all be constants? How are we using them?
+
+-Considering changing channel and channelstrip ID's to C-style strings, instead of std::strings... 
+Maybe wait for now, to see how performance is.
+
+-Set up "banking", so various function, like handling fader move, sends dsp commands depending on selected bank.

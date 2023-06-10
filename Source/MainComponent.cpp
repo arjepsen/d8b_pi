@@ -4,8 +4,6 @@
 
 MainComponent::MainComponent()
     : mixerManager(MixerManager::getInstance())
-//    : settings(Settings::getInstance())
-
 {
     std::cout << "MainComponent Constructor" << std::endl;
     // Main window size.
@@ -92,6 +90,9 @@ void MainComponent::resized()
     {
         strip.setBounds(strip_x, 28, 75, 1024);
         strip_x += 75;
+
+        // Since we're handling each strip anyway, hand over the callbacks:
+        strip.setFaderMoveCallbackFunction([this](const std::string channelStripID, float newFaderValue) { this->faderMoveCallback(channelStripID, newFaderValue); });
     }
 
 
@@ -123,4 +124,15 @@ void MainComponent::resized()
     // Master strip placement
     masterStrip.setBounds(1800, 28,120,1024);
 
+}
+
+void MainComponent::faderMoveCallback(const std::string channelStripID, float newValue)
+{
+    std::cout << "MAINCOMP: You moved fader: " << channelStripID << ", to new value: " << newValue << std::endl;
+
+    mixerManager.handleUiFaderMove(channelStripID, newValue);
+
+
+    // This method should now call a method in MixerManager, to have the value converted, and put together to a DSP board command.
+    // And send it .... of course....
 }

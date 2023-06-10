@@ -21,7 +21,9 @@
 
 //[Headers]     -- You can add your own extra header files here --
 
+
 #include <JuceHeader.h>
+
 
 //[/Headers]
 
@@ -52,7 +54,10 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-    void setFaderVolume(double value);
+    void setFaderPosition(double value);
+
+    void setFaderMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
+
 
     //[/UserMethods]
 
@@ -67,6 +72,15 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+
+    std::string channelStripComponentID;
+    static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
+
+    std::function<void(std::string, float)> faderMoveCallback;
+
+    // Access to the mixermanager
+    //MixerManager &mixerManager;
+
 
     //[/UserVariables]
 
