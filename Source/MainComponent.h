@@ -33,6 +33,7 @@ public:
 
     // My stuff
     void faderMoveCallback(const std::string channelStripComponentID, float newValue);
+    void masterFaderMoveCallback(float newValue);
 
 
 private:

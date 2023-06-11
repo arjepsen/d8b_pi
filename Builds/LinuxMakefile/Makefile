@@ -87,6 +87,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/IOSlotClass_f67f5815.o \
   $(JUCE_OBJDIR)/Main_90ebc5c2.o \
   $(JUCE_OBJDIR)/MainComponent_a6ffb4a5.o \
+  $(JUCE_OBJDIR)/MasterChannelClass_c80afc0.o \
   $(JUCE_OBJDIR)/MasterStripComponent_436c38d0.o \
   $(JUCE_OBJDIR)/MenuBar_49511495.o \
   $(JUCE_OBJDIR)/MixerInitScripts_86ba9d18.o \
@@ -186,6 +187,11 @@ $(JUCE_OBJDIR)/Main_90ebc5c2.o: ../../Source/Main.cpp
 $(JUCE_OBJDIR)/MainComponent_a6ffb4a5.o: ../../Source/MainComponent.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling MainComponent.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/MasterChannelClass_c80afc0.o: ../../Source/MasterChannelClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling MasterChannelClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/MasterStripComponent_436c38d0.o: ../../Source/MasterStripComponent.cpp

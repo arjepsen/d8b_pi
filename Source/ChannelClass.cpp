@@ -52,12 +52,16 @@ std::string Channel::getID()
 	return channelID;
 }
 
+// #######################################################################################
+// This method updates the channel object's volume member, and sends a command to the DSP
+// #######################################################################################
 void Channel::setVolume(std::string volumeValue, int dspDescriptor)
 {
-	// Send the update command
-	std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
+	// Update volume member
 	volume = volumeValue;
+
+	// Construct DSP command, and send it.
+	std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
 	if (!mute)
 		write(dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
-	
 }

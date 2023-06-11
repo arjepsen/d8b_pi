@@ -45,6 +45,11 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
+
+    void setMasterFaderPosition(double value);
+
+    void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
+
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -53,13 +58,14 @@ public:
     void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
     void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
-    // Binary resources:
-    static const char* clipboard01_jpg;
-    static const int clipboard01_jpgSize;
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+
+	std::function<void(float)> masterFaderMoveCallback;
+
+
     //[/UserVariables]
 
     //==============================================================================

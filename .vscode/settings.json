@@ -69,7 +69,8 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "*.mm": "cpp"
     },
     "cmake.configureOnOpen": false
 }

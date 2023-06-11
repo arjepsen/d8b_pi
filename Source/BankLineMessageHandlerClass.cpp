@@ -27,57 +27,15 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
     {
         case 'f': // FADER MOVED.
         {
-            // Send a channel volume command to the DSP
-            // The command has the form "xxcXyyQ", where xx is the channel ID, and yy is the value.
-            // Note that yy can be a single digit, like 0. Max is FF.
-            // Also note, that the master fader has a different command to send out (4Cc9XyyQAXyyQ) - likely this is stereo (9XyyQ / AXyyQ)
+            std::string channelStrip = message.substr(0, 2); // Get channel strip ID from message
+            std::string value = message.substr(2, 2);       // Get fader position from message
 
-			// MUST RETHINK IT!
-			// In each bank, a channelstrip can be assigned different channels!
-			// Maybe make 2 or more arrays with pointers to the configured channel?
+            MessageData msgStruct;
+            msgStruct.channelStrip = channelStrip;
+            msgStruct.bank = LINE_BANK;
+            msgStruct.value = value;
 
-			// So here we would call a public method in mixermanager.....
-			// something like chStripFaderMove(strip-index, value)... then this should pass that to the object?
-			// Where should we then send the command from? Channel object? Mixermanager? all the way back here?
-
-			// One way is, that the communication is kept in this class.....
-			// So it will query mixermanager for the command info to send?
-			// but... technically this object should not even knowthat mixermanager exists....
-
-
-            std::string channelStrip = message.substr(0, 2); // Get channel
-            std::string value = message.substr(2, 2);
-
-            if (channelStrip != "18")
-            {
-
-                MessageData msgStruct;
-                msgStruct.channelStrip = channelStrip;
-                msgStruct.bank = LINE_BANK;
-                msgStruct.value = value;
-
-                callback(msgStruct);
-
-            }
-            else
-            printf("MASTER FAAADEEEER!!!!\n");
-            // // Build the full command in one go.
-            // std::string faderDspCommand;
-            // if (channel == "18") // Master fader
-            // {
-            //     faderDspCommand = channelMap[channel] + "c9X" + value + "QAX" + value + "Q";
-            // }
-            // else
-            // {
-            //     faderDspCommand = channelMap[channel] + "cX" + value + "Q";
-            // }
-
-            // // Send the command
-            // write(dsp, faderDspCommand.c_str(), faderDspCommand.length());
-
-            // update UI.
-
-
+            callback(msgStruct);
             break;
         }
         case 'v': // V-Pot turned

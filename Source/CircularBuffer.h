@@ -23,6 +23,7 @@ private:
     std::condition_variable condVar_;
 
     int msgCount = 0;
+    int maxMsgCount = 0;
 
     size_t next_index(size_t index) const;
 };

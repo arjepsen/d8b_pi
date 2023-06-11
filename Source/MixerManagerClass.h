@@ -35,11 +35,13 @@
 #include "BankEnum.h"
 #include "ChannelIDMap.h"
 #include "ChannelStripComponent.h"
+#include "MasterChannelClass.h"
 
 class MixerManager
 {
 private:
-    Settings &settings; // Reference to the Settings singleton.
+    Settings &settings; // Reference to the Settings singleton. 
+    MasterChannel &masterChannel;   // Reference to masterChannel singleton.
 
     // Declare the IO slot objects.
     IOSlot *ioSlotA;
@@ -140,6 +142,7 @@ public:
 
     void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
     void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);
+    void handleUiMasterFaderMove(float newMasterFaderValue);
 
 
     // TODO: Add methods to handle communication with the Brain and DSP boards

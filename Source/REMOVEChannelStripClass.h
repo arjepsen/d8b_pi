@@ -8,14 +8,14 @@
   ==============================================================================
 */
 
-#pragma once
+// #pragma once
 
-#include "ChannelClass.h"
+// #include "ChannelClass.h"
 
-class ChannelStrip
-{
-private:
-    Channel *channelPtr;
+// class ChannelStrip
+// {
+// private:
+//     Channel *channelPtr;
 
-public:
-};
+// public:
+// };

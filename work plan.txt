@@ -1,0 +1,5 @@
+physcial / UI fader interaction. - WORKING.
+
+Next, get the master fader up and running.
+
+Then start working on buttons. (maybe wait with pans untill banks are implemented?)

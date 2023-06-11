@@ -20,6 +20,9 @@ void CircularBuffer::push(const char *message)
 
     msgCount++;
 
+    if (maxMsgCount < msgCount)
+        maxMsgCount = msgCount;
+
     lock.unlock();
     condVar_.notify_one(); // Notify reader
 }
@@ -42,9 +45,10 @@ std::string CircularBuffer::pop()
     tail_ = next_index(tail_);
 
     msgCount--;
-    printf("POP - messages in queue: %d\n", msgCount);
+    //printf("POP - messages in queue: %d\n", msgCount);
 
-    printf("returning %s\n", message.c_str());
+
+    printf("returning %s, max buffer msgs: %d\n", message.c_str(), maxMsgCount);
     lock.unlock();
     return message;
 }

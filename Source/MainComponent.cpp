@@ -12,7 +12,6 @@ MainComponent::MainComponent()
     // This would print out the devices
     // settings.printUsbDevices();
 
-
     // Show channelStrips.
     for (auto &strip : chStrips)
     {
@@ -54,9 +53,7 @@ MainComponent::MainComponent()
     addAndMakeVisible(menuBar);
 
     // Set up an array of pointers to the channelStripcomponents
-    //ChannelStripComponent chStripComponentArray[24];
-
-
+    // ChannelStripComponent chStripComponentArray[24];
 }
 
 MainComponent::~MainComponent()
@@ -92,9 +89,14 @@ void MainComponent::resized()
         strip_x += 75;
 
         // Since we're handling each strip anyway, hand over the callbacks:
-        strip.setFaderMoveCallbackFunction([this](const std::string channelStripID, float newFaderValue) { this->faderMoveCallback(channelStripID, newFaderValue); });
+        strip.setFaderMoveCallbackFunction
+        (
+            [this](const std::string channelStripID, float newFaderValue)
+            {
+                this->faderMoveCallback(channelStripID, newFaderValue);
+            }
+        );
     }
-
 
     // channelStrip1.setBounds(0, 28, 75, 1024);
     // channelStrip2.setBounds(75, 28, 75, 1024);
@@ -122,17 +124,27 @@ void MainComponent::resized()
     // channelStrip24.setBounds(1725, 28, 75, 1024);
 
     // Master strip placement
-    masterStrip.setBounds(1800, 28,120,1024);
+    masterStrip.setBounds(1800, 28, 120, 1024);
 
+    // Master strip fader callback
+    masterStrip.setMasterFaderMoveCallbackFunction
+    (
+        [this](float newFaderValue)
+        {
+            this->masterFaderMoveCallback(newFaderValue);
+        }
+    );
 }
 
 void MainComponent::faderMoveCallback(const std::string channelStripID, float newValue)
 {
-    std::cout << "MAINCOMP: You moved fader: " << channelStripID << ", to new value: " << newValue << std::endl;
-
     mixerManager.handleUiFaderMove(channelStripID, newValue);
-
 
     // This method should now call a method in MixerManager, to have the value converted, and put together to a DSP board command.
     // And send it .... of course....
+}
+
+void MainComponent::masterFaderMoveCallback(float newValue)
+{
+    mixerManager.handleUiMasterFaderMove(newValue);
 }

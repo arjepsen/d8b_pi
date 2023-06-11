@@ -26,3 +26,11 @@ handle different volume levels for L/R.
 Maybe wait for now, to see how performance is.
 
 -Set up "banking", so various function, like handling fader move, sends dsp commands depending on selected bank.
+
+-optimize - remove various debug messages, remove debug variables like msgcount in the circular buffer.
+
+- change initialize procedure, so the window closes when init is successful.
+
+-setVolume in MasterChannelClass - check if there is a case where we update the volume member, without sending to dsp... (like mute...)
+
+- really test circular buffer size.

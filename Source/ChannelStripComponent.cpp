@@ -1249,12 +1249,11 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
 
 // #################################################################################################
 // This method is called, when a fader is moved on the physical mixer.
-// We want to avoid a cyclic effect, where moving a fader on the mixer, means that an update
-// command gets sent back, obstructing the fader move
+// "dontSendNotification" prevents a cyclic reaction, where the ui will then try to update the mixer
 // #################################################################################################
 void ChannelStripComponent::setFaderPosition(double value)
 {
-    fader.get()->setValue(value, juce::dontSendNotification);
+    juce::MessageManager::callAsync([this, value]() { fader.get()->setValue(value, juce::dontSendNotification); });
 }
 
 void ChannelStripComponent::setFaderMoveCallbackFunction(std::function<void(std::string, float)> callbackFunction)
