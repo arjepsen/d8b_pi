@@ -3,7 +3,8 @@
 //==============================================================================
 
 MainComponent::MainComponent()
-    : mixerManager(MixerManager::getInstance())
+    : eventBus(EventBus::getInstance()),
+      mixerManager(MixerManager::getInstance())
 {
     std::cout << "MainComponent Constructor" << std::endl;
     // Main window size.

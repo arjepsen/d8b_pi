@@ -50,6 +50,9 @@
             file="Source/CircularBuffer.h"/>
       <FILE id="n0ZxHX" name="CommandStrings.h" compile="0" resource="0"
             file="Source/CommandStrings.h"/>
+      <FILE id="whafmG" name="EventBusClass.cpp" compile="1" resource="0"
+            file="Source/EventBusClass.cpp"/>
+      <FILE id="ROWLES" name="EventBusClass.h" compile="0" resource="0" file="Source/EventBusClass.h"/>
       <FILE id="lkn7of" name="FXCardClass.h" compile="0" resource="0" file="Source/FXCardClass.h"/>
       <FILE id="EOEs3v" name="FXSlotClass.cpp" compile="1" resource="0" file="Source/FXSlotClass.cpp"/>
       <FILE id="cfuxAA" name="FXSlotClass.h" compile="0" resource="0" file="Source/FXSlotClass.h"/>

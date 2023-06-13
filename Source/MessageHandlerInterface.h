@@ -13,6 +13,7 @@
 #include <string>
 #include <functional>
 #include "BankEnum.h"
+#include "EventBusClass.h"
 
 struct MessageData
 {

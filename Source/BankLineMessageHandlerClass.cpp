@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 
+
 void LineBankMessageHandler::handleMessage(const std::string &message)
 {
 
@@ -35,7 +36,7 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
             msgStruct.bank = LINE_BANK;
             msgStruct.value = value;
 
-            callback(msgStruct);
+            callback(msgStruct);  // INSTEAD USE EVENT BUS POST
             break;
         }
         case 'v': // V-Pot turned

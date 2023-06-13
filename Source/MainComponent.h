@@ -4,6 +4,7 @@
 #include "MenuBar.h"
 #include "MixerManagerClass.h"
 #include "MasterStripComponent.h"
+#include "EventBusClass.h"
 #include <JuceHeader.h>
 
 //#include "SettingsWindow.h"
@@ -70,6 +71,7 @@ private:
 
     MasterStripComponent masterStrip;
 
+    EventBus &eventBus;
     MixerManager &mixerManager;
 
 

@@ -36,12 +36,14 @@
 #include "ChannelIDMap.h"
 #include "ChannelStripComponent.h"
 #include "MasterChannelClass.h"
+#include "EventBusClass.h"
 
 class MixerManager
 {
 private:
     Settings &settings; // Reference to the Settings singleton. 
     MasterChannel &masterChannel;   // Reference to masterChannel singleton.
+    EventBus &eventBus;     // Reference to EventBus singleton.
 
     // Declare the IO slot objects.
     IOSlot *ioSlotA;

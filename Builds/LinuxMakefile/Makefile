@@ -83,6 +83,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/REMOVEChannelStripClass_b5c1bb80.o \
   $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o \
   $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o \
+  $(JUCE_OBJDIR)/EventBusClass_f5722df3.o \
   $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o \
   $(JUCE_OBJDIR)/IOSlotClass_f67f5815.o \
   $(JUCE_OBJDIR)/Main_90ebc5c2.o \
@@ -167,6 +168,11 @@ $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o: ../../Source/ChannelStripCompon
 $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o: ../../Source/CircularBuffer.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling CircularBuffer.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/EventBusClass_f5722df3.o: ../../Source/EventBusClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling EventBusClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o: ../../Source/FXSlotClass.cpp

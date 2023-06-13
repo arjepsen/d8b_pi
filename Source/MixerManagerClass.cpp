@@ -34,6 +34,7 @@
 // ############################ CONSTRUCTOR ####################################
 MixerManager::MixerManager()
     : settings(Settings::getInstance()),
+      eventBus(EventBus::getInstance()),
       masterChannel(MasterChannel::getInstance()),
       isInitializing(false),
       messageHandler(&lineBankMessageHandler)
@@ -517,7 +518,7 @@ void MixerManager::faderMessageCallback(const MessageData &messageData)
         masterChannel.setMasterVolume(messageData.value, dspDescriptor);
 
         // Update UI
-        
+
 
     }
 }
