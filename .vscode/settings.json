@@ -70,7 +70,8 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "ranges": "cpp",
-        "*.mm": "cpp"
+        "*.mm": "cpp",
+        "any": "cpp"
     },
     "cmake.configureOnOpen": false
 }

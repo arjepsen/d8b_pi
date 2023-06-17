@@ -13,71 +13,88 @@
 
 #pragma once
 
+#include "BankEnum.h"
+#include "EventBusClass.h"
+#include <array>
 #include <cstdint>
 #include <string>
-#include <array>
-
+#include <unordered_map>
+#include <unordered_set>
 
 class Channel
 {
 private:
-    const uint8_t channelNumber; 
-    const std::string channelID;  // unique ID for each channel (1 - 48) ( actually up to 56)
-    std::string volume;
-    //uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
-    //uint8_t pan;             // (0 - FE) - weird things happen on "FF". 
-    
-    bool mute;               // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
-                          // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
+    EventBus &eventBus;        // Reference to EventBus singleton.
+    static int &dspDescriptor; // Reference to the DSP file descriptor.
 
-    //bool solo;               // maybe there should be a general list of soloed channels somewhere?
+    const uint8_t channelNumber;
+    const std::string channelID; // unique ID for each channel (1 - 48) ( actually up to 56)
+    // std::string channelStripID; // NOT WORKING..... CHANNEL CAN BE SET UP TO MORE THAN ONE STRIP ON SAME BANK, AND WHAT ABOUT OTHER BANKS???
+
+    std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
+
+    std::string volume;
+    // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
+    // uint8_t pan;             // (0 - FE) - weird things happen on "FF".
+
+    bool mute; // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
+               // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
+
+    // bool solo;               // maybe there should be a general list of soloed channels somewhere?
 
     // These should probably be made to classes.... Not sure... see below.
-    //bool phaseReversed;
-    //bool gateOn;
-    //bool compressorOn;
-    //bool eqOn;
+    // bool phaseReversed;
+    // bool gateOn;
+    // bool compressorOn;
+    // bool eqOn;
 
-    //bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R) (L-R = index 0)
+    // bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R) (L-R = index 0)
 
-    //std::array<char, 8> label;          // channel label.
+    // std::array<char, 8> label;          // channel label.
 
-    //uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
-    //bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
+    // uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
+    // bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
+
+    void subscribeToLineBankEvents();
 
 public:
     // Constructor
     Channel();
-    //uint8_t getVolume() { return volume; }
+    // uint8_t getVolume() { return volume; }
 
-    void setVolume(std::string, int dspDescriptor);
+    void setVolume(std::string);
     std::string getID();
 
+    void setChannelStrip(std::string stripID);
+    void linkDspDescriptor(int &dspDescriptor);
+    // void removeLineBankStripSubscription(std::string channelStripID);
+    // void removeSubscription(BankEventType eventType, std::string channelStripID);
+    void removeSubscription(Bank bank, std::string channelStripIDtoRemove);
+
+    void channelStripFaderEvent(std::string &faderValue, Bank bank);
 };
 
+// // Should these be classes also??
+// int pre_dsp_insert;  // somehow must ID channel-, bus-, aux- taps or 2-track inputs or plugins.
+// int post_dsp_insert; // only plugins possible as post insert. this variable must ID.
+// int key_input;       // ID for what is set as key for key-eq/dynamics.. Default is channel iteself. Others: ch.tap, alt-return, bus-tap, aux-tap, 2-track input.
 
-
-    // // Should these be classes also??
-    // int pre_dsp_insert;  // somehow must ID channel-, bus-, aux- taps or 2-track inputs or plugins.
-    // int post_dsp_insert; // only plugins possible as post insert. this variable must ID.
-    // int key_input;       // ID for what is set as key for key-eq/dynamics.. Default is channel iteself. Others: ch.tap, alt-return, bus-tap, aux-tap, 2-track input.
-
-    // // Channel DSP:
-    // int delay;
-    // int digital_trim;  // Need to sniff this one. This one is shown as the blue bar
-    // int level_to_tape; // the red bar.
-    // int phase;
-    // // Gate-in meter???
-    // int Gate;       // this might have to be a separate class?
-    // int Compressor; // Might also have to be a class.
-    // // Compressor-out meter??
-    // int hi_pass; // Unsure how much is in this - is it just a boolean or??
-    // // int EQ; // This should probably also be a class.
-    // float eqLow;
-    // float eqMid;
-    // float eqHigh;
-    // float eqLowQ;
-    // float eqMidQ;
-    // float eqHighQ;
+// // Channel DSP:
+// int delay;
+// int digital_trim;  // Need to sniff this one. This one is shown as the blue bar
+// int level_to_tape; // the red bar.
+// int phase;
+// // Gate-in meter???
+// int Gate;       // this might have to be a separate class?
+// int Compressor; // Might also have to be a class.
+// // Compressor-out meter??
+// int hi_pass; // Unsure how much is in this - is it just a boolean or??
+// // int EQ; // This should probably also be a class.
+// float eqLow;
+// float eqMid;
+// float eqHigh;
+// float eqLowQ;
+// float eqMidQ;
+// float eqHighQ;

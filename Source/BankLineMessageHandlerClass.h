@@ -17,6 +17,8 @@
 class LineBankMessageHandler : public MessageHandler
 {
 public:
+
+  //LineBankMessageHandler() : eventBus(EventBus::getInstance()) {}
     void handleMessage(const std::string &message) override;
     //void setComDescriptors(int brainDescriptor, int dspDescriptor) override;
     void setCallbackFunction(std::function<void(const MessageData&)> callbackFunction) override;
@@ -24,6 +26,8 @@ public:
 private:
 
 	std::function<void(const MessageData&)> callback;
+
+  
 
 	// int brain;
 	// int dsp;

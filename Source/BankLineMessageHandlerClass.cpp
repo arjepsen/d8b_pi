@@ -28,15 +28,18 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
     {
         case 'f': // FADER MOVED.
         {
-            std::string channelStrip = message.substr(0, 2); // Get channel strip ID from message
+            std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
             std::string value = message.substr(2, 2);       // Get fader position from message
 
-            MessageData msgStruct;
-            msgStruct.channelStrip = channelStrip;
-            msgStruct.bank = LINE_BANK;
-            msgStruct.value = value;
+			eventBus.lineBankEventPost(FADER_EVENT, channelStripID, value);
 
-            callback(msgStruct);  // INSTEAD USE EVENT BUS POST
+
+            // MessageData msgStruct;
+            // msgStruct.channelStrip = channelStripID;
+            // msgStruct.bank = LINE_BANK;
+            // msgStruct.value = value;
+
+            // callback(msgStruct);  // INSTEAD USE EVENT BUS POST
             break;
         }
         case 'v': // V-Pot turned

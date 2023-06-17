@@ -37,7 +37,7 @@ MixerManager::MixerManager()
       eventBus(EventBus::getInstance()),
       masterChannel(MasterChannel::getInstance()),
       isInitializing(false),
-      messageHandler(&lineBankMessageHandler)
+      messageHandler(&lineBankMessageHandler)   
 {
     std::cout << "MixerManger Constructor" << std::endl;
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
@@ -47,8 +47,11 @@ MixerManager::MixerManager()
 
     // Pass the callback function to the message handlers.
     // MAKE DIFFERENT CALLBAKCS FOR EACH BRAIN MESSAGE (fader, vpot, btndwn, btnup)
-    lineBankMessageHandler.setCallbackFunction([this](const MessageData &messageData)
-                                               { this->faderMessageCallback(messageData); });
+
+
+    // REMOVE THIS - WE ARE GOING TO USE EVENT BUS INSTEAD
+    // lineBankMessageHandler.setCallbackFunction([this](const MessageData &messageData)
+    //                                            { this->faderMessageCallback(messageData); });
     // SAME FOR THE OTHER FOUR
 
     // Set up channelstrip map of pointers to channel objects. (initially Line bank, ch. 1-24)
@@ -230,35 +233,13 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
 
                 // Channels are already constructed by now, so they should have their default values already.
-                // We need a way to send all the settings in a channel, and here do it for all channels.
+                // Run a for loop to set up stuff that all channel objects need:
+                for (auto channel : channels)
+                {
+                    // Set the reference to the dspDescriptor:
+                    channel.linkDspDescriptor(dspDescriptor);
+                }
 
-                // // So now, add 24 objects to the channelstripmap.
-                // // Set their KEY in the map as the hex code (00 - 17) corresponding to the brain messages.
-                // for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
-                // {
-                //     std::stringstream stream;
-                //     stream << std::hex << std::setw(2) << std::setfill('0') << i;
-                //     std::string hexCode = stream.str();
-
-                //     // Instantiate a ChannelStrip object as value to this key.
-                //     channelStripMap[hexCode] = ChannelStrip();
-                // }
-
-                // Set up the
-                // for (int i = 0; i < CHANNEL_STRIP_COUNT; ++i)
-                // {
-                //     //channelStripMap[dspChannelIDs[i]] = &channels[i];
-                //     channelStripMap[]
-                // }
-
-                // channelStripMap["00"] = &channels[0];
-
-                // DO THE ARRAY OR MAP INSTEAD
-
-                // Run a for loop over all channels, and send their dsp values.
-                // Or what? Do we need to?
-
-                // run a for loop over channelstrips. This is boot, so assign channel 1-24 to channelstrips, then load their settings to the strip.
 
                 isInitializing = false;
 
@@ -267,8 +248,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                                                 {
                                                     initMixerBtn->setEnabled(true); // Re-enable the button
                                                 });
-            }
-        );
+            });
     }
 }
 
@@ -518,8 +498,6 @@ void MixerManager::faderMessageCallback(const MessageData &messageData)
         masterChannel.setMasterVolume(messageData.value, dspDescriptor);
 
         // Update UI
-
-
     }
 }
 
@@ -595,5 +573,3 @@ void MixerManager::handleUiMasterFaderMove(float newMasterFaderValue)
     std::string brainCommand = "18" + faderHexValue + "f";
     write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
 }
-
-

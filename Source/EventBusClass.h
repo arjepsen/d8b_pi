@@ -10,64 +10,37 @@
 
 #pragma once
 
-//#include <any>
+// #include <any>
+#include "BankEnum.h"
+#include <array>
 #include <functional>
 #include <string>
 #include <unordered_map>
-#include <array>
-
-
-enum EventType
-{
-	FADER_EVENT,
-	VPOT_EVENT,
-	BUTTON_EVENT
-};
 
 enum BankEventType
 {
-	LINE_EVENT,
-	TAPE_EVENT,
-	EFFECTS_EVENT,
-	MASTERS_EVENT
+    FADER_EVENT,
+    VPOT_EVENT,
+    BUTTON_EVENT,
+    EVENT_TYPE_COUNT // Smart way to set the element count in the array.
 };
 
-struct EventData
-{
-    //std::unordered_map<std::string, std::any> data;
-};
+// So - a channel strip event:
+// 1 - associated channel sends dsp command back to DSP.
+// 2 - channel sends fader move to all OTHER associated strips in current bank.
+// 3 - all associated UI channel strips gets updated.
 
-// void exampleMethod()
-// {
-//     //////// Example
-//     EventData eventData;
+// There seems to be a tight bond between associated channels, and ui strips...
+// But the channel objects shouldn't know about ui strips... the ui strips should subscribe to the events.
+// Maybe instead there should be a channelStrip class anyway?,
+// So the channel subscribes to strip events.
+// but ALSO a channelStrip subscribes to events?
 
-//     eventData.data["channel"] = (std::string) "00";
-//     eventData.data["channelChar"] = "00";
-//     eventData.data["faderValue"] = "C1";
-//     eventBus.post(FADER_MOVE, eventData);
-// }
-
-// ////// And the subscriber
-// eventBus.subscribe(FADER_MOVED, [](const EventData &data)
-// 	{
-// 		int channel = std::any_cast<int>(data.data.at("channel"));
-// 		float volume = std::any_cast<float>(data.data.at("volume"));
-// 		// Handle the event here...
-// 	}
-// );
+// BUT this kind of means that we now would have THREE classes to make sure gets updated on any subscribe.....
 
 class EventBus
 {
 private:
-    // Map of callbackfunctions for various events...I think...
-    // std::unordered_map<EventType, std::vector<std::function<void(const EventData &)>>> handlers;
-	// static constexpr int CHANNELS_COUNT = 48;
-	// static constexpr int BANKS_COUNT = 4;
-
-    // std::array<std::array<std::function<void(const EventData &)>, CHANNELS_COUNT>, BANKS_COUNT> handlers;
-    // Bank currentBank;
-
     EventBus();  // Constructor
     ~EventBus(); // Destructor
 
@@ -75,24 +48,37 @@ private:
     EventBus(const EventBus &) = delete;
     EventBus &operator=(const EventBus &) = delete;
 
+    // Structure to hold callbacks, the first is for the channelobject, the second is for removing a
+    // strip from the channel object's association map.
+    struct BankEventCallbacks
+    {
+        // First string is value, second string is channelstrip ID
+        std::function<void(const std::string &, Bank, const std::string &)> channelObjectCallback;
+        std::function<void(Bank, const std::string &)> removeChannelSubscriptionCallback;
+    };
 
-	std::array<std::unordered_map<std::string, std::function<void(const std::string&)>>, 3> lineBankCallbacks;
-	std::array<std::unordered_map<std::string, std::function<void(const std::string&)>>, 3> tapeBankCallbacks;
-	std::array<std::unordered_map<std::string, std::function<void(const std::string&)>>, 3> effectsBankCallbacks;
-	std::array<std::unordered_map<std::string, std::function<void(const std::string&)>>, 3> mastersBankCallbacks;
-
+    // Structure the callback functions in four arrays (for the banks) of three maps, corresponding to the three event types.
+    // Each map has the channelstrip ID as key.
+    std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> lineBankCallbacks;
+    std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> tapeBankCallbacks;
+    std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> effectsBankCallbacks;
+    std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> mastersBankCallbacks;
 
 public:
+    static EventBus &getInstance(); // Returns a reference to the instance.
 
-	static EventBus &getInstance(); // Returns a reference to the instance.
+    void bankEventSubscribe(Bank bank,
+                            BankEventType eventType,
+                            const std::string &channelStripID,
+                            std::function<void(const std::string &, Bank, const std::string &)> callback,
+                            std::function<void(Bank, const std::string &)> removeSubscriptionCallback);
 
-	void subscribe();	// CHECK NECESSARY PARAMETERS - something like EventType, ChannelID, Callback...??
+    void lineBankEventPost(BankEventType eventType, const std::string &channelStripID, const std::string &eventValue);
+    // void tapeBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
+    // void effectsBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
+    // void mastersBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
 
-	void lineBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
-	void tapeBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
-	void effectsBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
-	void mastersBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
-
+    void associateChStripEventPost(Bank bank, BankEventType eventType, std::string eventValue);
 };
 
 // Singleton modifications
