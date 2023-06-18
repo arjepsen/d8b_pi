@@ -10,12 +10,15 @@
 
 // #pragma once
 
-// #include "ChannelClass.h"
+// #include "EventBusClass.h"
 
 // class ChannelStrip
 // {
 // private:
-//     Channel *channelPtr;
+//     EventBus &eventBus;        // Reference to EventBus singleton.
+//     static int &brainDescriptor; // Reference to the Brain file descriptor.
+
+//     std::string channelID; // ID of the channel we're controling. (There may be some funkyness with non-audio channels...)
 
 // public:
 // };

@@ -16,6 +16,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 enum BankEventType
 {
@@ -64,6 +65,12 @@ private:
     std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> effectsBankCallbacks;
     std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> mastersBankCallbacks;
 
+    // Structure for "associative events", like when more than one channelstrip is configured to the same channel on the same bank.
+    std::array<
+        std::unordered_map<std::string, std::unordered_map<std::string, std::function<void(std::string &)>>>,
+        EVENT_TYPE_COUNT>
+        lineBankAssociativeStripCallbacks;
+
 public:
     static EventBus &getInstance(); // Returns a reference to the instance.
 
@@ -78,7 +85,10 @@ public:
     // void effectsBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
     // void mastersBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
 
-    void associateChStripEventPost(Bank bank, BankEventType eventType, std::string eventValue);
+    // this should receive a set of associate channels, an event type, and the value. DO WE NEED BANK?
+    // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
+    void associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+    void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
 };
 
 // Singleton modifications

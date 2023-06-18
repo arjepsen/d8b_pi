@@ -26,12 +26,14 @@ class Channel
 private:
     EventBus &eventBus;        // Reference to EventBus singleton.
     static int &dspDescriptor; // Reference to the DSP file descriptor.
+    static int &brainDescriptor; // Reference to the Brain file descriptor.
 
     const uint8_t channelNumber;
     const std::string channelID; // unique ID for each channel (1 - 48) ( actually up to 56)
     // std::string channelStripID; // NOT WORKING..... CHANNEL CAN BE SET UP TO MORE THAN ONE STRIP ON SAME BANK, AND WHAT ABOUT OTHER BANKS???
 
     std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
+
 
     std::string volume;
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
@@ -73,7 +75,7 @@ public:
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
     void removeSubscription(Bank bank, std::string channelStripIDtoRemove);
 
-    void channelStripFaderEvent(std::string &faderValue, Bank bank);
+    void channelStripFaderEvent(std::string &faderValue, Bank bank,std::string &channelStripID);
 };
 
 // // Should these be classes also??

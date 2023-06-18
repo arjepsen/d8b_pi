@@ -74,6 +74,7 @@ void EventBus::lineBankEventPost(BankEventType eventType, const std::string &cha
     try // Guard to protect from exceptions
     {
         lineBankCallbacks[eventType][channelStripID].channelObjectCallback(eventValue, LINE_BANK, channelStripID);
+
         //lineBankCallbacks[eventType][channelStripID].channelStripComponentCallback(eventValue);
     }
     catch (const std::exception &e)
@@ -88,3 +89,13 @@ void EventBus::lineBankEventPost(BankEventType eventType, const std::string &cha
 // void EventBus::tapeBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
 // void EventBus::effectsBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
 // void EventBus::mastersBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
+
+
+void associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
+{
+    // Iterate over the set, reference channelstripID to map of channelStripComponents, run the callback.
+    for (auto & stripID : channelStrips)
+    {
+        // refer to a map of callbacks.
+    }
+}
