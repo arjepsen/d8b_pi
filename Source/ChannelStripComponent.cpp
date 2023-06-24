@@ -23,7 +23,6 @@
 
 #include "ChannelStripComponent.h"
 
-
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 
 // Set first channel ID. This will increment with every channel object constructed.
@@ -32,7 +31,7 @@ int ChannelStripComponent::nextChannelStripComponentID = 0;
 //[/MiscUserDefs]
 
 //==============================================================================
-ChannelStripComponent::ChannelStripComponent ()
+ChannelStripComponent::ChannelStripComponent()
 {
     //[Constructor_pre] You can add your own custom stuff here..
     // ################################ MY CONSTRUCTOR STUFF##########################################
@@ -42,20 +41,19 @@ ChannelStripComponent::ChannelStripComponent ()
     stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
     channelStripComponentID = stream.str();
 
-    // Precompute the array of logarithms, so we avoid slow computations during runtime.
-            if (!precomputed_logs_filled) 
-            {
-            for (int i = 0; i <= 0xFF; ++i) 
-            {
-                precomputed_logs[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
-            }
-            precomputed_logs_filled = true;
+    // Precompute the array of logarithms, so we avoid slow log10 computations during runtime.
+    if (precomputedLog10Values[0] != -90.0)  // Check if array has already been computed. (then first element would be -90)
+    {
+        const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
+        for (int i = 0; i <= 0xFF; ++i)
+        {
+            precomputedLog10Values[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
         }
-RET TIL SÅ VI UNDGÅR AT SKULLE BRUGE EN EKSTRA BOOL
+    }
 
-
-    // Add the callbacks to the eventBus
-    eventBus.addChStripComponentCallback(channelStripComponentID, [this](const std::string &valueString){ this->faderMoveEvent(valueString); });
+        // Add the callbacks to the eventBus
+        eventBus.addChStripComponentCallback(channelStripComponentID, [this](const std::string &valueString)
+                                             { this->faderMoveEvent(valueString); });
 
     // Increment the static counter.
     nextChannelStripComponentID++;
@@ -63,520 +61,517 @@ RET TIL SÅ VI UNDGÅR AT SKULLE BRUGE EN EKSTRA BOOL
     // ################### END OF MY CONSTRUCTOR STUFF #####################################################
     //[/Constructor_pre]
 
-    setName ("ChannelStripComponent");
-    fader.reset (new juce::Slider ("Channel Fader"));
-    addAndMakeVisible (fader.get());
-    fader->setRange (-90, 10, 0.1);
-    fader->setSliderStyle (juce::Slider::LinearVertical);
-    fader->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 20);
-    fader->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x008e989b));
-    fader->addListener (this);
-    fader->setSkewFactor (3);
-
-    fader->setBounds (2, 788, 71, 230);
-
-    writeButton.reset (new juce::TextButton ("Write Button"));
-    addAndMakeVisible (writeButton.get());
-    writeButton->setButtonText (TRANS("WRITE"));
-    writeButton->addListener (this);
-    writeButton->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff595959));
-
-    writeButton->setBounds (2, 572, 71, 20);
-
-    channelPan.reset (new juce::Slider ("Channel Pan"));
-    addAndMakeVisible (channelPan.get());
-    channelPan->setRange (-127, 127, 1);
-    channelPan->setSliderStyle (juce::Slider::Rotary);
-    channelPan->setTextBoxStyle (juce::Slider::TextBoxBelow, true, 71, 20);
-    channelPan->setColour (juce::Slider::rotarySliderOutlineColourId, juce::Colour (0xff181f22));
-    channelPan->setColour (juce::Slider::textBoxBackgroundColourId, juce::Colour (0xff131919));
-    channelPan->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0xff242627));
-    channelPan->addListener (this);
-
-    channelPan->setBounds (2, 596, 71, 80);
-
-    selectBtn.reset (new juce::TextButton ("Select Button"));
-    addAndMakeVisible (selectBtn.get());
-    selectBtn->setButtonText (TRANS("SELECT"));
-    selectBtn->addListener (this);
-    selectBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2e8d9a));
-    selectBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xff69cee8));
-
-    selectBtn->setBounds (2, 684, 71, 20);
-
-    soloBtn.reset (new juce::TextButton ("Solo Button"));
-    addAndMakeVisible (soloBtn.get());
-    soloBtn->setButtonText (TRANS("SOLO"));
-    soloBtn->addListener (this);
-    soloBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xffb08620));
-    soloBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffe1ba59));
-
-    soloBtn->setBounds (2, 708, 71, 20);
-
-    muteBtn.reset (new juce::TextButton ("Mute Button"));
-    addAndMakeVisible (muteBtn.get());
-    muteBtn->setButtonText (TRANS("MUTE"));
-    muteBtn->addListener (this);
-    muteBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff025c02));
-    muteBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    muteBtn->setBounds (2, 732, 71, 20);
-
-    recordBtn.reset (new juce::TextButton ("Record Button"));
-    addAndMakeVisible (recordBtn.get());
-    recordBtn->setButtonText (TRANS("RECORD"));
-    recordBtn->addListener (this);
-    recordBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff7a2e2e));
-    recordBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    recordBtn->setBounds (2, 548, 71, 20);
-
-    channelSelector.reset (new juce::ComboBox ("Channel Selector"));
-    addAndMakeVisible (channelSelector.get());
-    channelSelector->setEditableText (false);
-    channelSelector->setJustificationType (juce::Justification::centred);
-    channelSelector->setTextWhenNothingSelected (TRANS("1"));
-    channelSelector->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    channelSelector->addListener (this);
-
-    channelSelector->setBounds (2, 524, 71, 20);
-
-    aux11_12Pan.reset (new juce::Slider ("Channel Aux 11/12 Pan"));
-    addAndMakeVisible (aux11_12Pan.get());
-    aux11_12Pan->setRange (-127, 127, 1);
-    aux11_12Pan->setSliderStyle (juce::Slider::LinearHorizontal);
-    aux11_12Pan->setTextBoxStyle (juce::Slider::NoTextBox, true, 80, 20);
-    aux11_12Pan->setColour (juce::Slider::backgroundColourId, juce::Colours::blue);
-    aux11_12Pan->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux11_12Pan->setColour (juce::Slider::trackColourId, juce::Colours::blue);
-    aux11_12Pan->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux11_12Pan->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux11_12Pan->addListener (this);
-
-    aux11_12Pan->setBounds (16, 500, 54, 8);
-
-    postEqInsert.reset (new juce::ComboBox ("Post EQ Insert Selector"));
-    addAndMakeVisible (postEqInsert.get());
-    postEqInsert->setEditableText (false);
-    postEqInsert->setJustificationType (juce::Justification::centred);
-    postEqInsert->setTextWhenNothingSelected (TRANS("POST"));
-    postEqInsert->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    postEqInsert->addItem (TRANS("Reset"), 1);
-    postEqInsert->addItem (TRANS("P01"), 2);
-    postEqInsert->addItem (TRANS("P02"), 3);
-    postEqInsert->addItem (TRANS("P03"), 4);
-    postEqInsert->addItem (TRANS("P04"), 5);
-    postEqInsert->addItem (TRANS("P05"), 6);
-    postEqInsert->addItem (TRANS("P06"), 7);
-    postEqInsert->addItem (TRANS("P07"), 8);
-    postEqInsert->addItem (TRANS("P08"), 9);
-    postEqInsert->addItem (TRANS("P09"), 10);
-    postEqInsert->addItem (TRANS("P10"), 11);
-    postEqInsert->addItem (TRANS("P11"), 12);
-    postEqInsert->addItem (TRANS("P12"), 13);
-    postEqInsert->addItem (TRANS("P13"), 14);
-    postEqInsert->addItem (TRANS("P14"), 15);
-    postEqInsert->addItem (TRANS("P15"), 16);
-    postEqInsert->addItem (TRANS("P16"), 17);
-    postEqInsert->addListener (this);
-
-    postEqInsert->setBounds (2, 316, 71, 20);
-
-    aux7Send.reset (new juce::Slider ("Channel Aux 7 Send"));
-    addAndMakeVisible (aux7Send.get());
-    aux7Send->setRange (-90, 10, 1);
-    aux7Send->setSliderStyle (juce::Slider::LinearBar);
-    aux7Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux7Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux7Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux7Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux7Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux7Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux7Send->addListener (this);
-
-    aux7Send->setBounds (16, 440, 54, 8);
-
-    aux11_12Send.reset (new juce::Slider ("Channel Aux 11/12 Send"));
-    addAndMakeVisible (aux11_12Send.get());
-    aux11_12Send->setRange (-90, 10, 1);
-    aux11_12Send->setSliderStyle (juce::Slider::LinearBar);
-    aux11_12Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux11_12Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux11_12Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux11_12Send->setColour (juce::Slider::trackColourId, juce::Colour (0xffffc900));
-    aux11_12Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux11_12Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux11_12Send->addListener (this);
-
-    aux11_12Send->setBounds (16, 488, 54, 8);
-
-    aux9_10Pan.reset (new juce::Slider ("Channel Aux 910 Pan"));
-    addAndMakeVisible (aux9_10Pan.get());
-    aux9_10Pan->setRange (-127, 127, 1);
-    aux9_10Pan->setSliderStyle (juce::Slider::LinearHorizontal);
-    aux9_10Pan->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux9_10Pan->setColour (juce::Slider::backgroundColourId, juce::Colours::blue);
-    aux9_10Pan->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux9_10Pan->setColour (juce::Slider::trackColourId, juce::Colours::blue);
-    aux9_10Pan->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux9_10Pan->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux9_10Pan->addListener (this);
-
-    aux9_10Pan->setBounds (16, 476, 54, 8);
-
-    aux9_10Send.reset (new juce::Slider ("Channel Aux 910 Send"));
-    addAndMakeVisible (aux9_10Send.get());
-    aux9_10Send->setRange (-90, 10, 1);
-    aux9_10Send->setSliderStyle (juce::Slider::LinearBar);
-    aux9_10Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux9_10Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux9_10Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux9_10Send->setColour (juce::Slider::trackColourId, juce::Colour (0xffffc900));
-    aux9_10Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux9_10Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux9_10Send->addListener (this);
-
-    aux9_10Send->setBounds (16, 464, 54, 8);
-
-    aux8Send.reset (new juce::Slider ("Channel Aux 8 Send"));
-    addAndMakeVisible (aux8Send.get());
-    aux8Send->setRange (-90, 10, 1);
-    aux8Send->setSliderStyle (juce::Slider::LinearBar);
-    aux8Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux8Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux8Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux8Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux8Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux8Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux8Send->addListener (this);
-
-    aux8Send->setBounds (16, 452, 54, 8);
-
-    aux6Send.reset (new juce::Slider ("Channel Aux 6 Send"));
-    addAndMakeVisible (aux6Send.get());
-    aux6Send->setRange (-90, 10, 1);
-    aux6Send->setSliderStyle (juce::Slider::LinearBar);
-    aux6Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux6Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux6Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux6Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux6Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux6Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux6Send->addListener (this);
-
-    aux6Send->setBounds (16, 428, 54, 8);
-
-    aux4Send.reset (new juce::Slider ("Channel Aux 4 Send"));
-    addAndMakeVisible (aux4Send.get());
-    aux4Send->setRange (-90, 10, 1);
-    aux4Send->setSliderStyle (juce::Slider::LinearBar);
-    aux4Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux4Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux4Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux4Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux4Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux4Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux4Send->addListener (this);
-
-    aux4Send->setBounds (16, 404, 54, 8);
-
-    aux5Send.reset (new juce::Slider ("Channel Aux 5 Send"));
-    addAndMakeVisible (aux5Send.get());
-    aux5Send->setRange (-90, 10, 1);
-    aux5Send->setSliderStyle (juce::Slider::LinearBar);
-    aux5Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux5Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux5Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux5Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux5Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux5Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux5Send->addListener (this);
-
-    aux5Send->setBounds (16, 416, 54, 8);
-
-    aux3Send.reset (new juce::Slider ("Channel Aux 3 Send"));
-    addAndMakeVisible (aux3Send.get());
-    aux3Send->setRange (-90, 10, 1);
-    aux3Send->setSliderStyle (juce::Slider::LinearBar);
-    aux3Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux3Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux3Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux3Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux3Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux3Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux3Send->addListener (this);
-
-    aux3Send->setBounds (16, 392, 54, 8);
-
-    aux2Send.reset (new juce::Slider ("Channel Aux 2 Send"));
-    addAndMakeVisible (aux2Send.get());
-    aux2Send->setRange (-90, 10, 1);
-    aux2Send->setSliderStyle (juce::Slider::LinearBar);
-    aux2Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux2Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux2Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux2Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux2Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux2Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux2Send->addListener (this);
-
-    aux2Send->setBounds (16, 380, 54, 8);
-
-    aux1Send.reset (new juce::Slider ("Channel Aux 1 Send"));
-    addAndMakeVisible (aux1Send.get());
-    aux1Send->setRange (-90, 10, 1);
-    aux1Send->setSliderStyle (juce::Slider::LinearBar);
-    aux1Send->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    aux1Send->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    aux1Send->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    aux1Send->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    aux1Send->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    aux1Send->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    aux1Send->addListener (this);
-
-    aux1Send->setBounds (16, 368, 54, 8);
-
-    postEqInsertLabel.reset (new juce::Label ("Post EQ Insert Label",
-                                              TRANS("P01")));
-    addAndMakeVisible (postEqInsertLabel.get());
-    postEqInsertLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-    postEqInsertLabel->setJustificationType (juce::Justification::centred);
-    postEqInsertLabel->setEditable (false, false, false);
-    postEqInsertLabel->setColour (juce::Label::backgroundColourId, juce::Colour (0xff140404));
-    postEqInsertLabel->setColour (juce::Label::outlineColourId, juce::Colour (0x044d4c4c));
-    postEqInsertLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    postEqInsertLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-
-    postEqInsertLabel->setBounds (2, 292, 71, 20);
-
-    chLabel.reset (new juce::Label ("Channel Label",
-                                    juce::String()));
-    addAndMakeVisible (chLabel.get());
-    chLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-    chLabel->setJustificationType (juce::Justification::centred);
-    chLabel->setEditable (true, true, false);
-    chLabel->setColour (juce::Label::outlineColourId, juce::Colours::black);
-    chLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    chLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-    chLabel->addListener (this);
-
-    chLabel->setBounds (2, 764, 71, 20);
-
-    eqThumbnail.reset (new juce::Component());
-    addAndMakeVisible (eqThumbnail.get());
-    eqThumbnail->setName ("place_holder_for_eq_show");
-
-    eqThumbnail->setBounds (2, 244, 71, 40);
-
-    phaseBtn.reset (new juce::TextButton ("Channel Phase Button"));
-    addAndMakeVisible (phaseBtn.get());
-    phaseBtn->setButtonText (juce::CharPointer_UTF8 ("\xc3\x98"));
-    phaseBtn->addListener (this);
-    phaseBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
-
-    phaseBtn->setBounds (6, 220, 30, 20);
-
-    eqBtn.reset (new juce::TextButton ("Channel EQ Button"));
-    addAndMakeVisible (eqBtn.get());
-    eqBtn->setButtonText (TRANS("EQ"));
-    eqBtn->addListener (this);
-    eqBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
-
-    eqBtn->setBounds (40, 220, 30, 20);
-
-    compressorBtn.reset (new juce::TextButton ("Channel Compressor Button"));
-    addAndMakeVisible (compressorBtn.get());
-    compressorBtn->setButtonText (TRANS("C"));
-    compressorBtn->addListener (this);
-    compressorBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
-
-    compressorBtn->setBounds (6, 196, 30, 20);
-
-    preEqInsertLabel.reset (new juce::Label ("Pre EQ Insert Label",
-                                             TRANS("P01")));
-    addAndMakeVisible (preEqInsertLabel.get());
-    preEqInsertLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-    preEqInsertLabel->setJustificationType (juce::Justification::centred);
-    preEqInsertLabel->setEditable (false, false, false);
-    preEqInsertLabel->setColour (juce::Label::backgroundColourId, juce::Colour (0xff140404));
-    preEqInsertLabel->setColour (juce::Label::outlineColourId, juce::Colour (0x044d4c4c));
-    preEqInsertLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    preEqInsertLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-
-    preEqInsertLabel->setBounds (2, 4, 71, 20);
-
-    preEqInsert.reset (new juce::ComboBox ("Pre EQ Insert Selector"));
-    addAndMakeVisible (preEqInsert.get());
-    preEqInsert->setEditableText (false);
-    preEqInsert->setJustificationType (juce::Justification::centred);
-    preEqInsert->setTextWhenNothingSelected (TRANS("PRE"));
-    preEqInsert->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    preEqInsert->addItem (TRANS("Reset"), 1);
-    preEqInsert->addItem (TRANS("P01"), 2);
-    preEqInsert->addItem (TRANS("P02"), 3);
-    preEqInsert->addItem (TRANS("P03"), 4);
-    preEqInsert->addItem (TRANS("P04"), 5);
-    preEqInsert->addItem (TRANS("P05"), 6);
-    preEqInsert->addItem (TRANS("P06"), 7);
-    preEqInsert->addItem (TRANS("P07"), 8);
-    preEqInsert->addItem (TRANS("P08"), 9);
-    preEqInsert->addItem (TRANS("P09"), 10);
-    preEqInsert->addItem (TRANS("P10"), 11);
-    preEqInsert->addItem (TRANS("P11"), 12);
-    preEqInsert->addItem (TRANS("P12"), 13);
-    preEqInsert->addItem (TRANS("P13"), 14);
-    preEqInsert->addItem (TRANS("P14"), 15);
-    preEqInsert->addItem (TRANS("P15"), 16);
-    preEqInsert->addItem (TRANS("P16"), 17);
-    preEqInsert->addListener (this);
-
-    preEqInsert->setBounds (2, 28, 71, 20);
-
-    gateBtn.reset (new juce::TextButton ("Channel Gate Button"));
-    addAndMakeVisible (gateBtn.get());
-    gateBtn->setButtonText (TRANS("G"));
-    gateBtn->addListener (this);
-    gateBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
-
-    gateBtn->setBounds (40, 196, 30, 20);
-
-    chAssignLRBtn.reset (new juce::TextButton ("L/R Assignment Button"));
-    addAndMakeVisible (chAssignLRBtn.get());
-    chAssignLRBtn->setButtonText (TRANS("L R"));
-    chAssignLRBtn->addListener (this);
-    chAssignLRBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    chAssignLRBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    chAssignLRBtn->setBounds (2, 124, 71, 14);
-
-    bus7AssignBtn.reset (new juce::TextButton ("Bus 7 Assign Button"));
-    addAndMakeVisible (bus7AssignBtn.get());
-    bus7AssignBtn->setButtonText (TRANS("7"));
-    bus7AssignBtn->addListener (this);
-    bus7AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus7AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus7AssignBtn->setBounds (2, 108, 34, 14);
-
-    bus8AssignBtn.reset (new juce::TextButton ("Bus 8 Assign Button"));
-    addAndMakeVisible (bus8AssignBtn.get());
-    bus8AssignBtn->setButtonText (TRANS("8"));
-    bus8AssignBtn->addListener (this);
-    bus8AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus8AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus8AssignBtn->setBounds (40, 108, 34, 14);
-
-    bus5AssignBtn.reset (new juce::TextButton ("Bus 5 Assign Button"));
-    addAndMakeVisible (bus5AssignBtn.get());
-    bus5AssignBtn->setButtonText (TRANS("5"));
-    bus5AssignBtn->addListener (this);
-    bus5AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus5AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus5AssignBtn->setBounds (2, 92, 34, 14);
-
-    bus6AssignBtn.reset (new juce::TextButton ("Bus 6 Assign Button"));
-    addAndMakeVisible (bus6AssignBtn.get());
-    bus6AssignBtn->setButtonText (TRANS("6"));
-    bus6AssignBtn->addListener (this);
-    bus6AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus6AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus6AssignBtn->setBounds (40, 92, 34, 14);
-
-    bus3AssignBtn.reset (new juce::TextButton ("Bus 3 Assign Button"));
-    addAndMakeVisible (bus3AssignBtn.get());
-    bus3AssignBtn->setButtonText (TRANS("3"));
-    bus3AssignBtn->addListener (this);
-    bus3AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus3AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus3AssignBtn->setBounds (2, 76, 34, 14);
-
-    bus4AssignBtn.reset (new juce::TextButton ("Bus 4 Assign Button"));
-    addAndMakeVisible (bus4AssignBtn.get());
-    bus4AssignBtn->setButtonText (TRANS("4"));
-    bus4AssignBtn->addListener (this);
-    bus4AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus4AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus4AssignBtn->setBounds (40, 76, 34, 14);
-
-    bus1AssignBtn.reset (new juce::TextButton ("Bus 1 Assign Button"));
-    addAndMakeVisible (bus1AssignBtn.get());
-    bus1AssignBtn->setButtonText (TRANS("1"));
-    bus1AssignBtn->addListener (this);
-    bus1AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus1AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus1AssignBtn->setBounds (2, 60, 34, 14);
-
-    bus2AssignBtn.reset (new juce::TextButton ("Bus 2 Assign Button"));
-    addAndMakeVisible (bus2AssignBtn.get());
-    bus2AssignBtn->setButtonText (TRANS("2"));
-    bus2AssignBtn->addListener (this);
-    bus2AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
-    bus2AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
-
-    bus2AssignBtn->setBounds (40, 60, 34, 14);
-
-    chDigitalTrim.reset (new juce::Slider ("Channel Digital Trim"));
-    addAndMakeVisible (chDigitalTrim.get());
-    chDigitalTrim->setRange (-90, 10, 1);
-    chDigitalTrim->setSliderStyle (juce::Slider::LinearBar);
-    chDigitalTrim->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    chDigitalTrim->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    chDigitalTrim->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    chDigitalTrim->setColour (juce::Slider::trackColourId, juce::Colours::blue);
-    chDigitalTrim->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    chDigitalTrim->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    chDigitalTrim->addListener (this);
-
-    chDigitalTrim->setBounds (16, 180, 52, 8);
-
-    juce__comboBox4.reset (new juce::ComboBox ("Direct Out Assignment"));
-    addAndMakeVisible (juce__comboBox4.get());
-    juce__comboBox4->setEditableText (false);
-    juce__comboBox4->setJustificationType (juce::Justification::centred);
-    juce__comboBox4->setTextWhenNothingSelected (TRANS("-"));
-    juce__comboBox4->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    juce__comboBox4->addItem (TRANS(" - "), 1);
-    juce__comboBox4->addItem (TRANS("tape out 1 - (ch. 25)"), 2);
-    juce__comboBox4->addItem (TRANS("tape out 2 - (ch. 26)"), 3);
-    juce__comboBox4->addItem (TRANS("tape out 3 - (ch. 27)"), 4);
+    setName("ChannelStripComponent");
+    fader.reset(new juce::Slider("Channel Fader"));
+    addAndMakeVisible(fader.get());
+    fader->setRange(-90, 10, 0.1);
+    fader->setSliderStyle(juce::Slider::LinearVertical);
+    fader->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    fader->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x008e989b));
+    fader->addListener(this);
+    fader->setSkewFactor(3);
+
+    fader->setBounds(2, 788, 71, 230);
+
+    writeButton.reset(new juce::TextButton("Write Button"));
+    addAndMakeVisible(writeButton.get());
+    writeButton->setButtonText(TRANS("WRITE"));
+    writeButton->addListener(this);
+    writeButton->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff595959));
+
+    writeButton->setBounds(2, 572, 71, 20);
+
+    channelPan.reset(new juce::Slider("Channel Pan"));
+    addAndMakeVisible(channelPan.get());
+    channelPan->setRange(-127, 127, 1);
+    channelPan->setSliderStyle(juce::Slider::Rotary);
+    channelPan->setTextBoxStyle(juce::Slider::TextBoxBelow, true, 71, 20);
+    channelPan->setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff181f22));
+    channelPan->setColour(juce::Slider::textBoxBackgroundColourId, juce::Colour(0xff131919));
+    channelPan->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0xff242627));
+    channelPan->addListener(this);
+
+    channelPan->setBounds(2, 596, 71, 80);
+
+    selectBtn.reset(new juce::TextButton("Select Button"));
+    addAndMakeVisible(selectBtn.get());
+    selectBtn->setButtonText(TRANS("SELECT"));
+    selectBtn->addListener(this);
+    selectBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2e8d9a));
+    selectBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff69cee8));
+
+    selectBtn->setBounds(2, 684, 71, 20);
+
+    soloBtn.reset(new juce::TextButton("Solo Button"));
+    addAndMakeVisible(soloBtn.get());
+    soloBtn->setButtonText(TRANS("SOLO"));
+    soloBtn->addListener(this);
+    soloBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xffb08620));
+    soloBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xffe1ba59));
+
+    soloBtn->setBounds(2, 708, 71, 20);
+
+    muteBtn.reset(new juce::TextButton("Mute Button"));
+    addAndMakeVisible(muteBtn.get());
+    muteBtn->setButtonText(TRANS("MUTE"));
+    muteBtn->addListener(this);
+    muteBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff025c02));
+    muteBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    muteBtn->setBounds(2, 732, 71, 20);
+
+    recordBtn.reset(new juce::TextButton("Record Button"));
+    addAndMakeVisible(recordBtn.get());
+    recordBtn->setButtonText(TRANS("RECORD"));
+    recordBtn->addListener(this);
+    recordBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff7a2e2e));
+    recordBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    recordBtn->setBounds(2, 548, 71, 20);
+
+    channelSelector.reset(new juce::ComboBox("Channel Selector"));
+    addAndMakeVisible(channelSelector.get());
+    channelSelector->setEditableText(false);
+    channelSelector->setJustificationType(juce::Justification::centred);
+    channelSelector->setTextWhenNothingSelected(TRANS("1"));
+    channelSelector->setTextWhenNoChoicesAvailable(TRANS("(no choices)"));
+    channelSelector->addListener(this);
+
+    channelSelector->setBounds(2, 524, 71, 20);
+
+    aux11_12Pan.reset(new juce::Slider("Channel Aux 11/12 Pan"));
+    addAndMakeVisible(aux11_12Pan.get());
+    aux11_12Pan->setRange(-127, 127, 1);
+    aux11_12Pan->setSliderStyle(juce::Slider::LinearHorizontal);
+    aux11_12Pan->setTextBoxStyle(juce::Slider::NoTextBox, true, 80, 20);
+    aux11_12Pan->setColour(juce::Slider::backgroundColourId, juce::Colours::blue);
+    aux11_12Pan->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux11_12Pan->setColour(juce::Slider::trackColourId, juce::Colours::blue);
+    aux11_12Pan->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux11_12Pan->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux11_12Pan->addListener(this);
+
+    aux11_12Pan->setBounds(16, 500, 54, 8);
+
+    postEqInsert.reset(new juce::ComboBox("Post EQ Insert Selector"));
+    addAndMakeVisible(postEqInsert.get());
+    postEqInsert->setEditableText(false);
+    postEqInsert->setJustificationType(juce::Justification::centred);
+    postEqInsert->setTextWhenNothingSelected(TRANS("POST"));
+    postEqInsert->setTextWhenNoChoicesAvailable(TRANS("(no choices)"));
+    postEqInsert->addItem(TRANS("Reset"), 1);
+    postEqInsert->addItem(TRANS("P01"), 2);
+    postEqInsert->addItem(TRANS("P02"), 3);
+    postEqInsert->addItem(TRANS("P03"), 4);
+    postEqInsert->addItem(TRANS("P04"), 5);
+    postEqInsert->addItem(TRANS("P05"), 6);
+    postEqInsert->addItem(TRANS("P06"), 7);
+    postEqInsert->addItem(TRANS("P07"), 8);
+    postEqInsert->addItem(TRANS("P08"), 9);
+    postEqInsert->addItem(TRANS("P09"), 10);
+    postEqInsert->addItem(TRANS("P10"), 11);
+    postEqInsert->addItem(TRANS("P11"), 12);
+    postEqInsert->addItem(TRANS("P12"), 13);
+    postEqInsert->addItem(TRANS("P13"), 14);
+    postEqInsert->addItem(TRANS("P14"), 15);
+    postEqInsert->addItem(TRANS("P15"), 16);
+    postEqInsert->addItem(TRANS("P16"), 17);
+    postEqInsert->addListener(this);
+
+    postEqInsert->setBounds(2, 316, 71, 20);
+
+    aux7Send.reset(new juce::Slider("Channel Aux 7 Send"));
+    addAndMakeVisible(aux7Send.get());
+    aux7Send->setRange(-90, 10, 1);
+    aux7Send->setSliderStyle(juce::Slider::LinearBar);
+    aux7Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux7Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux7Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux7Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux7Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux7Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux7Send->addListener(this);
+
+    aux7Send->setBounds(16, 440, 54, 8);
+
+    aux11_12Send.reset(new juce::Slider("Channel Aux 11/12 Send"));
+    addAndMakeVisible(aux11_12Send.get());
+    aux11_12Send->setRange(-90, 10, 1);
+    aux11_12Send->setSliderStyle(juce::Slider::LinearBar);
+    aux11_12Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux11_12Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux11_12Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux11_12Send->setColour(juce::Slider::trackColourId, juce::Colour(0xffffc900));
+    aux11_12Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux11_12Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux11_12Send->addListener(this);
+
+    aux11_12Send->setBounds(16, 488, 54, 8);
+
+    aux9_10Pan.reset(new juce::Slider("Channel Aux 910 Pan"));
+    addAndMakeVisible(aux9_10Pan.get());
+    aux9_10Pan->setRange(-127, 127, 1);
+    aux9_10Pan->setSliderStyle(juce::Slider::LinearHorizontal);
+    aux9_10Pan->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux9_10Pan->setColour(juce::Slider::backgroundColourId, juce::Colours::blue);
+    aux9_10Pan->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux9_10Pan->setColour(juce::Slider::trackColourId, juce::Colours::blue);
+    aux9_10Pan->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux9_10Pan->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux9_10Pan->addListener(this);
+
+    aux9_10Pan->setBounds(16, 476, 54, 8);
+
+    aux9_10Send.reset(new juce::Slider("Channel Aux 910 Send"));
+    addAndMakeVisible(aux9_10Send.get());
+    aux9_10Send->setRange(-90, 10, 1);
+    aux9_10Send->setSliderStyle(juce::Slider::LinearBar);
+    aux9_10Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux9_10Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux9_10Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux9_10Send->setColour(juce::Slider::trackColourId, juce::Colour(0xffffc900));
+    aux9_10Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux9_10Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux9_10Send->addListener(this);
+
+    aux9_10Send->setBounds(16, 464, 54, 8);
+
+    aux8Send.reset(new juce::Slider("Channel Aux 8 Send"));
+    addAndMakeVisible(aux8Send.get());
+    aux8Send->setRange(-90, 10, 1);
+    aux8Send->setSliderStyle(juce::Slider::LinearBar);
+    aux8Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux8Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux8Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux8Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux8Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux8Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux8Send->addListener(this);
+
+    aux8Send->setBounds(16, 452, 54, 8);
+
+    aux6Send.reset(new juce::Slider("Channel Aux 6 Send"));
+    addAndMakeVisible(aux6Send.get());
+    aux6Send->setRange(-90, 10, 1);
+    aux6Send->setSliderStyle(juce::Slider::LinearBar);
+    aux6Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux6Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux6Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux6Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux6Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux6Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux6Send->addListener(this);
+
+    aux6Send->setBounds(16, 428, 54, 8);
+
+    aux4Send.reset(new juce::Slider("Channel Aux 4 Send"));
+    addAndMakeVisible(aux4Send.get());
+    aux4Send->setRange(-90, 10, 1);
+    aux4Send->setSliderStyle(juce::Slider::LinearBar);
+    aux4Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux4Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux4Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux4Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux4Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux4Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux4Send->addListener(this);
+
+    aux4Send->setBounds(16, 404, 54, 8);
+
+    aux5Send.reset(new juce::Slider("Channel Aux 5 Send"));
+    addAndMakeVisible(aux5Send.get());
+    aux5Send->setRange(-90, 10, 1);
+    aux5Send->setSliderStyle(juce::Slider::LinearBar);
+    aux5Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux5Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux5Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux5Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux5Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux5Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux5Send->addListener(this);
+
+    aux5Send->setBounds(16, 416, 54, 8);
+
+    aux3Send.reset(new juce::Slider("Channel Aux 3 Send"));
+    addAndMakeVisible(aux3Send.get());
+    aux3Send->setRange(-90, 10, 1);
+    aux3Send->setSliderStyle(juce::Slider::LinearBar);
+    aux3Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux3Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux3Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux3Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux3Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux3Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux3Send->addListener(this);
+
+    aux3Send->setBounds(16, 392, 54, 8);
+
+    aux2Send.reset(new juce::Slider("Channel Aux 2 Send"));
+    addAndMakeVisible(aux2Send.get());
+    aux2Send->setRange(-90, 10, 1);
+    aux2Send->setSliderStyle(juce::Slider::LinearBar);
+    aux2Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux2Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux2Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux2Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux2Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux2Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux2Send->addListener(this);
+
+    aux2Send->setBounds(16, 380, 54, 8);
+
+    aux1Send.reset(new juce::Slider("Channel Aux 1 Send"));
+    addAndMakeVisible(aux1Send.get());
+    aux1Send->setRange(-90, 10, 1);
+    aux1Send->setSliderStyle(juce::Slider::LinearBar);
+    aux1Send->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    aux1Send->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    aux1Send->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    aux1Send->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    aux1Send->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    aux1Send->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    aux1Send->addListener(this);
+
+    aux1Send->setBounds(16, 368, 54, 8);
+
+    postEqInsertLabel.reset(new juce::Label("Post EQ Insert Label",
+                                            TRANS("P01")));
+    addAndMakeVisible(postEqInsertLabel.get());
+    postEqInsertLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    postEqInsertLabel->setJustificationType(juce::Justification::centred);
+    postEqInsertLabel->setEditable(false, false, false);
+    postEqInsertLabel->setColour(juce::Label::backgroundColourId, juce::Colour(0xff140404));
+    postEqInsertLabel->setColour(juce::Label::outlineColourId, juce::Colour(0x044d4c4c));
+    postEqInsertLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
+    postEqInsertLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
+
+    postEqInsertLabel->setBounds(2, 292, 71, 20);
+
+    chLabel.reset(new juce::Label("Channel Label",
+                                  juce::String()));
+    addAndMakeVisible(chLabel.get());
+    chLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    chLabel->setJustificationType(juce::Justification::centred);
+    chLabel->setEditable(true, true, false);
+    chLabel->setColour(juce::Label::outlineColourId, juce::Colours::black);
+    chLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
+    chLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
+    chLabel->addListener(this);
+
+    chLabel->setBounds(2, 764, 71, 20);
+
+    eqThumbnail.reset(new juce::Component());
+    addAndMakeVisible(eqThumbnail.get());
+    eqThumbnail->setName("place_holder_for_eq_show");
+
+    eqThumbnail->setBounds(2, 244, 71, 40);
+
+    phaseBtn.reset(new juce::TextButton("Channel Phase Button"));
+    addAndMakeVisible(phaseBtn.get());
+    phaseBtn->setButtonText(juce::CharPointer_UTF8("\xc3\x98"));
+    phaseBtn->addListener(this);
+    phaseBtn->setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+
+    phaseBtn->setBounds(6, 220, 30, 20);
+
+    eqBtn.reset(new juce::TextButton("Channel EQ Button"));
+    addAndMakeVisible(eqBtn.get());
+    eqBtn->setButtonText(TRANS("EQ"));
+    eqBtn->addListener(this);
+    eqBtn->setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+
+    eqBtn->setBounds(40, 220, 30, 20);
+
+    compressorBtn.reset(new juce::TextButton("Channel Compressor Button"));
+    addAndMakeVisible(compressorBtn.get());
+    compressorBtn->setButtonText(TRANS("C"));
+    compressorBtn->addListener(this);
+    compressorBtn->setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+
+    compressorBtn->setBounds(6, 196, 30, 20);
+
+    preEqInsertLabel.reset(new juce::Label("Pre EQ Insert Label",
+                                           TRANS("P01")));
+    addAndMakeVisible(preEqInsertLabel.get());
+    preEqInsertLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    preEqInsertLabel->setJustificationType(juce::Justification::centred);
+    preEqInsertLabel->setEditable(false, false, false);
+    preEqInsertLabel->setColour(juce::Label::backgroundColourId, juce::Colour(0xff140404));
+    preEqInsertLabel->setColour(juce::Label::outlineColourId, juce::Colour(0x044d4c4c));
+    preEqInsertLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
+    preEqInsertLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
+
+    preEqInsertLabel->setBounds(2, 4, 71, 20);
+
+    preEqInsert.reset(new juce::ComboBox("Pre EQ Insert Selector"));
+    addAndMakeVisible(preEqInsert.get());
+    preEqInsert->setEditableText(false);
+    preEqInsert->setJustificationType(juce::Justification::centred);
+    preEqInsert->setTextWhenNothingSelected(TRANS("PRE"));
+    preEqInsert->setTextWhenNoChoicesAvailable(TRANS("(no choices)"));
+    preEqInsert->addItem(TRANS("Reset"), 1);
+    preEqInsert->addItem(TRANS("P01"), 2);
+    preEqInsert->addItem(TRANS("P02"), 3);
+    preEqInsert->addItem(TRANS("P03"), 4);
+    preEqInsert->addItem(TRANS("P04"), 5);
+    preEqInsert->addItem(TRANS("P05"), 6);
+    preEqInsert->addItem(TRANS("P06"), 7);
+    preEqInsert->addItem(TRANS("P07"), 8);
+    preEqInsert->addItem(TRANS("P08"), 9);
+    preEqInsert->addItem(TRANS("P09"), 10);
+    preEqInsert->addItem(TRANS("P10"), 11);
+    preEqInsert->addItem(TRANS("P11"), 12);
+    preEqInsert->addItem(TRANS("P12"), 13);
+    preEqInsert->addItem(TRANS("P13"), 14);
+    preEqInsert->addItem(TRANS("P14"), 15);
+    preEqInsert->addItem(TRANS("P15"), 16);
+    preEqInsert->addItem(TRANS("P16"), 17);
+    preEqInsert->addListener(this);
+
+    preEqInsert->setBounds(2, 28, 71, 20);
+
+    gateBtn.reset(new juce::TextButton("Channel Gate Button"));
+    addAndMakeVisible(gateBtn.get());
+    gateBtn->setButtonText(TRANS("G"));
+    gateBtn->addListener(this);
+    gateBtn->setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+
+    gateBtn->setBounds(40, 196, 30, 20);
+
+    chAssignLRBtn.reset(new juce::TextButton("L/R Assignment Button"));
+    addAndMakeVisible(chAssignLRBtn.get());
+    chAssignLRBtn->setButtonText(TRANS("L R"));
+    chAssignLRBtn->addListener(this);
+    chAssignLRBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    chAssignLRBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    chAssignLRBtn->setBounds(2, 124, 71, 14);
+
+    bus7AssignBtn.reset(new juce::TextButton("Bus 7 Assign Button"));
+    addAndMakeVisible(bus7AssignBtn.get());
+    bus7AssignBtn->setButtonText(TRANS("7"));
+    bus7AssignBtn->addListener(this);
+    bus7AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus7AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus7AssignBtn->setBounds(2, 108, 34, 14);
+
+    bus8AssignBtn.reset(new juce::TextButton("Bus 8 Assign Button"));
+    addAndMakeVisible(bus8AssignBtn.get());
+    bus8AssignBtn->setButtonText(TRANS("8"));
+    bus8AssignBtn->addListener(this);
+    bus8AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus8AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus8AssignBtn->setBounds(40, 108, 34, 14);
+
+    bus5AssignBtn.reset(new juce::TextButton("Bus 5 Assign Button"));
+    addAndMakeVisible(bus5AssignBtn.get());
+    bus5AssignBtn->setButtonText(TRANS("5"));
+    bus5AssignBtn->addListener(this);
+    bus5AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus5AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus5AssignBtn->setBounds(2, 92, 34, 14);
+
+    bus6AssignBtn.reset(new juce::TextButton("Bus 6 Assign Button"));
+    addAndMakeVisible(bus6AssignBtn.get());
+    bus6AssignBtn->setButtonText(TRANS("6"));
+    bus6AssignBtn->addListener(this);
+    bus6AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus6AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus6AssignBtn->setBounds(40, 92, 34, 14);
+
+    bus3AssignBtn.reset(new juce::TextButton("Bus 3 Assign Button"));
+    addAndMakeVisible(bus3AssignBtn.get());
+    bus3AssignBtn->setButtonText(TRANS("3"));
+    bus3AssignBtn->addListener(this);
+    bus3AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus3AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus3AssignBtn->setBounds(2, 76, 34, 14);
+
+    bus4AssignBtn.reset(new juce::TextButton("Bus 4 Assign Button"));
+    addAndMakeVisible(bus4AssignBtn.get());
+    bus4AssignBtn->setButtonText(TRANS("4"));
+    bus4AssignBtn->addListener(this);
+    bus4AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus4AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus4AssignBtn->setBounds(40, 76, 34, 14);
+
+    bus1AssignBtn.reset(new juce::TextButton("Bus 1 Assign Button"));
+    addAndMakeVisible(bus1AssignBtn.get());
+    bus1AssignBtn->setButtonText(TRANS("1"));
+    bus1AssignBtn->addListener(this);
+    bus1AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus1AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus1AssignBtn->setBounds(2, 60, 34, 14);
+
+    bus2AssignBtn.reset(new juce::TextButton("Bus 2 Assign Button"));
+    addAndMakeVisible(bus2AssignBtn.get());
+    bus2AssignBtn->setButtonText(TRANS("2"));
+    bus2AssignBtn->addListener(this);
+    bus2AssignBtn->setColour(juce::TextButton::buttonColourId, juce::Colour(0xff2a8061));
+    bus2AssignBtn->setColour(juce::TextButton::buttonOnColourId, juce::Colours::red);
+
+    bus2AssignBtn->setBounds(40, 60, 34, 14);
+
+    chDigitalTrim.reset(new juce::Slider("Channel Digital Trim"));
+    addAndMakeVisible(chDigitalTrim.get());
+    chDigitalTrim->setRange(-90, 10, 1);
+    chDigitalTrim->setSliderStyle(juce::Slider::LinearBar);
+    chDigitalTrim->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    chDigitalTrim->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    chDigitalTrim->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    chDigitalTrim->setColour(juce::Slider::trackColourId, juce::Colours::blue);
+    chDigitalTrim->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    chDigitalTrim->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    chDigitalTrim->addListener(this);
+
+    chDigitalTrim->setBounds(16, 180, 52, 8);
+
+    juce__comboBox4.reset(new juce::ComboBox("Direct Out Assignment"));
+    addAndMakeVisible(juce__comboBox4.get());
+    juce__comboBox4->setEditableText(false);
+    juce__comboBox4->setJustificationType(juce::Justification::centred);
+    juce__comboBox4->setTextWhenNothingSelected(TRANS("-"));
+    juce__comboBox4->setTextWhenNoChoicesAvailable(TRANS("(no choices)"));
+    juce__comboBox4->addItem(TRANS(" - "), 1);
+    juce__comboBox4->addItem(TRANS("tape out 1 - (ch. 25)"), 2);
+    juce__comboBox4->addItem(TRANS("tape out 2 - (ch. 26)"), 3);
+    juce__comboBox4->addItem(TRANS("tape out 3 - (ch. 27)"), 4);
     juce__comboBox4->addSeparator();
-    juce__comboBox4->addListener (this);
+    juce__comboBox4->addListener(this);
 
-    juce__comboBox4->setBounds (8, 148, 60, 14);
+    juce__comboBox4->setBounds(8, 148, 60, 14);
 
-    chLevelToTape.reset (new juce::Slider ("Channel Level To Tape"));
-    addAndMakeVisible (chLevelToTape.get());
-    chLevelToTape->setRange (-90, 10, 1);
-    chLevelToTape->setSliderStyle (juce::Slider::LinearBar);
-    chLevelToTape->setTextBoxStyle (juce::Slider::NoTextBox, false, 80, 20);
-    chLevelToTape->setColour (juce::Slider::backgroundColourId, juce::Colour (0x00263238));
-    chLevelToTape->setColour (juce::Slider::thumbColourId, juce::Colour (0xff79d5fa));
-    chLevelToTape->setColour (juce::Slider::trackColourId, juce::Colours::red);
-    chLevelToTape->setColour (juce::Slider::rotarySliderFillColourId, juce::Colours::red);
-    chLevelToTape->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0x4d8e989b));
-    chLevelToTape->addListener (this);
+    chLevelToTape.reset(new juce::Slider("Channel Level To Tape"));
+    addAndMakeVisible(chLevelToTape.get());
+    chLevelToTape->setRange(-90, 10, 1);
+    chLevelToTape->setSliderStyle(juce::Slider::LinearBar);
+    chLevelToTape->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+    chLevelToTape->setColour(juce::Slider::backgroundColourId, juce::Colour(0x00263238));
+    chLevelToTape->setColour(juce::Slider::thumbColourId, juce::Colour(0xff79d5fa));
+    chLevelToTape->setColour(juce::Slider::trackColourId, juce::Colours::red);
+    chLevelToTape->setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::red);
+    chLevelToTape->setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x4d8e989b));
+    chLevelToTape->addListener(this);
 
-    chLevelToTape->setBounds (16, 166, 52, 8);
-
+    chLevelToTape->setBounds(16, 166, 52, 8);
 
     //[UserPreSize]
 
     //[/UserPreSize]
 
-    setSize (75, 1024);
-
+    setSize(75, 1024);
 
     //[Constructor] You can add your own custom stuff here..
 
     // Set initial channel strip label (nextID incremented, so fits now.)
     chLabel->setText("Ch. " + (juce::String)nextChannelStripComponentID, juce::dontSendNotification);
-
 
     //[/Constructor]
 }
@@ -630,330 +625,327 @@ ChannelStripComponent::~ChannelStripComponent()
     juce__comboBox4 = nullptr;
     chLevelToTape = nullptr;
 
-
     //[Destructor]. You can add your own custom destruction code here..
 
     //[/Destructor]
 }
 
 //==============================================================================
-void ChannelStripComponent::paint (juce::Graphics& g)
+void ChannelStripComponent::paint(juce::Graphics &g)
 {
     //[UserPrePaint] Add your own custom painting code here..
 
     //[/UserPrePaint]
 
-    g.fillAll (juce::Colour (0xff242d31));
+    g.fillAll(juce::Colour(0xff242d31));
 
     {
         int x = 0, y = 0, width = 75, height = 1024;
-        juce::Colour fillColour = juce::Colour (0xff294e55);
-        juce::Colour strokeColour = juce::Colour (0xff1c0b07);
+        juce::Colour fillColour = juce::Colour(0xff294e55);
+        juce::Colour strokeColour = juce::Colour(0xff1c0b07);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.fillRect (x, y, width, height);
-        g.setColour (strokeColour);
-        g.drawRect (x, y, width, height, 1);
-
+        g.setColour(fillColour);
+        g.fillRect(x, y, width, height);
+        g.setColour(strokeColour);
+        g.drawRect(x, y, width, height, 1);
     }
 
     {
         int x = 12, y = 364, width = 60, height = 152;
-        juce::Colour fillColour = juce::Colour (0xff162a2e);
+        juce::Colour fillColour = juce::Colour(0xff162a2e);
         juce::Colour strokeColour = juce::Colours::grey;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.fillRect (x, y, width, height);
-        g.setColour (strokeColour);
-        g.drawRect (x, y, width, height, 2);
-
+        g.setColour(fillColour);
+        g.fillRect(x, y, width, height);
+        g.setColour(strokeColour);
+        g.drawRect(x, y, width, height, 2);
     }
 
     {
         int x = 0, y = 500, width = 11, height = 8;
-        juce::String text (TRANS("P"));
+        juce::String text(TRANS("P"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 476, width = 12, height = 8;
-        juce::String text (TRANS("P"));
+        juce::String text(TRANS("P"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 488, width = 11, height = 8;
-        juce::String text (TRANS("11"));
+        juce::String text(TRANS("11"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 464, width = 11, height = 8;
-        juce::String text (TRANS("9"));
+        juce::String text(TRANS("9"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 452, width = 11, height = 8;
-        juce::String text (TRANS("8"));
+        juce::String text(TRANS("8"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 440, width = 11, height = 8;
-        juce::String text (TRANS("7"));
+        juce::String text(TRANS("7"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 428, width = 11, height = 8;
-        juce::String text (TRANS("6"));
+        juce::String text(TRANS("6"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 416, width = 11, height = 8;
-        juce::String text (TRANS("5"));
+        juce::String text(TRANS("5"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 404, width = 11, height = 8;
-        juce::String text (TRANS("4"));
+        juce::String text(TRANS("4"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 392, width = 11, height = 8;
-        juce::String text (TRANS("3"));
+        juce::String text(TRANS("3"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 380, width = 11, height = 8;
-        juce::String text (TRANS("2"));
+        juce::String text(TRANS("2"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 0, y = 368, width = 11, height = 8;
-        juce::String text (TRANS("1"));
+        juce::String text(TRANS("1"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 2, y = 344, width = 71, height = 20;
-        juce::String text (TRANS("AUXES"));
+        juce::String text(TRANS("AUXES"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 4, y = 144, width = 68, height = 48;
-        juce::Colour fillColour = juce::Colour (0xff030303);
+        juce::Colour fillColour = juce::Colour(0xff030303);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.fillRect (x, y, width, height);
+        g.setColour(fillColour);
+        g.fillRect(x, y, width, height);
     }
 
     {
         int x = 4, y = 180, width = 11, height = 8;
-        juce::String text (TRANS("D"));
+        juce::String text(TRANS("D"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 4, y = 166, width = 11, height = 8;
-        juce::String text (TRANS("T"));
+        juce::String text(TRANS("T"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 7, y = 846, width = 14, height = 8;
-        juce::String text (TRANS("U -"));
+        juce::String text(TRANS("U -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 893, width = 20, height = 8;
-        juce::String text (TRANS("10 -"));
+        juce::String text(TRANS("10 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 934, width = 20, height = 8;
-        juce::String text (TRANS("30 -"));
+        juce::String text(TRANS("30 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 956, width = 20, height = 8;
-        juce::String text (TRANS("40 -"));
+        juce::String text(TRANS("40 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 870, width = 20, height = 8;
-        juce::String text (TRANS("5 -"));
+        juce::String text(TRANS("5 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 827, width = 20, height = 8;
-        juce::String text (TRANS("5 -"));
+        juce::String text(TRANS("5 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 803, width = 20, height = 8;
-        juce::String text (TRANS("10 -"));
+        juce::String text(TRANS("10 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     {
         int x = 5, y = 914, width = 20, height = 8;
-        juce::String text (TRANS("20 -"));
+        juce::String text(TRANS("20 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
-        g.setColour (fillColour);
-        g.setFont (juce::Font (11.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
-        g.drawText (text, x, y, width, height,
-                    juce::Justification::centred, true);
+        g.setColour(fillColour);
+        g.setFont(juce::Font(11.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        g.drawText(text, x, y, width, height,
+                   juce::Justification::centred, true);
     }
 
     //[UserPaint] Add your own custom painting code here..
@@ -972,7 +964,7 @@ void ChannelStripComponent::resized()
     //[/UserResized]
 }
 
-void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved)
+void ChannelStripComponent::sliderValueChanged(juce::Slider *sliderThatWasMoved)
 {
     //[UsersliderValueChanged_Pre]
 
@@ -1086,7 +1078,7 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     //[/UsersliderValueChanged_Post]
 }
 
-void ChannelStripComponent::buttonClicked (juce::Button* buttonThatWasClicked)
+void ChannelStripComponent::buttonClicked(juce::Button *buttonThatWasClicked)
 {
     //[UserbuttonClicked_Pre]
 
@@ -1206,7 +1198,7 @@ void ChannelStripComponent::buttonClicked (juce::Button* buttonThatWasClicked)
     //[/UserbuttonClicked_Post]
 }
 
-void ChannelStripComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
+void ChannelStripComponent::comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged)
 {
     //[UsercomboBoxChanged_Pre]
 
@@ -1242,7 +1234,7 @@ void ChannelStripComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChan
     //[/UsercomboBoxChanged_Post]
 }
 
-void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
+void ChannelStripComponent::labelTextChanged(juce::Label *labelThatHasChanged)
 {
     //[UserlabelTextChanged_Pre]
 
@@ -1260,8 +1252,6 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
     //[/UserlabelTextChanged_Post]
 }
 
-
-
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
 // #################################################################################################
@@ -1271,7 +1261,8 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
 void ChannelStripComponent::setFaderPosition(double value)
 {
     // TODO: do we still need dontsendnotifacation with the current implementation?
-    juce::MessageManager::callAsync([this, value]() { fader.get()->setValue(value, juce::dontSendNotification); });
+    juce::MessageManager::callAsync([this, value]()
+                                    { fader.get()->setValue(value, juce::dontSendNotification); });
 }
 
 // void ChannelStripComponent::setFaderMoveCallbackFunction(std::function<void(std::string, float)> callbackFunction)
@@ -1294,11 +1285,7 @@ void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
     setFaderPosition(faderValue);
 }
 
-
-
-
 //[/MiscUserCode]
-
 
 //==============================================================================
 #if 0
@@ -1592,8 +1579,6 @@ END_JUCER_METADATA
 */
 #endif
 
-
 //[EndFile] You can add extra defines here...
 
 //[/EndFile]
-

@@ -88,8 +88,9 @@ private:
 
     std::string channelStripComponentID;
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
-	const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
+	//const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
     static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
+    
 
     
 
