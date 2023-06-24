@@ -80,12 +80,18 @@ private:
 public:
     static EventBus &getInstance(); // Returns a reference to the instance.
 
+    // ########################################## SUBSCRIPTION DECLARATIONS #########################################
     void bankEventSubscribe(Bank bank,
                             BankEventType eventType,
                             const std::string &channelStripID,
                             std::function<void(const std::string &, Bank, const std::string &)> callback,
                             std::function<void(Bank, const std::string &)> removeSubscriptionCallback);
 
+    void chStripComponentSubscribe(const std::string stripID,
+                                   const BankEventType eventType,
+                                   std::function<void(const std::string &)> chStripCompCallback);
+
+    // ############################################# EVENT POST DECLARATIONS #############################################
     void lineBankEventPost(BankEventType eventType, const std::string &channelStripID, const std::string &eventValue);
     // void tapeBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
     // void effectsBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue);
@@ -95,11 +101,6 @@ public:
     // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
     void associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
     void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
-
-    //void addChStripComponentCallback(std::string stripID, std::function<void(const BankEventType, const std::string &)> chStripCompCallback);
-    void addChStripComponentCallback(const std::string stripID,
-                                     const BankEventType eventType,
-                                     std::function<void(const std::string &)> chStripCompCallback);
 };
 
 // Singleton modifications

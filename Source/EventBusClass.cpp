@@ -125,7 +125,7 @@ void EventBus::associateChStripEventPost(std::unordered_set<std::string> channel
 // ################################################################################################
 // This method is used to add the callbacks to the channel strip component callback lookup table.
 // #################################################################################################
-void EventBus::addChStripComponentCallback(const std::string stripID,
+void EventBus::chStripComponentSubscribe(const std::string stripID,
                                            const BankEventType eventType,
                                            std::function<void(const std::string &)> chStripCompCallback)
 {

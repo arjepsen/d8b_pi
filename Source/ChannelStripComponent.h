@@ -59,7 +59,7 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
     void setFaderPosition(double value);
 
-    // void setFaderMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
+    //void setFaderUiMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
 
 	// std::function<void(std::string, float)> faderMoveCallback;
 
@@ -78,7 +78,6 @@ public:
     void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
     void labelTextChanged (juce::Label* labelThatHasChanged) override;
 
-    
 
 
 private:
@@ -90,9 +89,9 @@ private:
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
 	//const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
     static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
-    
 
-    
+
+
 
     // Access to the mixermanager
     //MixerManager &mixerManager;
@@ -103,7 +102,7 @@ private:
     //==============================================================================
     std::unique_ptr<juce::Slider> fader;
     std::unique_ptr<juce::TextButton> writeButton;
-    std::unique_ptr<juce::Slider> channelPan;
+    std::unique_ptr<juce::Slider> vPot;
     std::unique_ptr<juce::TextButton> selectBtn;
     std::unique_ptr<juce::TextButton> soloBtn;
     std::unique_ptr<juce::TextButton> muteBtn;

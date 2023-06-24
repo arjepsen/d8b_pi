@@ -11,6 +11,7 @@
 #include "ChannelClass.h"
 #include "ChannelIDMap.h"
 #include <unistd.h>
+#include <sstream>
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define CHANNEL_DEBUG_MESSAGES
@@ -142,16 +143,14 @@ void Channel::linkDspDescriptor(int &dspDescriptor)
 // First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips 
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
-void Channel::channelStripFaderEvent(std::string &faderValue, Bank bank, std::string &channelStripID)
+void Channel::channelStripFaderEvent(const std::string &faderValue, Bank bank, const std::string &channelStripID)
 {
 
 	// TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
 
-    // TODO: Should we also use this for UI fader events?? - moving a fader in the UI? Then that fader shouldnt be removed from the set.....
-
-
     // Construct DSP volume command, and send it.
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
+
     if (!mute)
         write(dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
 

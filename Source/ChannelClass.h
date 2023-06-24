@@ -75,7 +75,7 @@ public:
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
     void removeSubscription(Bank bank, std::string channelStripIDtoRemove);
 
-    void channelStripFaderEvent(std::string &faderValue, Bank bank,std::string &channelStripID);
+    void channelStripFaderEvent(const std::string &faderValue, Bank bank,const std::string &channelStripID);
 };
 
 // // Should these be classes also??

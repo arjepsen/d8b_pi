@@ -33,7 +33,7 @@ public:
     void resized() override;
 
     // My stuff
-    void faderMoveCallback(const std::string channelStripComponentID, float newValue);
+    void faderUiMoveCallback(const std::string channelStripComponentID, float newValue);
     void masterFaderMoveCallback(float newValue);
 
 

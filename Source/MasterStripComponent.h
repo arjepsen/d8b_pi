@@ -48,7 +48,8 @@ public:
 
     void setMasterFaderPosition(double value);
 
-    void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
+    //void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
+    TODO: Set it up through event bus instead.
 
     //[/UserMethods]
 
