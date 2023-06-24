@@ -23,6 +23,9 @@
 
 
 #include <JuceHeader.h>
+#include "EventBusClass.h"
+#include <array>
+
 
 
 //[/Headers]
@@ -56,8 +59,15 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
     void setFaderPosition(double value);
 
-    void setFaderMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
+    // void setFaderMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
 
+	// std::function<void(std::string, float)> faderMoveCallback;
+
+    // Callback functions for the "Channel associate events".
+    // These ONLY update the UI - purely cosmetical - so no need know which bank. (logic already handled elsewhere).
+	void faderMoveEventCallback(std::string faderValue);
+    void vpotTurnEventCallback(std::string vpotValue);
+    void buttonEventCallback(std::string buttonValue);  // This one is a bit different... but again mainly cosmetic.
 
     //[/UserMethods]
 
@@ -68,15 +78,20 @@ public:
     void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
     void labelTextChanged (juce::Label* labelThatHasChanged) override;
 
+    
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
+	EventBus &eventBus;        // Reference to EventBus singleton.
+
     std::string channelStripComponentID;
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
+	const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
+    static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
 
-    std::function<void(std::string, float)> faderMoveCallback;
+    
 
     // Access to the mixermanager
     //MixerManager &mixerManager;

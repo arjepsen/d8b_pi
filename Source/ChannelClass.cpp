@@ -136,13 +136,19 @@ void Channel::linkDspDescriptor(int &dspDescriptor)
     dspDescriptor = dspDescriptor;
 }
 
+
+// ###########################################################################################################################
+// This is a callback function that is fired by the EventBus, when a fader is moved.
+// First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips 
+// on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
+// ###########################################################################################################################
 void Channel::channelStripFaderEvent(std::string &faderValue, Bank bank, std::string &channelStripID)
 {
-    // 1 - Send dsp command.
-    // 2 - update internal volume member.
-    // 3 - Post a new associateChStrip event, pass a set of associated chStripID's WITHOUT the one that started all this nonsense.
 
-	// THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
+	// TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
+
+    // TODO: Should we also use this for UI fader events?? - moving a fader in the UI? Then that fader shouldnt be removed from the set.....
+
 
     // Construct DSP volume command, and send it.
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";

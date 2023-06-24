@@ -35,15 +35,32 @@ int ChannelStripComponent::nextChannelStripComponentID = 0;
 ChannelStripComponent::ChannelStripComponent ()
 {
     //[Constructor_pre] You can add your own custom stuff here..
+    // ################################ MY CONSTRUCTOR STUFF##########################################
 
     // Give each new channelStripComponent a unique hex ID, from "00" and upwards.
     std::stringstream stream;
     stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
     channelStripComponentID = stream.str();
 
+    // Precompute the array of logarithms, so we avoid slow computations during runtime.
+            if (!precomputed_logs_filled) 
+            {
+            for (int i = 0; i <= 0xFF; ++i) 
+            {
+                precomputed_logs[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
+            }
+            precomputed_logs_filled = true;
+        }
+RET TIL SÅ VI UNDGÅR AT SKULLE BRUGE EN EKSTRA BOOL
+
+
+    // Add the callbacks to the eventBus
+    eventBus.addChStripComponentCallback(channelStripComponentID, [this](const std::string &valueString){ this->faderMoveEvent(valueString); });
+
     // Increment the static counter.
     nextChannelStripComponentID++;
 
+    // ################### END OF MY CONSTRUCTOR STUFF #####################################################
     //[/Constructor_pre]
 
     setName ("ChannelStripComponent");
@@ -1253,13 +1270,30 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
 // #################################################################################################
 void ChannelStripComponent::setFaderPosition(double value)
 {
+    // TODO: do we still need dontsendnotifacation with the current implementation?
     juce::MessageManager::callAsync([this, value]() { fader.get()->setValue(value, juce::dontSendNotification); });
 }
 
-void ChannelStripComponent::setFaderMoveCallbackFunction(std::function<void(std::string, float)> callbackFunction)
+// void ChannelStripComponent::setFaderMoveCallbackFunction(std::function<void(std::string, float)> callbackFunction)
+// {
+// 	faderMoveCallback = callbackFunction;
+// }
+
+// ################################################################################################
+// This is a callback method to be used by the eventBus. It will be called, when the channel object
+// has sent it's commands to the DSP, and Brain, and all that is left is to update the UI.
+// It will convert the Hex value reported by the console, to a double on a logarithmic scale.
+// ################################################################################################
+
+// TODO - should we change these to float for optimization of speed? Is double precision needed?
+
+void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
 {
-	faderMoveCallback = callbackFunction;
+    int decimalValue = std::stoi(faderHexValue, nullptr, 16);
+    double faderValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
+    setFaderPosition(faderValue);
 }
+
 
 
 

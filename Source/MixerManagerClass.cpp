@@ -513,6 +513,9 @@ void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripA
 // Faders sends a hex value (byte) on a linear scale.
 // This method calculates the corresponding value to show in the ui.
 // ###############################################################################
+
+// TODO MAYBE THIS BELONGS IN CHANNELSTRIPCOMPONENT??
+
 double MixerManager::mapToSliderScale(std::string hexValue)
 {
     int decimalValue = std::stoi(hexValue, nullptr, 16);
@@ -531,6 +534,9 @@ double MixerManager::mapToSliderScale(std::string hexValue)
 // WE STILL NEED TO EXPAND THIS TO TAKE SELECTED BANK INTO CONSIDERATION!!!!!!!!!!!!
 
 // ###########################################################################################
+
+// TODO MAYBE THIS BELONGS IN CHANNELSTRIPCOMPONENT??
+
 void MixerManager::handleUiFaderMove(std::string channelStripComponentID, float newFaderValue)
 {
     // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)

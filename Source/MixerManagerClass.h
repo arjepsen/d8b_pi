@@ -85,7 +85,8 @@ private:
 	int brainDescriptor;
 	int dspDescriptor;
 
-    const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
+    // Maybe this should be purely in the channelstrip component?
+    // const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
 
 
     MixerManager();  // Constructor

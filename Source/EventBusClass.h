@@ -71,6 +71,12 @@ private:
         EVENT_TYPE_COUNT>
         lineBankAssociativeStripCallbacks;
 
+    // Structure for associating channel strip ID's with a channelStripComponent callback.
+    // std::unordered_map<std::string, std::function<void(const BankEventType, const std::string &)>> chStripComponentCallbacks;
+
+    // Trying with the array for event type:
+    std::array<std::unordered_map<std::string, std::function<void(const std::string &)>>, EVENT_TYPE_COUNT> chStripComponentCallbacks;
+
 public:
     static EventBus &getInstance(); // Returns a reference to the instance.
 
@@ -89,6 +95,11 @@ public:
     // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
     void associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
     void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+
+    //void addChStripComponentCallback(std::string stripID, std::function<void(const BankEventType, const std::string &)> chStripCompCallback);
+    void addChStripComponentCallback(const std::string stripID,
+                                     const BankEventType eventType,
+                                     std::function<void(const std::string &)> chStripCompCallback);
 };
 
 // Singleton modifications
