@@ -25,8 +25,8 @@ class Channel
 {
 private:
     EventBus &eventBus;        // Reference to EventBus singleton.
-    static int &dspDescriptor; // Reference to the DSP file descriptor.
-    static int &brainDescriptor; // Reference to the Brain file descriptor.
+    int *dspDescriptor; // Reference to the DSP file descriptor.
+    int *brainDescriptor; // Reference to the Brain file descriptor.
 
     const uint8_t channelNumber;
     const std::string channelID; // unique ID for each channel (1 - 48)
@@ -69,7 +69,7 @@ public:
     std::string getID();
 
     //void setChannelStrip(std::string stripID);
-    void linkDspDescriptor(int &dspDescriptor);
+    void linkDspDescriptor(int *dspDescriptor);
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 

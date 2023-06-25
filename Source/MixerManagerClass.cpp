@@ -237,7 +237,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 for (auto channel : channels)
                 {
                     // Set the reference to the dspDescriptor:
-                    channel.linkDspDescriptor(dspDescriptor);
+                    channel.linkDspDescriptor(&dspDescriptor);
                 }
 
 
@@ -454,52 +454,52 @@ void MixerManager::setBank(Bank bank)
     }
 }
 
-void MixerManager::messageHandlerCallback(const MessageData &messageData)
-{
-    DEBUG_MSG("Callback Function in MixerManager called.\n");
+// void MixerManager::messageHandlerCallback(const MessageData &messageData)
+// {
+//     DEBUG_MSG("Callback Function in MixerManager called.\n");
 
-    // FIGURE OUT WHAT TYPE OF MESSAGE, WHICH WILL TELL US WHERE TO SEND IT.
-    // Then update ui...
+//     // FIGURE OUT WHAT TYPE OF MESSAGE, WHICH WILL TELL US WHERE TO SEND IT.
+//     // Then update ui...
 
-    // REDO, AS SPECIFIC CALLLS FOR EACH TYPE OF BRAIN MESSAGE (fader, vpot, btn, etc.)
+//     // REDO, AS SPECIFIC CALLLS FOR EACH TYPE OF BRAIN MESSAGE (fader, vpot, btn, etc.)
 
-    // Use the pointer in the channelstrip map to call the actual channel object
-    channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
+//     // Use the pointer in the channelstrip map to call the actual channel object
+//     channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
 
-    double uiValue = mapToSliderScale(messageData.value);
+//     double uiValue = mapToSliderScale(messageData.value);
 
-    int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
+//     int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
 
-    chStripComponents[channelStripIndex].setFaderPosition(uiValue);
+//     chStripComponents[channelStripIndex].setFaderPosition(uiValue);
 
-    // WHERE DO WE HANDLE THE UI CHANGES? HERE? IN CHANNEL? IN MSGHANDLER????
-}
+//     // WHERE DO WE HANDLE THE UI CHANGES? HERE? IN CHANNEL? IN MSGHANDLER????
+// }
 
-void MixerManager::faderMessageCallback(const MessageData &messageData)
-{
-    // Handle non-master fader moves.
-    if (messageData.channelStrip != "18")
-    {
-        // Use channelStrip map to call channel object's setvolume mehod
-        channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
+// void MixerManager::faderMessageCallback(const MessageData &messageData)
+// {
+//     // Handle non-master fader moves.
+//     if (messageData.channelStrip != "18")
+//     {
+//         // Use channelStrip map to call channel object's setvolume mehod
+//         channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
 
-        // Calculate the UI fader value to show
-        double uiValue = mapToSliderScale(messageData.value);
+//         // Calculate the UI fader value to show
+//         double uiValue = mapToSliderScale(messageData.value);
 
-        // Get the integer index of the channelstrip that was moved
-        int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
+//         // Get the integer index of the channelstrip that was moved
+//         int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
 
-        // Update UI
-        chStripComponents[channelStripIndex].setFaderPosition(uiValue);
-    }
-    else
-    {
-        // Master fader was moved. Use MasterChannel class' method:
-        masterChannel.setMasterVolume(messageData.value, dspDescriptor);
+//         // Update UI
+//         chStripComponents[channelStripIndex].setFaderPosition(uiValue);
+//     }
+//     else
+//     {
+//         // Master fader was moved. Use MasterChannel class' method:
+//         masterChannel.setMasterVolume(messageData.value, dspDescriptor);
 
-        // Update UI
-    }
-}
+//         // Update UI
+//     }
+// }
 
 // #########################################################################################
 // Method to a pointer to the channel Strip Component array from the MainComponent.
@@ -516,14 +516,14 @@ void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripA
 
 // TODO MAYBE THIS BELONGS IN CHANNELSTRIPCOMPONENT??
 
-double MixerManager::mapToSliderScale(std::string hexValue)
-{
-    int decimalValue = std::stoi(hexValue, nullptr, 16);
+// double MixerManager::mapToSliderScale(std::string hexValue)
+// {
+//     int decimalValue = std::stoi(hexValue, nullptr, 16);
 
-    double returnValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
+//     double returnValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
 
-    return returnValue;
-}
+//     return returnValue;
+// }
 
 // ##########################################################################################
 // This method gets called by MainComponent's callback function, when a fader is moved in UI
@@ -537,45 +537,45 @@ double MixerManager::mapToSliderScale(std::string hexValue)
 
 // TODO MAYBE THIS BELONGS IN CHANNELSTRIPCOMPONENT??
 
-void MixerManager::handleUiFaderMove(std::string channelStripComponentID, float newFaderValue)
-{
-    // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
-    float x = 28.3f * powf(10.0f, 0.01f * newFaderValue + 0.9f) - 28.3f;
+// void MixerManager::handleUiFaderMove(std::string channelStripComponentID, float newFaderValue)
+// {
+//     // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
+//     float x = 28.3f * powf(10.0f, 0.01f * newFaderValue + 0.9f) - 28.3f;
 
-    // Round to integer
-    int roundedX = static_cast<int>(x + 0.5f);
+//     // Round to integer
+//     int roundedX = static_cast<int>(x + 0.5f);
 
-    // Convert to 2-digit hex string
-    std::stringstream stream;
-    stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
-    std::string faderHexValue = stream.str();
+//     // Convert to 2-digit hex string
+//     std::stringstream stream;
+//     stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
+//     std::string faderHexValue = stream.str();
 
-    // Tell channel object to send volume command, and update it's record.
-    // IF BANK == LINE BANK:
-    channelStripMap[channelStripComponentID]->setVolume(faderHexValue, dspDescriptor);
+//     // Tell channel object to send volume command, and update it's record.
+//     // IF BANK == LINE BANK:
+//     channelStripMap[channelStripComponentID]->setVolume(faderHexValue, dspDescriptor);
 
-    // Send a fader move command to the Brain:
-    std::string brainCommand = channelStripComponentID + faderHexValue + "f";
-    write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
-}
+//     // Send a fader move command to the Brain:
+//     std::string brainCommand = channelStripComponentID + faderHexValue + "f";
+//     write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
+// }
 
-void MixerManager::handleUiMasterFaderMove(float newMasterFaderValue)
-{
-    // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
-    float x = 28.3f * powf(10.0f, 0.01f * newMasterFaderValue + 0.9f) - 28.3f;
+// void MixerManager::handleUiMasterFaderMove(float newMasterFaderValue)
+// {
+//     // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
+//     float x = 28.3f * powf(10.0f, 0.01f * newMasterFaderValue + 0.9f) - 28.3f;
 
-    // Round to integer
-    int roundedX = static_cast<int>(x + 0.5f);
+//     // Round to integer
+//     int roundedX = static_cast<int>(x + 0.5f);
 
-    // Convert to 2-digit hex string
-    std::stringstream stream;
-    stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
-    std::string faderHexValue = stream.str();
+//     // Convert to 2-digit hex string
+//     std::stringstream stream;
+//     stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
+//     std::string faderHexValue = stream.str();
 
-    // Tell MasterChannel singleton to send volume command to dsp, and update it's record.
-    masterChannel.setMasterVolume(faderHexValue, dspDescriptor);
+//     // Tell MasterChannel singleton to send volume command to dsp, and update it's record.
+//     masterChannel.setMasterVolume(faderHexValue, dspDescriptor);
 
-    // Send a fader move command to the brain.
-    std::string brainCommand = "18" + faderHexValue + "f";
-    write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
-}
+//     // Send a fader move command to the brain.
+//     std::string brainCommand = "18" + faderHexValue + "f";
+//     write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
+// }

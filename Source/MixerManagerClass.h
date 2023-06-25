@@ -72,7 +72,7 @@ private:
     // Channel and Channelstrip
     static constexpr uint8_t CHANNEL_COUNT = 48;
 	static constexpr uint8_t CHANNEL_STRIP_COUNT = 24;
-    std::array<Channel, CHANNEL_COUNT> channels;
+    std::array<Channel, CHANNEL_COUNT> channels;    // This will auto-instantiate channel objects
 	std::unordered_map<std::string, Channel*> channelStripMap;
 
     // Component pointers
@@ -112,8 +112,8 @@ private:
     double mapToSliderScale(std::string hexValue);
 
 	// Callback function for handling the message structures from the message handlers
-	void messageHandlerCallback(const MessageData& messageData);
-    void faderMessageCallback(const MessageData& messageData);
+	// void messageHandlerCallback(const MessageData& messageData);
+    // void faderMessageCallback(const MessageData& messageData);
     // void vPotMessageHandlerCallback(const MessageData& messageData);
     // void ButtonDwnMessageHandlerCallback(const MessageData& messageData);
     // void ButtonUpMessageHandlerCallback(const MessageData& messageData);
@@ -144,8 +144,8 @@ public:
     void setBank(Bank bank);
 
     void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
-    void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);
-    void handleUiMasterFaderMove(float newMasterFaderValue);
+    // void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);
+    // void handleUiMasterFaderMove(float newMasterFaderValue);
 
 
     // TODO: Add methods to handle communication with the Brain and DSP boards

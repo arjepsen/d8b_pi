@@ -26,6 +26,7 @@
 // Set first channel ID. This will increment with every channel object constructed.
 uint8_t Channel::nextChannelNumber = 0;
 
+
 // ############################### CONSTRUCTOR #########################################
 // Channel Constructor. Set up channel number and get channel dsp ID from channelIDMap.h
 // Convert channel number to channelStripID for the associate map.
@@ -97,7 +98,7 @@ void Channel::setVolume(std::string volumeValue)
     // Construct DSP command, and send it.
     std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
     if (!mute)
-        write(dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
+        write(*dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
 }
 
 // ###########################################################################################################################
@@ -114,7 +115,7 @@ void Channel::channelStripFaderEventCallback(const std::string &faderValue, cons
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
 
     if (!mute)
-        write(dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
+        write(*dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
 
     // Update volume member
     volume = faderValue;
@@ -129,7 +130,7 @@ void Channel::channelStripFaderEventCallback(const std::string &faderValue, cons
     for (auto &stripID : associateStrips)
     {
         std::string faderCommand = stripID + faderValue + "f";
-        write(brainDescriptor, faderCommand.c_str(), volumeCommand.length());
+        write(*brainDescriptor, faderCommand.c_str(), volumeCommand.length());
     }
 
     // Now make an event post, for the UI strips to get updated
@@ -168,8 +169,8 @@ std::string Channel::getID()
     return channelID;
 }
 
-void Channel::linkDspDescriptor(int &dspDescriptor)
+void Channel::linkDspDescriptor(int *dspDescriptor)
 {
-    dspDescriptor = dspDescriptor;
+    this->dspDescriptor = dspDescriptor;
 }
 

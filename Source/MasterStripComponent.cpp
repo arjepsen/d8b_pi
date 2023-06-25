@@ -833,10 +833,10 @@ void MasterStripComponent::setMasterFaderPosition(double value)
     juce::MessageManager::callAsync([this, value]() { masterFader.get()->setValue(value, juce::dontSendNotification); });
 }
 
-void MasterStripComponent::setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction)
-{
-	masterFaderMoveCallback = callbackFunction;
-}
+// void MasterStripComponent::setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction)
+// {
+// 	masterFaderMoveCallback = callbackFunction;
+// }
 //[/MiscUserCode]
 
 

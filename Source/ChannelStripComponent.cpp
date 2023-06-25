@@ -30,6 +30,8 @@
 // Set first channel ID. This will increment with every channel object constructed.
 int ChannelStripComponent::nextChannelStripComponentID = 0;
 
+std::array<float, 256> ChannelStripComponent::precomputedLog10Values;
+
 //[/MiscUserDefs]
 
 //==============================================================================
