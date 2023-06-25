@@ -58,7 +58,7 @@ private:
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
-    void subscribeToLineBankEvents();
+    //void subscribeToLineBankEvents();
 
 public:
     // Constructor
@@ -68,16 +68,16 @@ public:
     void setVolume(std::string);
     std::string getID();
 
-    void setChannelStrip(std::string stripID);
+    //void setChannelStrip(std::string stripID);
     void linkDspDescriptor(int &dspDescriptor);
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
-    void removeSubscription(Bank bank, std::string channelStripIDtoRemove);
 
     void channelStripFaderEventCallback(const std::string &faderValue, Bank bank,const std::string &channelStripID);
+    void channelStripVpotEventCallback(const std::string &vpotValue, const Bank bank, const std::string &channelStripID);
+    void channelStripButtonEventCallback(const std::string &buttonID, const Bank bank, const std::string &channelStripID);
 
-
-    void removesubsciriptsioncallbackmethod.....
+    void removeChStripAssociationCallback(const Bank bank, const std::string channelStripID);
 };
 
 // // Should these be classes also??

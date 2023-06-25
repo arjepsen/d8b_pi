@@ -992,10 +992,13 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
 
         // Fader was moved in the UI.
         float newFaderValue = sliderThatWasMoved->getValue();
+        printf("fader was moved in UI\n");
 
         // Use callback to send value to MainComponent
         // faderMoveCallback(channelStripComponentID, newFaderValue);
-        INSTEAD MAKE IT AN EVENT POST
+        
+        
+        //TODO: INSTEAD MAKE IT AN EVENT POST
 
         //[/UserSliderCode_fader]
     }
@@ -1276,6 +1279,8 @@ void ChannelStripComponent::labelTextChanged (juce::Label* labelThatHasChanged)
 // This method is called, when a fader is moved on the physical mixer.
 // "dontSendNotification" prevents a cyclic reaction, where the ui will then try to update the mixer
 // #################################################################################################
+
+// TODO: is this method used at all?
 void ChannelStripComponent::setFaderPosition(double value)
 {
     // TODO: do we still need dontsendnotifacation with the current implementation?
@@ -1291,7 +1296,7 @@ void ChannelStripComponent::setFaderPosition(double value)
 // ################################################################################################
 // This is a callback method to be used by the eventBus. It will be called, when the channel object
 // has sent it's commands to the DSP, and Brain, and all that is left is to update the UI.
-// It will convert the Hex value reported by the console, to a double on a logarithmic scale.
+// It looks up the value in the precomputed map, and sets the fader to the given value.
 // ################################################################################################
 void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
 {

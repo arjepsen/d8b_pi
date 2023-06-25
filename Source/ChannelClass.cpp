@@ -10,9 +10,9 @@
 
 #include "ChannelClass.h"
 #include "ChannelIDMap.h"
-#include <unistd.h>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+#include <unistd.h>
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define CHANNEL_DEBUG_MESSAGES
@@ -26,14 +26,14 @@
 // Set first channel ID. This will increment with every channel object constructed.
 uint8_t Channel::nextChannelNumber = 0;
 
-// #####################################################################################
+// ############################### CONSTRUCTOR #########################################
 // Channel Constructor. Set up channel number and get channel dsp ID from channelIDMap.h
 // Convert channel number to channelStripID for the associate map.
 // #####################################################################################
 Channel::Channel()
-    : channelID{dspChannelIDs[nextChannelNumber]},  // Get unique channel ID for dsp commands.
-      channelNumber{nextChannelNumber},             // Set unique channel number.
-      eventBus(EventBus::getInstance())             // Get the eventbus instance.
+    : channelID{dspChannelIDs[nextChannelNumber]}, // Get unique channel ID for dsp commands.
+      channelNumber{nextChannelNumber},            // Set unique channel number.
+      eventBus(EventBus::getInstance())            // Get the eventbus instance.
 {
     // Set up variables for initial channel strip event subscription
     int initialAssociateStripNumber = channelNumber;
@@ -45,34 +45,27 @@ Channel::Channel()
         initialAssociateStripNumber -= 23;
         initialAssociateBank = TAPE_BANK;
     }
-        
+
     // Convert Channel Number to a corresponding channel strip ID.
     std::stringstream stream;
     stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << initialAssociateStripNumber;
     std::string initialAssociateChannelStripID = stream.str();
 
-    // SUBSCRIBE TO EVENT BUS STUFF...
-    eventBus.bankEventSubscribe(
-        initialAssociateBank, 
-        FADER_EVENT, 
-        initialAssociateChannelStripID, 
+    // Subscribe to events on the given bank and strip.
+    eventBus.bankEventSubscribe
+    (
+        initialAssociateBank,
+        //FADER_EVENT,
+        initialAssociateChannelStripID,
         [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID)
         { this->channelStripFaderEventCallback(faderValue, bank, channelStripID); },
-        [this]()
-        
-        );
-
-
-        eventBus.bankEventSubscribe(
-            LINE_BANK,
-            FADER_EVENT,    // The event type.
-            channelStripID, // ID for the channel strip controling this channel, when line bank is chosen.
-            [this](const std::string &valueString)
-            { this->setVolume(valueString); }, // The callback function.
-            true                               // This is the channel class, not the UI channel strip class.
-        );
-
-
+        [this](const std::string &vpotValue, const Bank bank, const std::string &channelStripID)
+        { this->channelStripVpotEventCallback(vpotValue, bank, channelStripID); },
+        [this](const std::string &buttonValue, const Bank bank, const std::string &channelStripID)
+        { this->channelStripVpotEventCallback(buttonValue, bank, channelStripID); },
+        [this](const Bank bank, const std::string &channelStripID)
+        { this->removeChStripAssociationCallback(bank, channelStripID); }
+    );
 
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
@@ -91,10 +84,7 @@ Channel::Channel()
 }
 
 // Implement other member functions...
-std::string Channel::getID()
-{
-    return channelID;
-}
+
 
 // #######################################################################################
 // This method updates the channel object's volume member, and sends a command to the DSP
@@ -110,78 +100,15 @@ void Channel::setVolume(std::string volumeValue)
         write(dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
 }
 
-// ##########################################################################
-// This method subscribes to line bank events, using the Event Bus's method.
-// ##########################################################################
-void Channel::subscribeToLineBankEvents()
-{
-    // Iterate through all associated channelstrips in the line bank.
-
-    for (const std::string &channelStripID : associatedChannelStrips[LINE_BANK])
-    {
-        // Subscribe to Fader Events
-        eventBus.bankEventSubscribe(
-            LINE_BANK,
-            FADER_EVENT,    // The event type.
-            channelStripID, // ID for the channel strip controling this channel, when line bank is chosen.
-            [this](const std::string &valueString)
-            { this->setVolume(valueString); }, // The callback function.
-            true                               // This is the channel class, not the UI channel strip class.
-        );
-
-        eventBus.bankEventSubscribe(
-            LINE_BANK,
-            VPOT_EVENT,     // The event type.
-            channelStripID, // ID for the channel strip controling this channel, when line bank is chosen.
-            [this](const std::string &valueString)
-            { this->setVolume(valueString); }, // The callback function.
-            true                               // This is the channel class, not the UI channel strip class.
-        );
-
-        eventBus.bankEventSubscribe(
-            LINE_BANK,
-            BUTTON_EVENT,   // The event type.
-            channelStripID, // ID for the channel strip controling this channel, when line bank is chosen.
-            [this](const std::string &valueString)
-            { this->setVolume(valueString); }, // The callback function.
-            true                               // This is the channel class, not the UI channel strip class.
-        );
-    }
-}
-
-// void Channel::removeSubscription(BankEventType eventType, std::string channelStripID)
-// {
-// 	// Find and remove the association to the given channelstrip
-// 	associatedChannelStrips[(BankID)eventType].erase(channelID);
-// }
-
-void Channel::removeSubscription(Bank bank, std::string channelStripIDtoRemove)
-{
-    // Check if there is a subscription to that ID:
-    associatedChannelStrips[bank].erase(channelStripIDtoRemove);
-}
-
-void Channel::setChannelStrip(std::string stripID)
-{
-    channelStripID = stripID;
-    subscribeToLineBankEvents();
-}
-
-void Channel::linkDspDescriptor(int &dspDescriptor)
-{
-    dspDescriptor = dspDescriptor;
-}
-
-
 // ###########################################################################################################################
 // This is a callback function that is fired by the EventBus, when a fader is moved.
-// First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips 
+// First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
 void Channel::channelStripFaderEventCallback(const std::string &faderValue, const Bank bank, const std::string &channelStripID)
 {
 
-	// TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
+    // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
 
     // Construct DSP volume command, and send it.
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
@@ -192,19 +119,57 @@ void Channel::channelStripFaderEventCallback(const std::string &faderValue, cons
     // Update volume member
     volume = faderValue;
 
-	// Retrieve the set of associated channel strips on the current bank.
-	std::unordered_set<std::string> associateStrips = associatedChannelStrips[bank];
+    // Retrieve the set of associated channel strips on the current bank.
+    std::unordered_set<std::string> associateStrips = associatedChannelStrips[bank];
 
-    // Remove the calling channelStripID (it's already moved)
+    // Remove the calling channelStripID (it was moved by hand...)
     associateStrips.erase(channelStripID);
 
     // Iterate through the set, send move command
-    for (auto& stripID : associateStrips)
+    for (auto &stripID : associateStrips)
     {
         std::string faderCommand = stripID + faderValue + "f";
         write(brainDescriptor, faderCommand.c_str(), volumeCommand.length());
     }
 
     // Now make an event post, for the UI strips to get updated
-	eventBus.associateChStripEventPost(associatedChannelStrips[bank], FADER_EVENT, faderValue);
+    eventBus.associateChStripEventPost(associatedChannelStrips[bank], FADER_EVENT, faderValue);
 }
+
+void Channel::channelStripVpotEventCallback(const std::string &vpotValue, const Bank bank, const std::string &channelStripID)
+{
+    // The supplied value is likely not a specific placement, but rather a number of how fast/far the pot was turned.
+    // So the procedure here is:
+    // 1 - DEDUCE WHAT THE POT IS CONTROLING
+    // 2 - CALCULATE NEW VALUE FROM OLD VALUE ON SUPPLIED CHANGE-VALUE
+    // 3 - SEND DSP (OR BRAIN?) COMMAND TO UPDATE WHAT THE VPOT IS CHOSEN TO CONTROL
+    // 4 - UPDATE PRIVATE MEMBER
+    // 5 - SEND AN ASSOCIATE EVENT POST FOR UPDATING THE UI
+}
+
+
+
+void Channel::channelStripButtonEventCallback(const std::string &buttonID, const Bank bank, const std::string &channelStripID)
+{
+    // SOME WORK TO BE DONE HERE...
+}
+
+// ####################################################################################################
+// This method is a callback for removing the supplied channel strip from the set of associated strips.
+// This is called from the event bus, when an association is updated.
+// ####################################################################################################
+void Channel::removeChStripAssociationCallback(const Bank bank, const std::string channelStripID)
+{
+    associatedChannelStrips[bank].erase(channelStripID);
+}
+
+std::string Channel::getID()
+{
+    return channelID;
+}
+
+void Channel::linkDspDescriptor(int &dspDescriptor)
+{
+    dspDescriptor = dspDescriptor;
+}
+

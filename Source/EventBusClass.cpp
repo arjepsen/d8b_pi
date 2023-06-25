@@ -40,9 +40,11 @@ EventBus::~EventBus() {}
 //  (maybe this could be changed in the future?)
 // ##############################################################################################################
 void EventBus::bankEventSubscribe(Bank bank,
-                                  BankEventType eventType,
+                                  //BankEventType eventType,
                                   const std::string &channelStripID,
-                                  std::function<void(const std::string &, Bank, const std::string &)> callback,
+                                  std::function<void(const std::string &, Bank, const std::string &)> faderCallback,
+                                  std::function<void(const std::string &, Bank, const std::string &)> vpotCallback,
+                                  std::function<void(const std::string &, Bank, const std::string &)> buttonCallback,
                                   std::function<void(Bank, const std::string &)> removeSubscriptionCallback)
 {
     if (channelStripID.length() != 2)
@@ -53,21 +55,33 @@ void EventBus::bankEventSubscribe(Bank bank,
 
     // Set a reference to the specific bank map of callbacks.
     auto &callbackMap =
-        (bank == LINE_BANK)      ? lineBankCallbacks[eventType]
-        : (bank == TAPE_BANK)    ? tapeBankCallbacks[eventType]
-        : (bank == EFFECTS_BANK) ? effectsBankCallbacks[eventType]
-        : (bank == MASTERS_BANK) ? mastersBankCallbacks[eventType]
+        (bank == LINE_BANK)      ? lineBankCallbacks
+        : (bank == TAPE_BANK)    ? tapeBankCallbacks
+        : (bank == EFFECTS_BANK) ? effectsBankCallbacks
+        : (bank == MASTERS_BANK) ? mastersBankCallbacks
                                  : (throw std::runtime_error("ERROR IN DETERMINING BANK FOR EVENT CALLBACK\n"));
 
+    //lineBankCallbacks[FADER_EVENT][channelStripID].eventCallbacks.faderEventCallback = faderCallback;
+
     // Check if the specified key (channelstripID) exists, before calling removal for old subscription.
+    //if (callbackMap.find(channelStripID) != callbackMap.end())
+    //if (callbackMap[eventType].find(channelStripID) != callbackMap[eventType].end())
     if (callbackMap.find(channelStripID) != callbackMap.end())
     {
-        callbackMap[channelStripID].removeChannelSubscriptionCallback(bank, channelStripID);
+        callbackMap[channelStripID].unsubscribeCallback(bank, channelStripID);
     }
 
-    // Old associatied channel should be updated. Now put in the callbacks for the new channel.
-    callbackMap[channelStripID].channelObjectCallback = callback;
-    callbackMap[channelStripID].removeChannelSubscriptionCallback = removeSubscriptionCallback;
+    callbackMap[channelStripID].callbackArray[FADER_EVENT] = faderCallback;
+    callbackMap[channelStripID].callbackArray[VPOT_EVENT] = vpotCallback;
+    callbackMap[channelStripID].callbackArray[BUTTON_EVENT] = buttonCallback;
+    callbackMap[channelStripID].unsubscribeCallback = removeSubscriptionCallback;
+
+
+    // // Iterate over the three event types, and assign the callbacks
+    // for (const auto& eventType : {FADER_EVENT, VPOT_EVENT, BUTTON_EVENT})
+    // {
+    //     callbackMap[channelStripID].callbackArray[eventType] = 
+    // }
 }
 
 
@@ -77,22 +91,20 @@ void EventBus::lineBankEventPost(BankEventType eventType, const std::string &cha
     // But we skip checking for the sake of speed :-D
     // Maybe if it is already effecient enough we can implement safechecks.
 
-    printf("EVENT BUS POST. Calling mr. lineBankCallback");
+    // printf("EVENT BUS POST. Calling mr. lineBankCallback");
+    // try // Guard to protect from exceptions
+    // {
+        lineBankCallbacks[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
+        //lineBankCallbacks[eventType][channelStripID].channelObjectCallback(eventValue, LINE_BANK, channelStripID);
+        
 
-    // Calling mr. callback.
-    // lineBankCallbacks[eventType][ChannelStripID](eventValue);
-
-    try // Guard to protect from exceptions
-    {
-        lineBankCallbacks[eventType][channelStripID].channelObjectCallback(eventValue, LINE_BANK, channelStripID);
-
-        // lineBankCallbacks[eventType][channelStripID].channelStripComponentCallback(eventValue);
-    }
-    catch (const std::exception &e)
-    {
-        std::string err = e.what();
-        printf("Exception in EventBusClass::lineBankPost (crap!): %s", err.c_str());
-    }
+    //     // lineBankCallbacks[eventType][channelStripID].channelStripComponentCallback(eventValue);
+    // }
+    // catch (const std::exception &e)
+    // {
+    //     std::string err = e.what();
+    //     printf("Exception in EventBusClass::lineBankPost (crap!): %s", err.c_str());
+    // }
 }
 
 // void EventBus::tapeBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
