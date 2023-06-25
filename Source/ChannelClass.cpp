@@ -98,7 +98,7 @@ void Channel::setVolume(std::string volumeValue)
     // Construct DSP command, and send it.
     std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
     if (!mute)
-        write(*dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
+        write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
 }
 
 // ###########################################################################################################################
@@ -106,19 +106,23 @@ void Channel::setVolume(std::string volumeValue)
 // First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
-void Channel::channelStripFaderEventCallback(const std::string &faderValue, const Bank bank, const std::string &channelStripID)
+void Channel::channelStripFaderEventCallback(const std::string faderValue, const Bank bank, const std::string &channelStripID)
 {
 
     // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
+
+    printf("fader event callbacker\n");
 
     // Construct DSP volume command, and send it.
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
 
     if (!mute)
-        write(*dspDescriptor, volumeCommand.c_str(), volumeCommand.length());
+        write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
 
     // Update volume member
     volume = faderValue;
+
+    printf("dsp command was sent\n");
 
     // Retrieve the set of associated channel strips on the current bank.
     std::unordered_set<std::string> associateStrips = associatedChannelStrips[bank];
@@ -126,18 +130,21 @@ void Channel::channelStripFaderEventCallback(const std::string &faderValue, cons
     // Remove the calling channelStripID (it was moved by hand...)
     associateStrips.erase(channelStripID);
 
+    printf("Just about to send brain commands.\n");
     // Iterate through the set, send move command
     for (auto &stripID : associateStrips)
     {
         std::string faderCommand = stripID + faderValue + "f";
-        write(*brainDescriptor, faderCommand.c_str(), volumeCommand.length());
+        write(*brainDescriptorPtr, faderCommand.c_str(), volumeCommand.length());
     }
 
+
+    printf("going for association\n");
     // Now make an event post, for the UI strips to get updated
     eventBus.associateChStripEventPost(associatedChannelStrips[bank], FADER_EVENT, faderValue);
 }
 
-void Channel::channelStripVpotEventCallback(const std::string &vpotValue, const Bank bank, const std::string &channelStripID)
+void Channel::channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID)
 {
     // The supplied value is likely not a specific placement, but rather a number of how fast/far the pot was turned.
     // So the procedure here is:
@@ -150,7 +157,7 @@ void Channel::channelStripVpotEventCallback(const std::string &vpotValue, const 
 
 
 
-void Channel::channelStripButtonEventCallback(const std::string &buttonID, const Bank bank, const std::string &channelStripID)
+void Channel::channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID)
 {
     // SOME WORK TO BE DONE HERE...
 }
@@ -171,6 +178,11 @@ std::string Channel::getID()
 
 void Channel::linkDspDescriptor(int *dspDescriptor)
 {
-    this->dspDescriptor = dspDescriptor;
+    printf("############============= LIIIINKIIIIING ==============##########################\n");
+    dspDescriptorPtr = dspDescriptor;
+    if (!dspDescriptor)
+        printf("passed pointer invalid\n");
+    if (!dspDescriptorPtr)
+        printf("link invalid\n");
 }
 

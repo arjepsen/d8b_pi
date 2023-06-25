@@ -217,6 +217,10 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 // ============= MIXER INITIALIZED ===============
                 // Now we need to set up everything else
 
+
+                NEED TO FIX FILE DESCRIPTOR IN A SEPARATE CLASS
+
+
                 // Set up the communication ports for further communication
                 brainDescriptor = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
                 dspDescriptor = openSerialPort(getDspPort().c_str(), B115200);

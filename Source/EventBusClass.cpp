@@ -87,6 +87,7 @@ void EventBus::bankEventSubscribe(Bank bank,
 
 void EventBus::lineBankEventPost(BankEventType eventType, const std::string &channelStripID, const std::string &eventValue)
 {
+    printf("post called\n");
     // Assume the command callback is registered... otherwise we might have an issue....
     // But we skip checking for the sake of speed :-D
     // Maybe if it is already effecient enough we can implement safechecks.
@@ -123,6 +124,7 @@ void EventBus::lineBankEventPost(BankEventType eventType, const std::string &cha
 // ####################################################################################################################
 void EventBus::associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
 {
+    printf("association post\n");
     // Iterate over the set, reference channelstripID to map of channelStripComponent callbacks, run the callback.
     for (auto &stripID : channelStrips)
     {

@@ -25,8 +25,8 @@ class Channel
 {
 private:
     EventBus &eventBus;        // Reference to EventBus singleton.
-    int *dspDescriptor; // Reference to the DSP file descriptor.
-    int *brainDescriptor; // Reference to the Brain file descriptor.
+    int *dspDescriptorPtr; // Reference to the DSP file descriptor.
+    int *brainDescriptorPtr; // Reference to the Brain file descriptor.
 
     const uint8_t channelNumber;
     const std::string channelID; // unique ID for each channel (1 - 48)
@@ -73,9 +73,9 @@ public:
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 
-    void channelStripFaderEventCallback(const std::string &faderValue, Bank bank,const std::string &channelStripID);
-    void channelStripVpotEventCallback(const std::string &vpotValue, const Bank bank, const std::string &channelStripID);
-    void channelStripButtonEventCallback(const std::string &buttonID, const Bank bank, const std::string &channelStripID);
+    void channelStripFaderEventCallback(const std::string faderValue, Bank bank,const std::string &channelStripID);
+    void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID);
+    void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID);
 
     void removeChStripAssociationCallback(const Bank bank, const std::string channelStripID);
 };

@@ -78,11 +78,13 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/BankTapeMessageHandlerClass_66e47a78.o \
   $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o \
   $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
+  $(JUCE_OBJDIR)/BrainWriterClass_fec282f8.o \
   $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o \
   $(JUCE_OBJDIR)/ChannelIDMap_ed0868a7.o \
   $(JUCE_OBJDIR)/ChannelStripClass_9e933684.o \
   $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o \
   $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o \
+  $(JUCE_OBJDIR)/DspWriterClass_e38fddcd.o \
   $(JUCE_OBJDIR)/EventBusClass_f5722df3.o \
   $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o \
   $(JUCE_OBJDIR)/IOSlotClass_f67f5815.o \
@@ -145,6 +147,11 @@ $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o: ../../Source/BrainMessageHandler
 	@echo "Compiling BrainMessageHandlers.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/BrainWriterClass_fec282f8.o: ../../Source/BrainWriterClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling BrainWriterClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o: ../../Source/ChannelClass.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling ChannelClass.cpp"
@@ -168,6 +175,11 @@ $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o: ../../Source/ChannelStripCompon
 $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o: ../../Source/CircularBuffer.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling CircularBuffer.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/DspWriterClass_e38fddcd.o: ../../Source/DspWriterClass.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling DspWriterClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/EventBusClass_f5722df3.o: ../../Source/EventBusClass.cpp

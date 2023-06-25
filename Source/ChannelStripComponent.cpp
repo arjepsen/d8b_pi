@@ -22,7 +22,6 @@
 //[/Headers]
 
 #include "ChannelStripComponent.h"
-#include <iomanip>
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
@@ -998,8 +997,8 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
 
         // Use callback to send value to MainComponent
         // faderMoveCallback(channelStripComponentID, newFaderValue);
-        
-        
+
+
         //TODO: INSTEAD MAKE IT AN EVENT POST
 
         //[/UserSliderCode_fader]

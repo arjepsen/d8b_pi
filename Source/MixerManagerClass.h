@@ -37,6 +37,8 @@
 #include "ChannelStripComponent.h"
 #include "MasterChannelClass.h"
 #include "EventBusClass.h"
+#include "BrainWriterClass.h"
+#include "DspWriterClass.h"
 
 class MixerManager
 {
@@ -44,6 +46,8 @@ private:
     Settings &settings; // Reference to the Settings singleton. 
     MasterChannel &masterChannel;   // Reference to masterChannel singleton.
     EventBus &eventBus;     // Reference to EventBus singleton.
+    BrainWriter &brain;
+    DspWriter &dsp;
 
     // Declare the IO slot objects.
     IOSlot *ioSlotA;
