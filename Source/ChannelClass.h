@@ -29,8 +29,7 @@ private:
     static int &brainDescriptor; // Reference to the Brain file descriptor.
 
     const uint8_t channelNumber;
-    const std::string channelID; // unique ID for each channel (1 - 48) ( actually up to 56)
-    // std::string channelStripID; // NOT WORKING..... CHANNEL CAN BE SET UP TO MORE THAN ONE STRIP ON SAME BANK, AND WHAT ABOUT OTHER BANKS???
+    const std::string channelID; // unique ID for each channel (1 - 48)
 
     std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
 
@@ -75,7 +74,10 @@ public:
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
     void removeSubscription(Bank bank, std::string channelStripIDtoRemove);
 
-    void channelStripFaderEvent(const std::string &faderValue, Bank bank,const std::string &channelStripID);
+    void channelStripFaderEventCallback(const std::string &faderValue, Bank bank,const std::string &channelStripID);
+
+
+    void removesubsciriptsioncallbackmethod.....
 };
 
 // // Should these be classes also??

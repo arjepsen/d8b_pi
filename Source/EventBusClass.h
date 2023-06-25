@@ -66,27 +66,28 @@ private:
     std::array<std::unordered_map<std::string, BankEventCallbacks>, EVENT_TYPE_COUNT> mastersBankCallbacks;
 
     // Structure for "associative events", like when more than one channelstrip is configured to the same channel on the same bank.
-    std::array<
-        std::unordered_map<std::string, std::unordered_map<std::string, std::function<void(std::string &)>>>,
-        EVENT_TYPE_COUNT>
-        lineBankAssociativeStripCallbacks;
+    // std::array<
+    //     std::unordered_map<std::string, std::unordered_map<std::string, std::function<void(std::string &)>>>,
+    //     EVENT_TYPE_COUNT>
+    //     lineBankAssociativeStripCallbacks;
 
     // Structure for associating channel strip ID's with a channelStripComponent callback.
     // std::unordered_map<std::string, std::function<void(const BankEventType, const std::string &)>> chStripComponentCallbacks;
 
-    // Trying with the array for event type:
+    // Trying with the array for event type, these are only for updating UI, they only provide an event type, and the value:
     std::array<std::unordered_map<std::string, std::function<void(const std::string &)>>, EVENT_TYPE_COUNT> chStripComponentCallbacks;
 
 public:
     static EventBus &getInstance(); // Returns a reference to the instance.
 
     // ########################################## SUBSCRIPTION DECLARATIONS #########################################
+    // Register/update event subscription for a particular strip, on a particular bank.
     void bankEventSubscribe(Bank bank,
                             BankEventType eventType,
                             const std::string &channelStripID,
                             std::function<void(const std::string &, Bank, const std::string &)> callback,
                             std::function<void(Bank, const std::string &)> removeSubscriptionCallback);
-
+                            
     void chStripComponentSubscribe(const std::string stripID,
                                    const BankEventType eventType,
                                    std::function<void(const std::string &)> chStripCompCallback);

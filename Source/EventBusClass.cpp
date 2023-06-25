@@ -30,8 +30,15 @@ EventBus::EventBus()
 
 EventBus::~EventBus() {}
 
-// void EventBus::bankEventSubscribe(EventType eventType, const std::string& channelStripID, std::function<void(const std::string &)> callback, bool isChannel)
-
+// ##############################################################################################################
+// This method is used to "subscribe" to events on the different banks, by handing over two callback methods.
+// The first method, is the callback that will be run when the event type happens on the given channel strip ID
+// (like moving a fader on strip 2).
+// The second callback, is used to remove the "old" callback, in cases where a channel "moves" it's subscription
+// to a different channelstrip. (otherwise the channel would still respond to the old channelstrip.)
+// NOTE: No channelstrip can be "empty" - there has to be a subscription.
+//  (maybe this could be changed in the future?)
+// ##############################################################################################################
 void EventBus::bankEventSubscribe(Bank bank,
                                   BankEventType eventType,
                                   const std::string &channelStripID,
@@ -44,6 +51,7 @@ void EventBus::bankEventSubscribe(Bank bank,
         exit(1);
     }
 
+    // Set a reference to the specific bank map of callbacks.
     auto &callbackMap =
         (bank == LINE_BANK)      ? lineBankCallbacks[eventType]
         : (bank == TAPE_BANK)    ? tapeBankCallbacks[eventType]
@@ -51,27 +59,17 @@ void EventBus::bankEventSubscribe(Bank bank,
         : (bank == MASTERS_BANK) ? mastersBankCallbacks[eventType]
                                  : (throw std::runtime_error("ERROR IN DETERMINING BANK FOR EVENT CALLBACK\n"));
 
-    // SO - first we need some way to let the previous channel know that it no longer controls this channel strip.
-    // This kinda means we need yet another callback for removing that subscription from the channel.
-
     // Check if the specified key (channelstripID) exists, before calling removal for old subscription.
     if (callbackMap.find(channelStripID) != callbackMap.end())
     {
         callbackMap[channelStripID].removeChannelSubscriptionCallback(bank, channelStripID);
     }
 
-    // Old associatied channel should be updated. Now put in the new callbacks.
+    // Old associatied channel should be updated. Now put in the callbacks for the new channel.
     callbackMap[channelStripID].channelObjectCallback = callback;
     callbackMap[channelStripID].removeChannelSubscriptionCallback = removeSubscriptionCallback;
-
-    // if (isChannel)
-    // {
-    //     callbackMap[channelStripID].channelObjectCallback = callback;
-    // 	callbackMap[channelStripID].removeChannelSubscriptionCallback = removeSubscriptionCallback;
-    // }
-    // else
-    //     callbackMap[channelStripID].channelStripComponentCallback = callback;
 }
+
 
 void EventBus::lineBankEventPost(BankEventType eventType, const std::string &channelStripID, const std::string &eventValue)
 {
@@ -126,8 +124,8 @@ void EventBus::associateChStripEventPost(std::unordered_set<std::string> channel
 // This method is used to add the callbacks to the channel strip component callback lookup table.
 // #################################################################################################
 void EventBus::chStripComponentSubscribe(const std::string stripID,
-                                           const BankEventType eventType,
-                                           std::function<void(const std::string &)> chStripCompCallback)
+                                         const BankEventType eventType,
+                                         std::function<void(const std::string &)> chStripCompCallback)
 {
     // Ensure that a valid strip ID has been provided, and that the callback has not already been set.
     if (chStripComponentCallbacks[eventType].count(stripID) && !chStripComponentCallbacks[eventType][stripID])

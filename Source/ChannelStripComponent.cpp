@@ -22,6 +22,7 @@
 //[/Headers]
 
 #include "ChannelStripComponent.h"
+#include <iomanip>
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...

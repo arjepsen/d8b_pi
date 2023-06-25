@@ -12,6 +12,7 @@
 #include "ChannelIDMap.h"
 #include <unistd.h>
 #include <sstream>
+#include <iomanip>
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define CHANNEL_DEBUG_MESSAGES
@@ -25,15 +26,54 @@
 // Set first channel ID. This will increment with every channel object constructed.
 uint8_t Channel::nextChannelNumber = 0;
 
-// Constructor. Set up channel number and get channel dsp ID from channelIDMap.h
+// #####################################################################################
+// Channel Constructor. Set up channel number and get channel dsp ID from channelIDMap.h
+// Convert channel number to channelStripID for the associate map.
+// #####################################################################################
 Channel::Channel()
-    : channelID{dspChannelIDs[nextChannelNumber]},
-      channelNumber{nextChannelNumber},
-      eventBus(EventBus::getInstance())
+    : channelID{dspChannelIDs[nextChannelNumber]},  // Get unique channel ID for dsp commands.
+      channelNumber{nextChannelNumber},             // Set unique channel number.
+      eventBus(EventBus::getInstance())             // Get the eventbus instance.
 {
-    DEBUG_MSG("\n=============== CHANNEL CONSTRUCTOR =====================\n");
+    // Set up variables for initial channel strip event subscription
+    int initialAssociateStripNumber = channelNumber;
+    Bank initialAssociateBank = LINE_BANK;
+
+    // Adjust for channels above 24.
+    if (channelNumber > 23)
+    {
+        initialAssociateStripNumber -= 23;
+        initialAssociateBank = TAPE_BANK;
+    }
+        
+    // Convert Channel Number to a corresponding channel strip ID.
+    std::stringstream stream;
+    stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << initialAssociateStripNumber;
+    std::string initialAssociateChannelStripID = stream.str();
 
     // SUBSCRIBE TO EVENT BUS STUFF...
+    eventBus.bankEventSubscribe(
+        initialAssociateBank, 
+        FADER_EVENT, 
+        initialAssociateChannelStripID, 
+        [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID)
+        { this->channelStripFaderEventCallback(faderValue, bank, channelStripID); },
+        [this]()
+        
+        );
+
+
+        eventBus.bankEventSubscribe(
+            LINE_BANK,
+            FADER_EVENT,    // The event type.
+            channelStripID, // ID for the channel strip controling this channel, when line bank is chosen.
+            [this](const std::string &valueString)
+            { this->setVolume(valueString); }, // The callback function.
+            true                               // This is the channel class, not the UI channel strip class.
+        );
+
+
+
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
     mute = false;
@@ -75,14 +115,9 @@ void Channel::setVolume(std::string volumeValue)
 // ##########################################################################
 void Channel::subscribeToLineBankEvents()
 {
-    // WHAT ABOUT NON-CHANNELSTRIP EVENTS? Maybe handled by different subscription?
-
     // Iterate through all associated channelstrips in the line bank.
 
-    // NEED TO RETHINK....MORE ASSOCIATED CHANNEL STRIPS....DIFFERENT CALLBACK METHOD
-    //     USE DIFFERENT METHODS FOR EACH EVENT TYPE
-
-        for (const std::string &channelStripID : associatedChannelStrips[LINE_BANK])
+    for (const std::string &channelStripID : associatedChannelStrips[LINE_BANK])
     {
         // Subscribe to Fader Events
         eventBus.bankEventSubscribe(
@@ -143,7 +178,7 @@ void Channel::linkDspDescriptor(int &dspDescriptor)
 // First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips 
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
-void Channel::channelStripFaderEvent(const std::string &faderValue, Bank bank, const std::string &channelStripID)
+void Channel::channelStripFaderEventCallback(const std::string &faderValue, const Bank bank, const std::string &channelStripID)
 {
 
 	// TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
