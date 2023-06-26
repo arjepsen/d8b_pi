@@ -43,9 +43,10 @@
 class MixerManager
 {
 private:
-    Settings &settings; // Reference to the Settings singleton. 
-    MasterChannel &masterChannel;   // Reference to masterChannel singleton.
-    EventBus &eventBus;     // Reference to EventBus singleton.
+    // References to singletons
+    Settings &settings; 
+    MasterChannel &masterChannel;   
+    EventBus &eventBus;     
     BrainWriter &brain;
     DspWriter &dsp;
 

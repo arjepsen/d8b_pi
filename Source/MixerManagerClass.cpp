@@ -36,6 +36,8 @@ MixerManager::MixerManager()
     : settings(Settings::getInstance()),
       eventBus(EventBus::getInstance()),
       masterChannel(MasterChannel::getInstance()),
+      brain(BrainWriter::getInstance()),
+      dsp(DspWriter::getInstance()),
       isInitializing(false),
       messageHandler(&lineBankMessageHandler)   
 {
@@ -306,10 +308,14 @@ int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
 // assumes, that a message always is sent in full, and are NOT "split" by the
 // heartbeats ('l / 'k').
 // ###############################################################################
+
+
+CHANGE TO USE WRITER CLASSES INSTEAD
 void MixerManager::brainMessageReceiver()
 {
     // Clear screen before entering loop.
-    write(brainDescriptor, "01u", 3);
+    //write(brainDescriptor, "01u", 3);
+    brain.write("01u");
     usleep(20000);
 
     char recvChar = '\0';
