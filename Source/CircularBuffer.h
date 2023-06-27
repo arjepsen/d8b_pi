@@ -10,12 +10,20 @@ constexpr size_t BUFFER_WIDTH = 256; // The max number of characters in each ele
 class CircularBuffer
 {
 public:
-    CircularBuffer();
+    //CircularBuffer();
+    static CircularBuffer &getInstance();   // Return reference to this instance.
 
     void push(const char* message);
     std::string pop();
 
 private:
+    CircularBuffer();
+    ~CircularBuffer();
+
+    // Delete copy constructor & assignment operator, no copying a singleton!
+    CircularBuffer(const CircularBuffer &) = delete;
+    CircularBuffer &operator = (const CircularBuffer&) = delete;
+
     std::array<std::array<char, BUFFER_WIDTH>, BUFFER_LENGTH> buffer_;
     std::atomic<size_t> head_;
     std::atomic<size_t> tail_;
@@ -27,3 +35,9 @@ private:
 
     size_t next_index(size_t index) const;
 };
+
+inline CircularBuffer &CircularBuffer::getInstance()
+{
+    static CircularBuffer instance;
+    return instance;
+}

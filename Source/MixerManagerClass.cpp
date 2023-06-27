@@ -36,8 +36,8 @@ MixerManager::MixerManager()
     : settings(Settings::getInstance()),
       eventBus(EventBus::getInstance()),
       masterChannel(MasterChannel::getInstance()),
-      brain(BrainWriter::getInstance()),
-      dsp(DspWriter::getInstance()),
+      brain(BrainCom::getInstance()),
+      dsp(DspCom::getInstance()),
       isInitializing(false),
       messageHandler(&lineBankMessageHandler)   
 {
@@ -227,12 +227,6 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 brainDescriptor = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
                 dspDescriptor = openSerialPort(getDspPort().c_str(), B115200);
 
-                // // Forward the descriptors to the handlers
-                // lineBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-                // tapeBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-                // effectsBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-                // mastersBankMessageHandler.setComDescriptors(brainDescriptor, dspDescriptor);
-
                 // Start the communication threads.
                 brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
                 dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
@@ -310,61 +304,62 @@ int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
 // ###############################################################################
 
 
-CHANGE TO USE WRITER CLASSES INSTEAD
-void MixerManager::brainMessageReceiver()
-{
-    // Clear screen before entering loop.
-    //write(brainDescriptor, "01u", 3);
-    brain.write("01u");
-    usleep(20000);
+//  !!!!!! CHANGE TO USE WRITER CLASSES INSTEAD  !!!!!!!!!!!!!!!!
+// void MixerManager::brainMessageReceiver()
+// {
+//     // Clear screen before entering loop.
+//     //write(brainDescriptor, "01u", 3);
+//     brain.sendCmd("01u");
+//     usleep(20000);
 
-    char recvChar = '\0';
-    std::string message = "";
-    int result;
+//     char recvChar = '\0';
+//     std::string message = "";
+//     int result;
 
-    // Clear com buffer for starting out
-    tcflush(brainDescriptor, TCIOFLUSH);
+//     // Clear com buffer for starting out
+//     //tcflush(brainDescriptor, TCIOFLUSH);
+//     brain.flushBuffer();
 
-    DEBUG_MSG("running brain message loop\n");
-    // Run the infinite loop.
-    while (true)
-    {
-        result = read(brainDescriptor, &recvChar, 1);
+//     DEBUG_MSG("running brain message loop\n");
+//     // Run the infinite loop.
+//     while (true)
+//     {
+//         result = read(brainDescriptor, &recvChar, 1);
 
-        if (result == 1) // One char was recevied.
-        {
-            message += recvChar;
+//         if (result == 1) // One char was recevied.
+//         {
+//             message += recvChar;
 
-            // A lower case letter means message complete.
-            if (recvChar >= 'a' && recvChar <= 'z')
-            {
-                // printf("brain message: %s\n", message.c_str());
+//             // A lower case letter means message complete.
+//             if (recvChar >= 'a' && recvChar <= 'z')
+//             {
+//                 // printf("brain message: %s\n", message.c_str());
 
-                if (recvChar == 'l' || recvChar == 'k')
-                {
-                    printf("hearbeat: %c\n", recvChar);
-                    heartBeatReceived();
-                }
-                else
-                    circBuffer.push(message.c_str()); // Push message to the circular buffer.
-                message = "";                         // Reset message string.
-            }
-        }
+//                 if (recvChar == 'l' || recvChar == 'k')
+//                 {
+//                     printf("hearbeat: %c\n", recvChar);
+//                     heartBeatReceived();
+//                 }
+//                 else
+//                     circBuffer.push(message.c_str()); // Push message to the circular buffer.
+//                 message = "";                         // Reset message string.
+//             }
+//         }
 
-        else if (result < 0)
-        {
-            perror("Error reading from file descriptor");
-            exit(1);
-        }
-        else if (result == 0) // 0 chars recevied - EOF
-        {
-            // Should we add any special functionality here??
-        }
-    }
+//         else if (result < 0)
+//         {
+//             perror("Error reading from file descriptor");
+//             exit(1);
+//         }
+//         else if (result == 0) // 0 chars recevied - EOF
+//         {
+//             // Should we add any special functionality here??
+//         }
+//     }
 
-    // We probably shouldn't get here... but just in case.
-    printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
-}
+//     // We probably shouldn't get here... but just in case.
+//     printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
+// }
 
 // ###############################################################################
 // Like the brainMessageReceiver... same... but different...

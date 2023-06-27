@@ -30,10 +30,9 @@
             file="Source/BrainMessageHandlers.cpp"/>
       <FILE id="Wr26Ds" name="BrainMessageHandlers.h" compile="0" resource="0"
             file="Source/BrainMessageHandlers.h"/>
-      <FILE id="RywKi6" name="BrainWriterClass.cpp" compile="1" resource="0"
-            file="Source/BrainWriterClass.cpp"/>
-      <FILE id="s0eKIb" name="BrainWriterClass.h" compile="0" resource="0"
-            file="Source/BrainWriterClass.h"/>
+      <FILE id="RywKi6" name="BrainComClass.cpp" compile="1" resource="0"
+            file="Source/BrainComClass.cpp"/>
+      <FILE id="s0eKIb" name="BrainComClass.h" compile="0" resource="0" file="Source/BrainComClass.h"/>
       <FILE id="Cc2BbQ" name="ChannelClass.cpp" compile="1" resource="0"
             file="Source/ChannelClass.cpp"/>
       <FILE id="Sie6ux" name="ChannelClass.h" compile="0" resource="0" file="Source/ChannelClass.h"/>
@@ -54,10 +53,8 @@
             file="Source/CircularBuffer.h"/>
       <FILE id="n0ZxHX" name="CommandStrings.h" compile="0" resource="0"
             file="Source/CommandStrings.h"/>
-      <FILE id="cmshL0" name="DspWriterClass.cpp" compile="1" resource="0"
-            file="Source/DspWriterClass.cpp"/>
-      <FILE id="Vigk9j" name="DspWriterClass.h" compile="0" resource="0"
-            file="Source/DspWriterClass.h"/>
+      <FILE id="cmshL0" name="DspComClass.cpp" compile="1" resource="0" file="Source/DspComClass.cpp"/>
+      <FILE id="Vigk9j" name="DspComClass.h" compile="0" resource="0" file="Source/DspComClass.h"/>
       <FILE id="whafmG" name="EventBusClass.cpp" compile="1" resource="0"
             file="Source/EventBusClass.cpp"/>
       <FILE id="ROWLES" name="EventBusClass.h" compile="0" resource="0" file="Source/EventBusClass.h"/>

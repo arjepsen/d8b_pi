@@ -21,7 +21,7 @@
 #include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
 //#include "ChannelStripClass.h"
-#include "CircularBuffer.h"
+//#include "CircularBuffer.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
 #include "MessageHandlerInterface.h"
@@ -37,8 +37,8 @@
 #include "ChannelStripComponent.h"
 #include "MasterChannelClass.h"
 #include "EventBusClass.h"
-#include "BrainWriterClass.h"
-#include "DspWriterClass.h"
+#include "BrainComClass.h"
+#include "DspComClass.h"
 
 class MixerManager
 {
@@ -47,8 +47,8 @@ private:
     Settings &settings; 
     MasterChannel &masterChannel;   
     EventBus &eventBus;     
-    BrainWriter &brain;
-    DspWriter &dsp;
+    BrainCom &brain;
+    DspCom &dsp;
 
     // Declare the IO slot objects.
     IOSlot *ioSlotA;
@@ -65,7 +65,7 @@ private:
     FXSlot *fxSlotD;
 
     // Create the circular buffer object.
-    CircularBuffer circBuffer;
+    //CircularBuffer circBuffer;
 
     // MessageHandler objects
     MessageHandler *messageHandler;
@@ -87,8 +87,10 @@ private:
 
 	// Various members/variables
     bool isInitializing; // Flag for avoid starting multiple init threads.
-	int brainDescriptor;
-	int dspDescriptor;
+
+    // CHANGE THESE TO THE BRAIN/DSPCOM CLASSES INSTEAD
+	// int brainDescriptor;
+	// int dspDescriptor;
 
     // Maybe this should be purely in the channelstrip component?
     // const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.

@@ -8,8 +8,8 @@
   ==============================================================================
 */
 
-#include "DspWriterClass.h"
+#include "DspComClass.h"
 
-DspWriter::DspWriter() {}
+DspCom::DspCom() {}
 
-DspWriter::~DspWriter() {}
+DspCom::~DspCom() {}

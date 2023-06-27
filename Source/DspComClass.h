@@ -10,23 +10,23 @@
 
 #pragma once
 
-class DspWriter
+class DspCom
 {
 private:
-    DspWriter();  // Constructor
-    ~DspWriter(); // Destructor
+    DspCom();  // Constructor
+    ~DspCom(); // Destructor
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
-    DspWriter(const DspWriter &) = delete;
-    DspWriter &operator=(const DspWriter &) = delete;
+    DspCom(const DspCom &) = delete;
+    DspCom &operator=(const DspCom &) = delete;
 
 public:
-    static DspWriter &getInstance(); // Returns a reference to the instance.
+    static DspCom &getInstance(); // Returns a reference to the instance.
 };
 
 // Singleton modifications
-inline DspWriter &DspWriter::getInstance()
+inline DspCom &DspCom::getInstance()
 {
-    static DspWriter instance;
+    static DspCom instance;
     return instance;
 }
