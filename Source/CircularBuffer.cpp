@@ -4,6 +4,8 @@
 CircularBuffer::CircularBuffer()
     : head_(0), tail_(0) {}
 
+CircularBuffer::~CircularBuffer() {}
+
 void CircularBuffer::push(const char *message)
 {
     std::unique_lock<std::mutex> lock(mutex_);

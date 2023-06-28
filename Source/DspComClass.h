@@ -10,7 +10,9 @@
 
 #pragma once
 
-class DspCom
+#include "ComBaseClass.h"
+
+class DspCom : public ComBase
 {
 private:
     DspCom();  // Constructor
@@ -19,6 +21,8 @@ private:
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
     DspCom(const DspCom &) = delete;
     DspCom &operator=(const DspCom &) = delete;
+
+    virtual void messageReceiver() override;
 
 public:
     static DspCom &getInstance(); // Returns a reference to the instance.
@@ -30,3 +34,5 @@ inline DspCom &DspCom::getInstance()
     static DspCom instance;
     return instance;
 }
+
+

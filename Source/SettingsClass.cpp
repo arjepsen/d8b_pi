@@ -160,32 +160,32 @@ void Settings::printUsbDevices()
     }
 }
 
-void Settings::settingSetBrainPort(std::string deviceString)
+void Settings::setBrainPort(std::string deviceString)
 {
     brainPort = deviceString;
 }
 
-void Settings::settingSetDspPort(std::string deviceString)
+void Settings::setDspPort(std::string deviceString)
 {
     dspPort = deviceString;
 }
 
-const std::string Settings::settingsGetBrainPort() const
+const std::string Settings::getBrainPort() const
 {
     return brainPort;
 }
 
-const std::string Settings::settingsGetDspPort() const
+const std::string Settings::getDspPort() const
 {
     return dspPort;
 }
 
-bool Settings::settingsGetBrainBoostState()
+bool Settings::getBrainBoostState()
 {
     return brainBoostState;
 }
 
-void Settings::settingsSetBrainBoostState(bool canWeGoToEleven)
+void Settings::setBrainBoostState(bool canWeGoToEleven)
 {
     if (canWeGoToEleven)
         std::cout << "WOOOHOOOOO" << std::endl;

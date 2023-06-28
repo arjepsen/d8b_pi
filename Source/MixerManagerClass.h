@@ -21,7 +21,7 @@
 #include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
 //#include "ChannelStripClass.h"
-//#include "CircularBuffer.h"
+#include "CircularBuffer.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
 #include "MessageHandlerInterface.h"
@@ -47,8 +47,9 @@ private:
     Settings &settings; 
     MasterChannel &masterChannel;   
     EventBus &eventBus;     
-    BrainCom &brain;
-    DspCom &dsp;
+    BrainCom &brainCom;
+    DspCom &dspCom;
+    CircularBuffer &circBuffer;
 
     // Declare the IO slot objects.
     IOSlot *ioSlotA;
@@ -103,19 +104,19 @@ private:
     MixerManager(const MixerManager &) = delete;
     MixerManager &operator=(const MixerManager &) = delete;
 
-    // Communication threads
-    std::thread brainReceiverThread;
-    std::thread dspReceiverThread;
+    // // Communication threads
+    // std::thread brainReceiverThread;
+    // std::thread dspReceiverThread;
     std::thread messageHandlerThread;
 
     // Thread methods
-    void brainMessageReceiver();
-    void dspMessageReceiver();
+    // void brainMessageReceiver();
+    // void dspMessageReceiver();
     void handleBufferMessage();
 
     // Other Methods
-    int openSerialPort(const char *devicePath, speed_t baudRate);
-    void heartBeatReceived();
+    //int openSerialPort(const char *devicePath, speed_t baudRate);
+    //void heartBeatReceived();
     double mapToSliderScale(std::string hexValue);
 
 	// Callback function for handling the message structures from the message handlers

@@ -36,8 +36,9 @@ MixerManager::MixerManager()
     : settings(Settings::getInstance()),
       eventBus(EventBus::getInstance()),
       masterChannel(MasterChannel::getInstance()),
-      brain(BrainCom::getInstance()),
-      dsp(DspCom::getInstance()),
+      brainCom(BrainCom::getInstance()),
+      dspCom(DspCom::getInstance()),
+      circBuffer(CircularBuffer::getInstance()),
       isInitializing(false),
       messageHandler(&lineBankMessageHandler)   
 {
@@ -87,7 +88,7 @@ bool MixerManager::setBrainPort(std::string deviceString)
     std::string deviceStringStart = "/dev/ttyUSB";
     if (deviceString.substr(0, deviceStringStart.length()) == deviceStringStart)
     {
-        settings.settingSetBrainPort(deviceString);
+        settings.setBrainPort(deviceString);
         return true;
     }
     else
@@ -99,7 +100,7 @@ bool MixerManager::setDspPort(std::string deviceString)
     std::string deviceStringStart = "/dev/ttyUSB";
     if (deviceString.substr(0, deviceStringStart.length()) == deviceStringStart)
     {
-        settings.settingSetDspPort(deviceString);
+        settings.setDspPort(deviceString);
         return true;
     }
     else
@@ -108,12 +109,12 @@ bool MixerManager::setDspPort(std::string deviceString)
 
 const std::string MixerManager::getBrainPort() const
 {
-    return settings.settingsGetBrainPort();
+    return settings.getBrainPort();
 }
 
 const std::string MixerManager::getDspPort() const
 {
-    return settings.settingsGetDspPort();
+    return settings.getDspPort();
 }
 
 const std::map<std::string, std::string> MixerManager::getUsbPortMap()
@@ -128,12 +129,12 @@ const std::map<std::string, std::string> MixerManager::getUsbPortMap()
 
 bool MixerManager::getBrainBoostState()
 {
-    return settings.settingsGetBrainBoostState();
+    return settings.getBrainBoostState();
 }
 
 void MixerManager::setBrainBoostState(bool doWeWantTurbo)
 {
-    settings.settingsSetBrainBoostState(doWeWantTurbo);
+    settings.setBrainBoostState(doWeWantTurbo);
 }
 
 void MixerManager::initIOSlot(IOSlot *ioSlotPtr, IOSlotID ioSlotID)
@@ -216,29 +217,34 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                                                            "OK");
                 }
 
-                // ============= MIXER INITIALIZED ===============
-                // Now we need to set up everything else
+                // ========================= MIXER INITIALIZED ===============================
+                // Set up communication singletons for threaded communication.
 
+                // Port should be set in settings class. 
+                brainCom.setPort(settings.getBrainPort());
+                dspCom.setPort(settings.getDspPort());
 
-                NEED TO FIX FILE DESCRIPTOR IN A SEPARATE CLASS
-
-
-                // Set up the communication ports for further communication
-                brainDescriptor = openSerialPort(getBrainPort().c_str(), getBrainBoostState() ? B230400 : B115200);
-                dspDescriptor = openSerialPort(getDspPort().c_str(), B115200);
+                // Baud rate for BrainCom depends on boost state.
+                brainCom.setBaudRate(settings.getBrainBoostState() ? B230400 : B115200);
+                dspCom.setBaudRate(B115200);
 
                 // Start the communication threads.
-                brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
-                dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
+                brainCom.startReceiverThread();
+                dspCom.startReceiverThread();
+
+                // brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
+                // dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
+
                 messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
 
-                // Channels are already constructed by now, so they should have their default values already.
-                // Run a for loop to set up stuff that all channel objects need:
-                for (auto channel : channels)
-                {
-                    // Set the reference to the dspDescriptor:
-                    channel.linkDspDescriptor(&dspDescriptor);
-                }
+                // // Channels are already constructed by now, so they should have their default values already.
+                // // Run a for loop to set up stuff that all channel objects need:
+                // for (auto channel : channels)
+                // {
+                //     // Set the reference to the dspDescriptor:
+                //     channel.linkDspDescriptor(&dspDescriptor);
+                // }
+                // NOT NEEDED - WE REFERENCE THE BrainCom and DspCom in the channels.
 
 
                 isInitializing = false;
@@ -252,49 +258,49 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
     }
 }
 
-// ###################################################################################
-// Method that opens a serial port for communication. It returns a file descriptor.
-// ###################################################################################
-int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
-{
-    DEBUG_MSG("Opening Serial port for %s @ %d\n", devicePath, baudRate);
-    struct termios options;
-    int fd = open(devicePath, O_RDWR | O_NOCTTY);
-    if (fd < 0)
-    {
-        perror("Error opening serial device");
-        // exit(1);
-        return -1;
-    }
+// // ###################################################################################
+// // Method that opens a serial port for communication. It returns a file descriptor.
+// // ###################################################################################
+// int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
+// {
+//     DEBUG_MSG("Opening Serial port for %s @ %d\n", devicePath, baudRate);
+//     struct termios options;
+//     int fd = open(devicePath, O_RDWR | O_NOCTTY);
+//     if (fd < 0)
+//     {
+//         perror("Error opening serial device");
+//         // exit(1);
+//         return -1;
+//     }
 
-    // Get current options
-    tcgetattr(fd, &options);
+//     // Get current options
+//     tcgetattr(fd, &options);
 
-    // Set baud rate
-    cfsetispeed(&options, baudRate);
-    cfsetospeed(&options, baudRate);
+//     // Set baud rate
+//     cfsetispeed(&options, baudRate);
+//     cfsetospeed(&options, baudRate);
 
-    // Set terminal mode
-    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-    options.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-    options.c_oflag &= ~(OPOST | ONLCR);
+//     // Set terminal mode
+//     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+//     options.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+//     options.c_oflag &= ~(OPOST | ONLCR);
 
-    // Set data format
-    options.c_cflag &= ~(PARENB | PARODD | CMSPAR | CSTOPB | CSIZE);
-    options.c_cflag |= CS8;
+//     // Set data format
+//     options.c_cflag &= ~(PARENB | PARODD | CMSPAR | CSTOPB | CSIZE);
+//     options.c_cflag |= CS8;
 
-    // Set input control options
-    options.c_iflag &= ~(INPCK | IXOFF | IUCLC | IXANY | IMAXBEL | IUTF8);
-    options.c_cc[VMIN] = 0;
-    options.c_cc[VTIME] = 5;
+//     // Set input control options
+//     options.c_iflag &= ~(INPCK | IXOFF | IUCLC | IXANY | IMAXBEL | IUTF8);
+//     options.c_cc[VMIN] = 0;
+//     options.c_cc[VTIME] = 5;
 
-    // Apply the new settings
-    tcflush(fd, TCIOFLUSH);
-    tcsetattr(fd, TCSANOW, &options);
+//     // Apply the new settings
+//     tcflush(fd, TCIOFLUSH);
+//     tcsetattr(fd, TCSANOW, &options);
 
-    // Return the file descriptor for the port.
-    return fd;
-}
+//     // Return the file descriptor for the port.
+//     return fd;
+// }
 
 // ###############################################################################
 // This method sets up the loop for the thread that reads messages from the Brain.
@@ -361,53 +367,53 @@ int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
 //     printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
 // }
 
-// ###############################################################################
-// Like the brainMessageReceiver... same... but different...
-// ###############################################################################
-void MixerManager::dspMessageReceiver()
-{
-    // Set up the file descriptor for the DSP port.
-    // const int DSP = openSerialPort(getDspPort().c_str(), B115200);
+// // ###############################################################################
+// // Like the brainMessageReceiver... same... but different...
+// // ###############################################################################
+// void MixerManager::dspMessageReceiver()
+// {
+//     // Set up the file descriptor for the DSP port.
+//     // const int DSP = openSerialPort(getDspPort().c_str(), B115200);
 
-    char recvChar = '\0';
-    std::string message = "";
-    int result;
+//     char recvChar = '\0';
+//     std::string message = "";
+//     int result;
 
-    // Clear com buffer for starting out
-    tcflush(dspDescriptor, TCIOFLUSH);
+//     // Clear com buffer for starting out
+//     tcflush(dspDescriptor, TCIOFLUSH);
 
-    DEBUG_MSG("Running dsp message loop\n");
-    while (true)
-    {
-        result = read(dspDescriptor, &recvChar, 1);
+//     DEBUG_MSG("Running dsp message loop\n");
+//     while (true)
+//     {
+//         result = read(dspDescriptor, &recvChar, 1);
 
-        if (result == 1)
-        {
-            message += recvChar;
-            if (recvChar >= 'a' && recvChar <= 'z')
-            {
-                printf("dsp message: %s\n", message.c_str());
-                // Lower case letter received, message complete. push to buffer.
-                circBuffer.push(message.c_str());
-                message = "";
-            }
-        }
+//         if (result == 1)
+//         {
+//             message += recvChar;
+//             if (recvChar >= 'a' && recvChar <= 'z')
+//             {
+//                 printf("dsp message: %s\n", message.c_str());
+//                 // Lower case letter received, message complete. push to buffer.
+//                 circBuffer.push(message.c_str());
+//                 message = "";
+//             }
+//         }
 
-        else if (result < 0)
-        {
-            perror("Error reading from file descriptor");
-            exit(1);
-        }
-        else if (result == 0)
-        {
-            // EOF
-            // should any handling happen here?
-        }
-    }
+//         else if (result < 0)
+//         {
+//             perror("Error reading from file descriptor");
+//             exit(1);
+//         }
+//         else if (result == 0)
+//         {
+//             // EOF
+//             // should any handling happen here?
+//         }
+//     }
 
-    // This should not happen
-    printf("\n\n############### DSP READER THREAD EXITED!!!!\n");
-}
+//     // This should not happen
+//     printf("\n\n############### DSP READER THREAD EXITED!!!!\n");
+// }
 
 // #################################################################################
 // This method is a "dispatcher" sort of thing, which is called
@@ -424,13 +430,13 @@ void MixerManager::handleBufferMessage()
     }
 }
 
-// ########################################################################################
-// Heartbeat handler method - this is invoked when an "l" or "k" is received from the Brain
-// ########################################################################################
-void MixerManager::heartBeatReceived()
-{
-    // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
-}
+// // ########################################################################################
+// // Heartbeat handler method - this is invoked when an "l" or "k" is received from the Brain
+// // ########################################################################################
+// void MixerManager::heartBeatReceived()
+// {
+//     // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
+// }
 
 // #########################################################################################
 // This method is used for switching bank message handler.

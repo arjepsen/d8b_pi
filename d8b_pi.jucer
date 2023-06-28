@@ -99,6 +99,9 @@
       <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
             file="Source/SettingsWindow.h"/>
     </GROUP>
+    <FILE id="g7BNcH" name="ComBaseClass.cpp" compile="1" resource="0"
+          file="Source/ComBaseClass.cpp"/>
+    <FILE id="t1eENZ" name="ComBaseClass.h" compile="0" resource="0" file="Source/ComBaseClass.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>

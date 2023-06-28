@@ -13,56 +13,67 @@
 
 #pragma once
 
-#include <mutex>
-#include <string>
-#include <termios.h>
-#include <thread>
-#include "CircularBuffer.h"
+#include "ComBaseClass.h"
+// #include <mutex>
+// #include <string>
+// #include <termios.h>
+// #include <thread>
+//#include "CircularBuffer.h"
 
-class BrainCom
+class BrainCom : public ComBase
 {
 private:
     BrainCom();  // Constructor
     ~BrainCom(); // Destructor
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
-    BrainCom(const BrainCom
-                 &) = delete;
-    BrainCom &operator=(const BrainCom
-                            &) = delete;
+    BrainCom(const BrainCom &) = delete;
+    BrainCom &operator=(const BrainCom &) = delete;
 
-    std::mutex brainWriteMutex; // Mutex for thread-safe write operations.
+	bool brainBoostState = false;
 
-    int BrainCom ::openSerialPort(const char *devicePath, speed_t baudRate);
+    virtual void messageReceiver() override;
 
-    std::string brainPort;
-    int brain; // This is the file descripter
+    void heartbeatReceived();
 
-    std::thread brainReceiverThread;
 
-    void brainMessageReceiver();
+	//CircularBuffer &circBuffer;	// Buffer singleton reference
 
-    CircularBuffer &circBuffer;
+
+    // std::mutex brainWriteMutex; // Mutex for thread-safe write operations.
+
+    // int openSerialPort(const char *devicePath, speed_t baudRate);
+
+    // std::string brainPort = "";
+    
+
+    // int brain; // This is the file descripter
+
+    // std::thread brainReceiverThread;
+    // bool brainThreadRunning = false;
+
+
 
 public:
     static BrainCom &getInstance(); // Returns a reference to the instance.
 
-    void settingSetBrainPort(std::string deviceString);
-    void setBrainPort(std::string port);
-    std::string getBrainPort();
+    // void settingSetBrainPort(std::string deviceString);
+    // void setBrainPort(std::string port);
+    // std::string getBrainPort();
 
-    void flushBuffer();
+    // void flushBuffer();
 
-    void initializeWriter();
+    // void initializeBrainCom();
 
-    const std::string &read();
-    void sendCmd(const std::string &command);
+    // const std::string &getMessage();
+    // void sendCmd(const std::string &command);
+
+    // void startBrainReceiverThread();
 };
 
 // Singleton modifications
 inline BrainCom &BrainCom::getInstance()
 {
-    static BrainCom
-        instance;
+    static BrainCom instance;
     return instance;
 }

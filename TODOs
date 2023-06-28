@@ -34,3 +34,5 @@ Maybe wait for now, to see how performance is.
 -setVolume in MasterChannelClass - check if there is a case where we update the volume member, without sending to dsp... (like mute...)
 
 - really test circular buffer size.
+
+- change various constructors, to be able to initialize the setup from a given saved configuration.

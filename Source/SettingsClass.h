@@ -22,13 +22,13 @@ public:
     // Public method to retreive the usb device list.
     const std::map<std::string, std::string> &getUSBDevices() const;
     void printUsbDevices();
-    void settingSetBrainPort(std::string deviceString);
-    void settingSetDspPort(std::string deviceString);
-    const std::string settingsGetBrainPort() const;
-    const std::string settingsGetDspPort() const;
+    void setBrainPort(std::string deviceString);
+    void setDspPort(std::string deviceString);
+    const std::string getBrainPort() const;
+    const std::string getDspPort() const;
     void findUSBDevices();
-    bool settingsGetBrainBoostState();
-    void settingsSetBrainBoostState(bool);
+    bool getBrainBoostState();
+    void setBrainBoostState(bool);
 
 private:
     Settings();

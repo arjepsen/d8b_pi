@@ -14,6 +14,8 @@
 #pragma once
 
 #include "BankEnum.h"
+#include "BrainComClass.h"
+#include "DspComClass.h"
 #include "EventBusClass.h"
 #include <array>
 #include <cstdint>
@@ -24,15 +26,18 @@
 class Channel
 {
 private:
-    EventBus &eventBus;        // Reference to EventBus singleton.
-    int *dspDescriptorPtr; // Reference to the DSP file descriptor.
-    int *brainDescriptorPtr; // Reference to the Brain file descriptor.
+	// References to singletons
+    EventBus &eventBus; 
+    BrainCom &brainCom;
+    DspCom &dspCom;
+
+    // int *dspDescriptorPtr; // Reference to the DSP file descriptor.
+    // int *brainDescriptorPtr; // Reference to the Brain file descriptor.
 
     const uint8_t channelNumber;
     const std::string channelID; // unique ID for each channel (1 - 48)
 
     std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
-
 
     std::string volume;
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
@@ -58,7 +63,7 @@ private:
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
-    //void subscribeToLineBankEvents();
+    // void subscribeToLineBankEvents();
 
 public:
     // Constructor
@@ -68,12 +73,12 @@ public:
     void setVolume(std::string);
     std::string getID();
 
-    //void setChannelStrip(std::string stripID);
-    void linkDspDescriptor(int *dspDescriptor);
+    // void setChannelStrip(std::string stripID);
+    //void linkDspDescriptor(int *dspDescriptor);
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 
-    void channelStripFaderEventCallback(const std::string faderValue, Bank bank,const std::string &channelStripID);
+    void channelStripFaderEventCallback(const std::string faderValue, Bank bank, const std::string &channelStripID);
     void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID);
     void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID);
 

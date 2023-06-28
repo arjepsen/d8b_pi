@@ -34,7 +34,9 @@ uint8_t Channel::nextChannelNumber = 0;
 Channel::Channel()
     : channelID{dspChannelIDs[nextChannelNumber]}, // Get unique channel ID for dsp commands.
       channelNumber{nextChannelNumber},            // Set unique channel number.
-      eventBus(EventBus::getInstance())            // Get the eventbus instance.
+      eventBus(EventBus::getInstance()),           // Get the singleton instances
+      brainCom(BrainCom::getInstance()),
+      dspCom(DspCom::getInstance())
 {
     // Set up variables for initial channel strip event subscription
     int initialAssociateStripNumber = channelNumber;
@@ -51,6 +53,11 @@ Channel::Channel()
     std::stringstream stream;
     stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << initialAssociateStripNumber;
     std::string initialAssociateChannelStripID = stream.str();
+
+    // Put the initial channel strip ID in the associate map, for the initial bank:
+    std::unordered_set<std::string> initialStripSet {initialAssociateChannelStripID};
+    associatedChannelStrips[initialAssociateBank] = initialStripSet;
+
 
     // Subscribe to events on the given bank and strip.
     eventBus.bankEventSubscribe
@@ -98,7 +105,8 @@ void Channel::setVolume(std::string volumeValue)
     // Construct DSP command, and send it.
     std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
     if (!mute)
-        write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+        //write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+        dspCom.send(volumeCommand);
 }
 
 // ###########################################################################################################################
@@ -117,12 +125,11 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue, const
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
 
     if (!mute)
-        write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+        //write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+        dspCom.send(volumeCommand);
 
     // Update volume member
     volume = faderValue;
-
-    printf("dsp command was sent\n");
 
     // Retrieve the set of associated channel strips on the current bank.
     std::unordered_set<std::string> associateStrips = associatedChannelStrips[bank];
@@ -130,16 +137,14 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue, const
     // Remove the calling channelStripID (it was moved by hand...)
     associateStrips.erase(channelStripID);
 
-    printf("Just about to send brain commands.\n");
     // Iterate through the set, send move command
     for (auto &stripID : associateStrips)
     {
         std::string faderCommand = stripID + faderValue + "f";
-        write(*brainDescriptorPtr, faderCommand.c_str(), volumeCommand.length());
+        //write(*brainDescriptorPtr, faderCommand.c_str(), volumeCommand.length());
+        brainCom.send(faderCommand);
     }
 
-
-    printf("going for association\n");
     // Now make an event post, for the UI strips to get updated
     eventBus.associateChStripEventPost(associatedChannelStrips[bank], FADER_EVENT, faderValue);
 }
@@ -176,13 +181,13 @@ std::string Channel::getID()
     return channelID;
 }
 
-void Channel::linkDspDescriptor(int *dspDescriptor)
-{
-    printf("############============= LIIIINKIIIIING ==============##########################\n");
-    dspDescriptorPtr = dspDescriptor;
-    if (!dspDescriptor)
-        printf("passed pointer invalid\n");
-    if (!dspDescriptorPtr)
-        printf("link invalid\n");
-}
+// void Channel::linkDspDescriptor(int *dspDescriptor)
+// {
+//     printf("############============= LIIIINKIIIIING ==============##########################\n");
+//     dspDescriptorPtr = dspDescriptor;
+//     if (!dspDescriptor)
+//         printf("passed pointer invalid\n");
+//     if (!dspDescriptorPtr)
+//         printf("link invalid\n");
+// }
 
