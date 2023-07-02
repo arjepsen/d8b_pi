@@ -41,6 +41,7 @@ ChannelStripComponent::ChannelStripComponent ()
     // ################################ MY CONSTRUCTOR STUFF##########################################
 
     // Give each new channelStripComponent a unique hex ID string, from "00" and upwards.
+    // This corresponds to "channelStripID" in other places of the program.
     std::stringstream stream;
     stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
     channelStripComponentID = stream.str();
@@ -55,6 +56,20 @@ ChannelStripComponent::ChannelStripComponent ()
             precomputedLog10Values[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
         }
     }
+
+    // Precompute the map of fader/vpot values and their corresponding DSP hex strings:
+    for (int i = -900; i <= 100; i++)
+    {
+        float faderValue = i / 10.0f;
+        int dspValue = static_cast<int>((pow(10, (faderValue + 90) / 100.0) - 1) / 9.0 * 255);
+
+
+        // Convert dspValue to 2-digit uppercase hex string, and store in map
+        std::stringstream hexStream;
+        hexStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << dspValue;
+        dspHexLookupMap[faderValue] = hexStream.str();
+    }
+
 
     // Add the callbacks to the eventBus
     eventBus.chStripComponentSubscribe(channelStripComponentID, FADER_EVENT,
@@ -992,14 +1007,15 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
         //[UserSliderCode_fader] -- add your slider handling code here..
 
         // Fader was moved in the UI.
-        float newFaderValue = sliderThatWasMoved->getValue();
-        printf("fader was moved in UI\n");
+        //float newFaderValue = sliderThatWasMoved->getValue();
+        float newFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
+        std::string dspFaderValue = dspHexLookupMap[newFaderValue];
 
-        // Use callback to send value to MainComponent
-        // faderMoveCallback(channelStripComponentID, newFaderValue);
+        // Use event post
+        eventBus.postEvent(FADER_EVENT, channelStripComponentID, dspFaderValue, UI_EVENT);
+        //std::cout << "Fader Value: " << newFaderValue << std::endl;
+        //std::cout << "Map lookup value: " << dspHexLookupMap[newFaderValue] << std::endl;
 
-
-        //TODO: INSTEAD MAKE IT AN EVENT POST
 
         //[/UserSliderCode_fader]
     }

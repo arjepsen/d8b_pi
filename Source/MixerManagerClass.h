@@ -32,7 +32,7 @@
 #include <cstdint>
 #include <termios.h>
 #include <unordered_map>
-#include "BankEnum.h"
+//#include "BankEnum.h" // moved to eventbus
 #include "ChannelIDMap.h"
 #include "ChannelStripComponent.h"
 #include "MasterChannelClass.h"

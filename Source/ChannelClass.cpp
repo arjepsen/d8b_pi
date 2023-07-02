@@ -26,7 +26,6 @@
 // Set first channel ID. This will increment with every channel object constructed.
 uint8_t Channel::nextChannelNumber = 0;
 
-
 // ############################### CONSTRUCTOR #########################################
 // Channel Constructor. Set up channel number and get channel dsp ID from channelIDMap.h
 // Convert channel number to channelStripID for the associate map.
@@ -55,26 +54,22 @@ Channel::Channel()
     std::string initialAssociateChannelStripID = stream.str();
 
     // Put the initial channel strip ID in the associate map, for the initial bank:
-    std::unordered_set<std::string> initialStripSet {initialAssociateChannelStripID};
+    std::unordered_set<std::string> initialStripSet{initialAssociateChannelStripID};
     associatedChannelStrips[initialAssociateBank] = initialStripSet;
 
-
     // Subscribe to events on the given bank and strip.
-    eventBus.bankEventSubscribe
-    (
+    eventBus.bankEventSubscribe(
         initialAssociateBank,
-        //FADER_EVENT,
+        // FADER_EVENT,
         initialAssociateChannelStripID,
-        [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID)
-        { this->channelStripFaderEventCallback(faderValue, bank, channelStripID); },
-        [this](const std::string &vpotValue, const Bank bank, const std::string &channelStripID)
-        { this->channelStripVpotEventCallback(vpotValue, bank, channelStripID); },
-        [this](const std::string &buttonValue, const Bank bank, const std::string &channelStripID)
-        { this->channelStripVpotEventCallback(buttonValue, bank, channelStripID); },
+        [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID, EventSource source)
+        { this->channelStripFaderEventCallback(faderValue, bank, channelStripID, source); },
+        [this](const std::string &vpotValue, const Bank bank, const std::string &channelStripID, EventSource source)
+        { this->channelStripVpotEventCallback(vpotValue, bank, channelStripID, source); },
+        [this](const std::string &buttonValue, const Bank bank, const std::string &channelStripID, EventSource source)
+        { this->channelStripVpotEventCallback(buttonValue, bank, channelStripID, source); },
         [this](const Bank bank, const std::string &channelStripID)
-        { this->removeChStripAssociationCallback(bank, channelStripID); }
-    );
-
+        { this->removeChStripAssociationCallback(bank, channelStripID); });
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
     mute = false;
@@ -93,7 +88,6 @@ Channel::Channel()
 
 // Implement other member functions...
 
-
 // #######################################################################################
 // This method updates the channel object's volume member, and sends a command to the DSP
 // #######################################################################################
@@ -105,7 +99,7 @@ void Channel::setVolume(std::string volumeValue)
     // Construct DSP command, and send it.
     std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
     if (!mute)
-        //write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+        // write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
         dspCom.send(volumeCommand);
 }
 
@@ -114,42 +108,59 @@ void Channel::setVolume(std::string volumeValue)
 // First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
-void Channel::channelStripFaderEventCallback(const std::string faderValue, const Bank bank, const std::string &channelStripID)
+void Channel::channelStripFaderEventCallback(const std::string faderValue,
+                                             const Bank bank,
+                                             const std::string &channelStripID,
+                                             EventSource source)
 {
 
     // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
 
-    printf("fader event callbacker\n");
+    // TODO: Master fader...??
+
 
     // Construct DSP volume command, and send it.
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
 
     if (!mute)
-        //write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+        // write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
         dspCom.send(volumeCommand);
 
     // Update volume member
     volume = faderValue;
 
-    // Retrieve the set of associated channel strips on the current bank.
-    std::unordered_set<std::string> associateStrips = associatedChannelStrips[bank];
+    // Retrieve the set of associated CONSOLE channel strips on the current bank.
+    std::unordered_set<std::string> associatedConsoleStrips = associatedChannelStrips[bank];
 
-    // Remove the calling channelStripID (it was moved by hand...)
-    associateStrips.erase(channelStripID);
+    // Make a copy for the associated UI channel strips on the current bank.
+    std::unordered_set<std::string> associatedUiStrips = associatedConsoleStrips;
 
-    // Iterate through the set, send move command
-    for (auto &stripID : associateStrips)
+    // Depending on whether the event was triggered by CONSOLE or UI, remove the ID that was activated
+    if (source == CONSOLE_EVENT)
+    {
+        associatedConsoleStrips.erase(channelStripID);
+        
+    }
+    else
+    {
+        associatedUiStrips.erase(channelStripID);
+    }
+
+    // Iterate through the set, send move command to move the console faders
+    for (auto &stripID : associatedConsoleStrips)
     {
         std::string faderCommand = stripID + faderValue + "f";
-        //write(*brainDescriptorPtr, faderCommand.c_str(), volumeCommand.length());
         brainCom.send(faderCommand);
     }
 
     // Now make an event post, for the UI strips to get updated
-    eventBus.associateChStripEventPost(associatedChannelStrips[bank], FADER_EVENT, faderValue);
+    eventBus.associateChStripEventPost(associatedUiStrips, FADER_EVENT, faderValue);
 }
 
-void Channel::channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID)
+void Channel::channelStripVpotEventCallback(const std::string vpotValue,
+                                            const Bank bank,
+                                            const std::string &channelStripID,
+                                            EventSource source)
 {
     // The supplied value is likely not a specific placement, but rather a number of how fast/far the pot was turned.
     // So the procedure here is:
@@ -160,9 +171,10 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue, const B
     // 5 - SEND AN ASSOCIATE EVENT POST FOR UPDATING THE UI
 }
 
-
-
-void Channel::channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID)
+void Channel::channelStripButtonEventCallback(const std::string buttonID,
+                                              const Bank bank,
+                                              const std::string &channelStripID,
+                                              EventSource source)
 {
     // SOME WORK TO BE DONE HERE...
 }
@@ -190,4 +202,3 @@ std::string Channel::getID()
 //     if (!dspDescriptorPtr)
 //         printf("link invalid\n");
 // }
-

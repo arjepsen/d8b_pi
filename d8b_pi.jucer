@@ -9,7 +9,6 @@
             resource="0" file="Source/BankMastersMessageHandlerClass.cpp"/>
       <FILE id="yWsvt6" name="BankMastersMessageHandlerClass.h" compile="0"
             resource="0" file="Source/BankMastersMessageHandlerClass.h"/>
-      <FILE id="KpurDA" name="BankEnum.h" compile="0" resource="0" file="Source/BankEnum.h"/>
       <FILE id="NqbSLb" name="BankEffectsMessageHandlerClass.cpp" compile="1"
             resource="0" file="Source/BankEffectsMessageHandlerClass.cpp"/>
       <FILE id="sSiSxy" name="BankEffectsMessageHandlerClass.h" compile="0"

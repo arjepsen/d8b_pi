@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "BankEnum.h"
+//#include "BankEnum.h" // moved to event bus
 #include "BrainComClass.h"
 #include "DspComClass.h"
 #include "EventBusClass.h"
@@ -78,9 +78,9 @@ public:
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 
-    void channelStripFaderEventCallback(const std::string faderValue, Bank bank, const std::string &channelStripID);
-    void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID);
-    void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID);
+    void channelStripFaderEventCallback(const std::string faderValue, Bank bank, const std::string &channelStripID, EventSource source);
+    void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID, EventSource source);
+    void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID, EventSource source);
 
     void removeChStripAssociationCallback(const Bank bank, const std::string channelStripID);
 };

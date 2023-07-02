@@ -16,6 +16,12 @@
 #include <string>
 
 
+// MAYBE WE MOVE THE DIFFERENCE IN BANK HANDLER TO THE EVENT BUS?
+// SO, THE MESSAGE HANDLER WILL BE SIMPLER, AND IN THE EVENT BUS, 
+// THERE WILL INSTEAD BE VARIOUS POINTERS TO THE SPECIFIC METHOD,
+// DEPENDING ON CHOSEN BANK?
+// FOR NOW: KEEP THESE STRUCTURES HERE, BUT IMPLEMENT THE DIFFERENT BANKS IN EVENTBUS
+
 void LineBankMessageHandler::handleMessage(const std::string &message)
 {
 
@@ -31,7 +37,8 @@ void LineBankMessageHandler::handleMessage(const std::string &message)
             std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
             std::string value = message.substr(2, 2);       // Get fader position from message
 
-			eventBus.lineBankEventPost(FADER_EVENT, channelStripID, value);
+            // eventBus.postEvent(FADER_EVENT, )
+			// eventBus.lineBankEventPost(FADER_EVENT, channelStripID, value);
 
 
             // MessageData msgStruct;
