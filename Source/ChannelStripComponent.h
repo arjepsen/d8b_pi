@@ -25,6 +25,7 @@
 #include <JuceHeader.h>
 #include "EventBusClass.h"
 #include <array>
+#include "FaderValueLookupClass.h"
 
 
 
@@ -84,12 +85,13 @@ private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
 	EventBus &eventBus;        // Reference to EventBus singleton.
+    FaderValueLookup &faderValueLookup;
 
     std::string channelStripComponentID;
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
-	//const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
-    static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
-    std::map<float, std::string> dspHexLookupMap;   // Map for correlating the possible UI fader values to their dsp hex values.
+	// //const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
+    // static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
+    // std::map<float, std::string> dspHexLookupMap;   // Map for correlating the possible UI fader values to their dsp hex values.
 
 
 

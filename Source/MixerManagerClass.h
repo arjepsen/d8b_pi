@@ -69,11 +69,11 @@ private:
     //CircularBuffer circBuffer;
 
     // MessageHandler objects
-    MessageHandler *messageHandler;
-    LineBankMessageHandler lineBankMessageHandler;
-    TapeBankMessageHandler tapeBankMessageHandler;
-    EffectsBankMessageHandler effectsBankMessageHandler;
-    MastersBankMessageHandler mastersBankMessageHandler;
+    // MessageHandler *messageHandler;
+    // LineBankMessageHandler lineBankMessageHandler;
+    // TapeBankMessageHandler tapeBankMessageHandler;
+    // EffectsBankMessageHandler effectsBankMessageHandler;
+    // MastersBankMessageHandler mastersBankMessageHandler;
 
     // Channel and Channelstrip
     static constexpr uint8_t CHANNEL_COUNT = 48;
@@ -149,7 +149,7 @@ public:
 
     void initMixer(juce::Button *initMixerBtn);
 
-    void setBank(Bank bank);
+    //void setBank(Bank bank);
 
     void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
     // void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);

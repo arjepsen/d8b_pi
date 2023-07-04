@@ -28,8 +28,25 @@
 
 //==============================================================================
 MasterStripComponent::MasterStripComponent ()
+    : eventBus(EventBus::getInstance()),
+      faderValueLookup(FaderValueLookup::getInstance())
 {
     //[Constructor_pre] You can add your own custom stuff here..
+    // ################## MY CONSTRUCTOR STUFF ###################
+
+    // Add the callbacks to the eventBus
+    eventBus.masterStripComponentSubscribe(FADER_EVENT,
+                                           [this](const std::string &valueString)
+                                           { this->faderMoveEventCallback(valueString); });
+    eventBus.masterStripComponentSubscribe(VPOT_EVENT,
+                                           [this](const std::string &valueString)
+                                           { this->vpotTurnEventCallback(valueString); });
+    eventBus.masterStripComponentSubscribe(BUTTON_EVENT,
+                                           [this](const std::string &valueString)
+                                           { this->buttonEventCallback(valueString); });
+
+    // ##################### END OF MY CONSTRUCTOR STUFF ##################
+
     //[/Constructor_pre]
 
     masterFader.reset (new juce::Slider ("Master Fader"));
@@ -656,11 +673,12 @@ void MasterStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved)
     {
         //[UserSliderCode_masterFader] -- add your slider handling code here..
 
-        // Master fader was moved - get the new value
-        float newMasterFaderValue = sliderThatWasMoved->getValue();
+        // Fader was moved in the UI.
+        float newMasterFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
+        std::string dspMasterFaderValue = faderValueLookup.dspHexLookupMap[newMasterFaderValue];
 
-        // Use callback to send value to MainComponent
-        masterFaderMoveCallback(newMasterFaderValue);
+        // Use event post (hardcoded strip ID - master is 18)
+        eventBus.postEvent(FADER_EVENT, "18", dspMasterFaderValue, UI_EVENT);
 
         //[/UserSliderCode_masterFader]
     }
@@ -830,13 +848,55 @@ void MasterStripComponent::buttonClicked (juce::Button* buttonThatWasClicked)
 
 void MasterStripComponent::setMasterFaderPosition(double value)
 {
-    juce::MessageManager::callAsync([this, value]() { masterFader.get()->setValue(value, juce::dontSendNotification); });
+    juce::MessageManager::callAsync([this, value]()
+                                    { masterFader.get()->setValue(value, juce::dontSendNotification); });
 }
 
 // void MasterStripComponent::setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction)
 // {
 // 	masterFaderMoveCallback = callbackFunction;
 // }
+
+// ################################################################################################
+// This is a callback method to be used by the eventBus. It will be called, when the master object
+// has sent it's commands to the DSP, and Brain, and all that is left is to update the UI.
+// It looks up the value in the precomputed map, and sets the fader to the given value.
+// ################################################################################################
+void MasterStripComponent::faderMoveEventCallback(std::string faderHexValue)
+{
+    int decimalValue = std::stoi(faderHexValue, nullptr, 16);
+    float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
+    juce::MessageManager::callAsync([this, logValue]()
+                                    { masterFader.get()->setValue(logValue, juce::dontSendNotification); });
+}
+
+// ####################################################
+// Same as above, this just updates the VPot in the UI. This value should probably already be calculated
+// in the MasterChannel class?
+// ####################################################
+void MasterStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
+{
+    // TODO: Check what value we would get here....
+
+    // int decimalValue = std::stoi(vpotHexValue, nullptr, 16);
+    // float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
+    // juce::MessageManager::callAsync([this, logValue]()
+    //                                 { masterVpot.get()->setValue(logValue, juce::dontSendNotification); });
+}
+
+// #####################################################################################################
+// This is the callback for a button event. This might be somewhat different than a button event,
+// although this is primarily for updating the UI, after the Channel class has handled the button press.
+// #####################################################################################################
+void MasterStripComponent::buttonEventCallback(std::string buttonValue)
+{
+    // TODO implement handling of channel strip buttons.
+}
+
+
+
+
+
 //[/MiscUserCode]
 
 
@@ -850,7 +910,7 @@ void MasterStripComponent::setMasterFaderPosition(double value)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="MasterStripComponent" componentName=""
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers=""
+                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;faderValueLookup(FaderValueLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ff323e44">

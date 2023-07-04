@@ -60,7 +60,6 @@ Channel::Channel()
     // Subscribe to events on the given bank and strip.
     eventBus.bankEventSubscribe(
         initialAssociateBank,
-        // FADER_EVENT,
         initialAssociateChannelStripID,
         [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID, EventSource source)
         { this->channelStripFaderEventCallback(faderValue, bank, channelStripID, source); },
@@ -70,6 +69,10 @@ Channel::Channel()
         { this->channelStripVpotEventCallback(buttonValue, bank, channelStripID, source); },
         [this](const Bank bank, const std::string &channelStripID)
         { this->removeChStripAssociationCallback(bank, channelStripID); });
+
+
+
+
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
     mute = false;

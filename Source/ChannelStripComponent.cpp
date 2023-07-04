@@ -29,13 +29,14 @@
 // Set first channel ID. This will increment with every channel object constructed.
 int ChannelStripComponent::nextChannelStripComponentID = 0;
 
-std::array<float, 256> ChannelStripComponent::precomputedLog10Values;
+//std::array<float, 256> ChannelStripComponent::precomputedLog10Values;
 
 //[/MiscUserDefs]
 
 //==============================================================================
 ChannelStripComponent::ChannelStripComponent ()
-    : eventBus(EventBus::getInstance())
+    : eventBus(EventBus::getInstance()),
+      faderValueLookup(FaderValueLookup::getInstance())
 {
     //[Constructor_pre] You can add your own custom stuff here..
     // ################################ MY CONSTRUCTOR STUFF##########################################
@@ -46,29 +47,29 @@ ChannelStripComponent::ChannelStripComponent ()
     stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
     channelStripComponentID = stream.str();
 
-    // Precompute the array of logarithms the first time this class is instantiated.
-    // This is done to avoid slow log10 computations during runtime, so we can look up the result in an array.
-    if (precomputedLog10Values[0] != -90.0) // Check if array has already been computed. (then first element would be -90)
-    {
-        const float logFactor = 9.0 / 255; // Factor used in linear byte to fader log scale conversion.
-        for (int i = 0; i <= 0xFF; ++i)
-        {
-            precomputedLog10Values[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
-        }
-    }
+    // // Precompute the array of logarithms the first time this class is instantiated.
+    // // This is done to avoid slow log10 computations during runtime, so we can look up the result in an array.
+    // if (precomputedLog10Values[0] != -90.0) // Check if array has already been computed. (then first element would be -90)
+    // {
+    //     const float logFactor = 9.0 / 255; // Factor used in linear byte to fader log scale conversion.
+    //     for (int i = 0; i <= 0xFF; ++i)
+    //     {
+    //         precomputedLog10Values[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
+    //     }
+    // }
 
-    // Precompute the map of fader/vpot values and their corresponding DSP hex strings:
-    for (int i = -900; i <= 100; i++)
-    {
-        float faderValue = i / 10.0f;
-        int dspValue = static_cast<int>((pow(10, (faderValue + 90) / 100.0) - 1) / 9.0 * 255);
+    // // Precompute the map of fader/vpot values and their corresponding DSP hex strings:
+    // for (int i = -900; i <= 100; i++)
+    // {
+    //     float faderValue = i / 10.0f;
+    //     int dspValue = static_cast<int>((pow(10, (faderValue + 90) / 100.0) - 1) / 9.0 * 255);
 
 
-        // Convert dspValue to 2-digit uppercase hex string, and store in map
-        std::stringstream hexStream;
-        hexStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << dspValue;
-        dspHexLookupMap[faderValue] = hexStream.str();
-    }
+    //     // Convert dspValue to 2-digit uppercase hex string, and store in map
+    //     std::stringstream hexStream;
+    //     hexStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << dspValue;
+    //     dspHexLookupMap[faderValue] = hexStream.str();
+    // }
 
 
     // Add the callbacks to the eventBus
@@ -1007,15 +1008,11 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
         //[UserSliderCode_fader] -- add your slider handling code here..
 
         // Fader was moved in the UI.
-        //float newFaderValue = sliderThatWasMoved->getValue();
         float newFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
-        std::string dspFaderValue = dspHexLookupMap[newFaderValue];
+        std::string dspFaderValue = faderValueLookup.dspHexLookupMap[newFaderValue];
 
         // Use event post
         eventBus.postEvent(FADER_EVENT, channelStripComponentID, dspFaderValue, UI_EVENT);
-        //std::cout << "Fader Value: " << newFaderValue << std::endl;
-        //std::cout << "Map lookup value: " << dspHexLookupMap[newFaderValue] << std::endl;
-
 
         //[/UserSliderCode_fader]
     }
@@ -1320,7 +1317,7 @@ void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
     int decimalValue = std::stoi(faderHexValue, nullptr, 16);
     // double faderValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
     // setFaderPosition(precomputedLog10Values[decimalValue]);
-    float logValue = precomputedLog10Values[decimalValue];
+    float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
     juce::MessageManager::callAsync([this, logValue]()
                                     { fader.get()->setValue(logValue, juce::dontSendNotification); });
 }
@@ -1330,10 +1327,15 @@ void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
 // ####################################################
 void ChannelStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
 {
-    int decimalValue = std::stoi(vpotHexValue, nullptr, 16);
-    float logValue = precomputedLog10Values[decimalValue];
-    juce::MessageManager::callAsync([this, logValue]()
-                                    { vPot.get()->setValue(logValue, juce::dontSendNotification); });
+    // THE BELOW ISNT WORKING - THE BRAIN SENDS A NUMBER BASED ON HOW FAST THE VPOT IS TURNED,
+    // AND IN WHICH DIRECTION - IT IS NOT A SPECIFIC SETTING. SO THE NEW SETTING HAS TO BE
+    // CALCULATED.....
+    // BUT SINCE THIS IS THE COMPONENT.... MAYBE WE ALREADY DID THAT CALCULATION IN THE CHANNEL CLASS?
+
+    // int decimalValue = std::stoi(vpotHexValue, nullptr, 16);
+    // float logValue = precomputedLog10Values[decimalValue];
+    // juce::MessageManager::callAsync([this, logValue]()
+    //                                 { vPot.get()->setValue(logValue, juce::dontSendNotification); });
 }
 
 // #####################################################################################################
@@ -1358,7 +1360,7 @@ void ChannelStripComponent::buttonEventCallback(std::string buttonValue)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="ChannelStripComponent" componentName="ChannelStripComponent"
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance())"
+                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;    faderValueLookup(FaderValueLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="75" initialHeight="1024">
   <BACKGROUND backgroundColour="ff242d31">

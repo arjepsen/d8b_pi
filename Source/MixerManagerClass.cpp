@@ -39,8 +39,8 @@ MixerManager::MixerManager()
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       circBuffer(CircularBuffer::getInstance()),
-      isInitializing(false),
-      messageHandler(&lineBankMessageHandler)   
+      isInitializing(false)
+      //messageHandler(&lineBankMessageHandler)   
 {
     std::cout << "MixerManger Constructor" << std::endl;
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
@@ -52,10 +52,6 @@ MixerManager::MixerManager()
     // MAKE DIFFERENT CALLBAKCS FOR EACH BRAIN MESSAGE (fader, vpot, btndwn, btnup)
 
 
-    // REMOVE THIS - WE ARE GOING TO USE EVENT BUS INSTEAD
-    // lineBankMessageHandler.setCallbackFunction([this](const MessageData &messageData)
-    //                                            { this->faderMessageCallback(messageData); });
-    // SAME FOR THE OTHER FOUR
 
     // Set up channelstrip map of pointers to channel objects. (initially Line bank, ch. 1-24)
     for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
@@ -231,21 +227,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 // Start the communication threads.
                 brainCom.startReceiverThread();
                 dspCom.startReceiverThread();
-
-                // brainReceiverThread = std::thread(&MixerManager::brainMessageReceiver, this);
-                // dspReceiverThread = std::thread(&MixerManager::dspMessageReceiver, this);
-
                 messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
-
-                // // Channels are already constructed by now, so they should have their default values already.
-                // // Run a for loop to set up stuff that all channel objects need:
-                // for (auto channel : channels)
-                // {
-                //     // Set the reference to the dspDescriptor:
-                //     channel.linkDspDescriptor(&dspDescriptor);
-                // }
-                // NOT NEEDED - WE REFERENCE THE BrainCom and DspCom in the channels.
-
 
                 isInitializing = false;
 
@@ -258,162 +240,6 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
     }
 }
 
-// // ###################################################################################
-// // Method that opens a serial port for communication. It returns a file descriptor.
-// // ###################################################################################
-// int MixerManager::openSerialPort(const char *devicePath, speed_t baudRate)
-// {
-//     DEBUG_MSG("Opening Serial port for %s @ %d\n", devicePath, baudRate);
-//     struct termios options;
-//     int fd = open(devicePath, O_RDWR | O_NOCTTY);
-//     if (fd < 0)
-//     {
-//         perror("Error opening serial device");
-//         // exit(1);
-//         return -1;
-//     }
-
-//     // Get current options
-//     tcgetattr(fd, &options);
-
-//     // Set baud rate
-//     cfsetispeed(&options, baudRate);
-//     cfsetospeed(&options, baudRate);
-
-//     // Set terminal mode
-//     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-//     options.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-//     options.c_oflag &= ~(OPOST | ONLCR);
-
-//     // Set data format
-//     options.c_cflag &= ~(PARENB | PARODD | CMSPAR | CSTOPB | CSIZE);
-//     options.c_cflag |= CS8;
-
-//     // Set input control options
-//     options.c_iflag &= ~(INPCK | IXOFF | IUCLC | IXANY | IMAXBEL | IUTF8);
-//     options.c_cc[VMIN] = 0;
-//     options.c_cc[VTIME] = 5;
-
-//     // Apply the new settings
-//     tcflush(fd, TCIOFLUSH);
-//     tcsetattr(fd, TCSANOW, &options);
-
-//     // Return the file descriptor for the port.
-//     return fd;
-// }
-
-// ###############################################################################
-// This method sets up the loop for the thread that reads messages from the Brain.
-// The method assumes that ALL messages end with a lower case letter, and also
-// assumes, that a message always is sent in full, and are NOT "split" by the
-// heartbeats ('l / 'k').
-// ###############################################################################
-
-
-//  !!!!!! CHANGE TO USE WRITER CLASSES INSTEAD  !!!!!!!!!!!!!!!!
-// void MixerManager::brainMessageReceiver()
-// {
-//     // Clear screen before entering loop.
-//     //write(brainDescriptor, "01u", 3);
-//     brain.sendCmd("01u");
-//     usleep(20000);
-
-//     char recvChar = '\0';
-//     std::string message = "";
-//     int result;
-
-//     // Clear com buffer for starting out
-//     //tcflush(brainDescriptor, TCIOFLUSH);
-//     brain.flushBuffer();
-
-//     DEBUG_MSG("running brain message loop\n");
-//     // Run the infinite loop.
-//     while (true)
-//     {
-//         result = read(brainDescriptor, &recvChar, 1);
-
-//         if (result == 1) // One char was recevied.
-//         {
-//             message += recvChar;
-
-//             // A lower case letter means message complete.
-//             if (recvChar >= 'a' && recvChar <= 'z')
-//             {
-//                 // printf("brain message: %s\n", message.c_str());
-
-//                 if (recvChar == 'l' || recvChar == 'k')
-//                 {
-//                     printf("hearbeat: %c\n", recvChar);
-//                     heartBeatReceived();
-//                 }
-//                 else
-//                     circBuffer.push(message.c_str()); // Push message to the circular buffer.
-//                 message = "";                         // Reset message string.
-//             }
-//         }
-
-//         else if (result < 0)
-//         {
-//             perror("Error reading from file descriptor");
-//             exit(1);
-//         }
-//         else if (result == 0) // 0 chars recevied - EOF
-//         {
-//             // Should we add any special functionality here??
-//         }
-//     }
-
-//     // We probably shouldn't get here... but just in case.
-//     printf("\n\n########################## BRAIN LOOP EXITED!!!!!!! ##############################\n");
-// }
-
-// // ###############################################################################
-// // Like the brainMessageReceiver... same... but different...
-// // ###############################################################################
-// void MixerManager::dspMessageReceiver()
-// {
-//     // Set up the file descriptor for the DSP port.
-//     // const int DSP = openSerialPort(getDspPort().c_str(), B115200);
-
-//     char recvChar = '\0';
-//     std::string message = "";
-//     int result;
-
-//     // Clear com buffer for starting out
-//     tcflush(dspDescriptor, TCIOFLUSH);
-
-//     DEBUG_MSG("Running dsp message loop\n");
-//     while (true)
-//     {
-//         result = read(dspDescriptor, &recvChar, 1);
-
-//         if (result == 1)
-//         {
-//             message += recvChar;
-//             if (recvChar >= 'a' && recvChar <= 'z')
-//             {
-//                 printf("dsp message: %s\n", message.c_str());
-//                 // Lower case letter received, message complete. push to buffer.
-//                 circBuffer.push(message.c_str());
-//                 message = "";
-//             }
-//         }
-
-//         else if (result < 0)
-//         {
-//             perror("Error reading from file descriptor");
-//             exit(1);
-//         }
-//         else if (result == 0)
-//         {
-//             // EOF
-//             // should any handling happen here?
-//         }
-//     }
-
-//     // This should not happen
-//     printf("\n\n############### DSP READER THREAD EXITED!!!!\n");
-// }
 
 // #################################################################################
 // This method is a "dispatcher" sort of thing, which is called
@@ -442,7 +268,7 @@ void MixerManager::handleBufferMessage()
                 std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 std::string value = message.substr(2, 2);       // Get fader position from message
 
-                //eventBus.lineBankEventPost(FADER_EVENT, channelStripID, value);
+                
                 eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
                 break;
             }
@@ -467,84 +293,7 @@ void MixerManager::handleBufferMessage()
 //     // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
 // }
 
-// #########################################################################################
-// This method is used for switching bank message handler.
-// The Brain will send the same messages on various activity (fader move, etc..), regardless
-// of which bank is selected, so we need to assign a specific message handler, depending on
-// which bank is currently selected.
-// #########################################################################################
-void MixerManager::setBank(Bank bank)
-{
 
-
-
-    // MAYBE HERE WE SHOULD UPDATE A REGISTER IN EVENT BUS ???
-
-    switch (bank)
-    {
-        case LINE_BANK:
-            messageHandler = &lineBankMessageHandler;
-            break;
-        case TAPE_BANK:
-            messageHandler = &tapeBankMessageHandler;
-            break;
-        case EFFECTS_BANK:
-            messageHandler = &effectsBankMessageHandler;
-            break;
-        case MASTERS_BANK:
-            messageHandler = &mastersBankMessageHandler;
-            break;
-        default:;
-            // Handle invalid bank input.
-    }
-}
-
-// void MixerManager::messageHandlerCallback(const MessageData &messageData)
-// {
-//     DEBUG_MSG("Callback Function in MixerManager called.\n");
-
-//     // FIGURE OUT WHAT TYPE OF MESSAGE, WHICH WILL TELL US WHERE TO SEND IT.
-//     // Then update ui...
-
-//     // REDO, AS SPECIFIC CALLLS FOR EACH TYPE OF BRAIN MESSAGE (fader, vpot, btn, etc.)
-
-//     // Use the pointer in the channelstrip map to call the actual channel object
-//     channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
-
-//     double uiValue = mapToSliderScale(messageData.value);
-
-//     int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
-
-//     chStripComponents[channelStripIndex].setFaderPosition(uiValue);
-
-//     // WHERE DO WE HANDLE THE UI CHANGES? HERE? IN CHANNEL? IN MSGHANDLER????
-// }
-
-// void MixerManager::faderMessageCallback(const MessageData &messageData)
-// {
-//     // Handle non-master fader moves.
-//     if (messageData.channelStrip != "18")
-//     {
-//         // Use channelStrip map to call channel object's setvolume mehod
-//         channelStripMap[messageData.channelStrip]->setVolume(messageData.value, dspDescriptor);
-
-//         // Calculate the UI fader value to show
-//         double uiValue = mapToSliderScale(messageData.value);
-
-//         // Get the integer index of the channelstrip that was moved
-//         int channelStripIndex = std::stoi(messageData.channelStrip, nullptr, 16);
-
-//         // Update UI
-//         chStripComponents[channelStripIndex].setFaderPosition(uiValue);
-//     }
-//     else
-//     {
-//         // Master fader was moved. Use MasterChannel class' method:
-//         masterChannel.setMasterVolume(messageData.value, dspDescriptor);
-
-//         // Update UI
-//     }
-// }
 
 // #########################################################################################
 // Method to a pointer to the channel Strip Component array from the MainComponent.

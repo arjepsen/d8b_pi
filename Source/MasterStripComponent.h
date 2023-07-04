@@ -21,6 +21,8 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
+#include "EventBusClass.h"
+#include "FaderValueLookupClass.h"
 //[/Headers]
 
 
@@ -48,6 +50,10 @@ public:
 
     void setMasterFaderPosition(double value);
 
+	void faderMoveEventCallback(std::string faderValue);
+    void vpotTurnEventCallback(std::string vpotValue);
+    void buttonEventCallback(std::string buttonValue);
+
     //void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
     //TODO: Set it up through event bus instead.
 
@@ -63,8 +69,11 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+    EventBus &eventBus;        // Reference to EventBus singleton.
+    FaderValueLookup &faderValueLookup;
 
 	std::function<void(float)> masterFaderMoveCallback;
+
 
 
     //[/UserVariables]

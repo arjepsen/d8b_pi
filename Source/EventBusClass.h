@@ -73,6 +73,9 @@ private:
     // Trying with the array for event type, these are only for updating UI, they only provide an event type, and the value:
     std::array<std::unordered_map<std::string, std::function<void(const std::string &)>>, EVENT_TYPE_COUNT> chStripComponentCallbacks;
 
+    // This .... holds the callbacks for the MasterStripComponent
+    std::array<std::function<void(const std::string&)>, EVENT_TYPE_COUNT> masterStripComponentCallback;
+
     Bank currentBank;
 
 public:
@@ -92,6 +95,8 @@ public:
     void chStripComponentSubscribe(const std::string stripID,
                                    const BankEventType eventType,
                                    std::function<void(const std::string &)> chStripCompCallback);
+
+    void masterStripComponentSubscribe(const BankEventType eventType, std::function<void(const std::string &)> masterStripCompCallback);
 
     // ############################################# EVENT POST DECLARATIONS #############################################
 
@@ -116,6 +121,9 @@ public:
     // this should receive a set of associate channels, an event type, and the value. DO WE NEED BANK?
     // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
     void associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+    void associateMasterEventPost(BankEventType eventType, std::string eventValue);
+    
+    
     void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
 
     // This method is used to switch bank - by changing the pointer

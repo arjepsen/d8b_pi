@@ -36,3 +36,6 @@ Maybe wait for now, to see how performance is.
 - really test circular buffer size.
 
 - change various constructors, to be able to initialize the setup from a given saved configuration.
+
+
+- Is there a mute function for the Master ? It could be implemented same as for channels, but is it there originally?

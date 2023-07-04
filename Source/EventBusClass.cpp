@@ -45,7 +45,6 @@ EventBus::~EventBus() {}
 //  (maybe this could be changed in the future?)
 // ##############################################################################################################
 void EventBus::bankEventSubscribe(Bank bank,
-                                  // BankEventType eventType,
                                   const std::string &channelStripID,
                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> faderCallback,
                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> vpotCallback,
@@ -79,25 +78,7 @@ void EventBus::bankEventSubscribe(Bank bank,
     callbackMap[channelStripID].unsubscribeCallback = removeSubscriptionCallback;
 }
 
-// void EventBus::lineBankEventPost(BankEventType eventType, const std::string &channelStripID, const std::string &eventValue)
-// {
-//     printf("post called\n");
-//     // Assume the command callback is registered... otherwise we might have an issue....
-//     // But we skip checking for the sake of speed :-D
-//     // Maybe if it is already effecient enough we can implement safechecks.
 
-//     lineBankCallbacks[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
-
-// }
-
-// void EventBus::tapeBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
-// void EventBus::effectsBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
-// void EventBus::mastersBankChStripPost(EventType eventType, std::string ChannelStripID, std::string eventValue) {}
-
-// SO.... in the channel class we keep a SET of which channelStrips are associeated with that particular channel.
-// Then actually there is no need to keep a seperate record of associated channelStripCOMPONENTS.....
-// Instead, we make a constant lookup table of channelStripID : componentCallback here.
-// BUT... we can't make that a constant..... can we?
 
 // ####################################################################################################################
 // When an event has fired, which calls a callback in a channel object (like moving a fader), the channel will the use
@@ -106,7 +87,6 @@ void EventBus::bankEventSubscribe(Bank bank,
 // ####################################################################################################################
 void EventBus::associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
 {
-    printf("association post\n");
     // Iterate over the set, reference channelstripID to map of channelStripComponent callbacks, run the callback.
     for (auto &stripID : channelStrips)
     {
@@ -114,6 +94,14 @@ void EventBus::associateChStripEventPost(std::unordered_set<std::string> channel
         // The callback takes the event value as parameter - it just mimicks the mixer, so no need for knowing bank here.
         chStripComponentCallbacks[eventType][stripID](eventValue);
     }
+}
+
+// #######################################################################################################################
+// This method is fired when a master strip event has happened, and we need to update the other (console or ui) interface.
+// #######################################################################################################################
+void EventBus::associateMasterEventPost(BankEventType eventType, std::string eventValue)
+{
+    masterStripComponentCallback[eventType](eventValue);
 }
 
 // ################################################################################################
@@ -136,6 +124,16 @@ void EventBus::chStripComponentSubscribe(const std::string stripID,
     }
 }
 
+// #####################################################################
+// This method is used to add the masterChannelStripComponent callbacks.
+// #####################################################################
+void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
+                                   std::function<void(const std::string &)> masterStripCompCallback)
+{
+    // Set the callback
+    masterStripComponentCallback[eventType] = masterStripCompCallback;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ##############################################################################################
@@ -147,14 +145,13 @@ void EventBus::postEvent(BankEventType eventType,
                          const std::string &eventValue,
                          EventSource source)
 {
-    //lineBankCallbacks[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
-    
+    // lineBankCallbacks[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
+
     //(*currentBankCallbacks)[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
     // The [] method creates a new element if the ID does not exist..... we dont want that.
     // ->at() will throw instead.
     currentBankCallbacks->at(channelStripID).callbackArray[eventType](eventValue, currentBank, channelStripID, source);
 }
-
 
 // ##################################################################################
 // This method is used to change poster method, depending on which bank is selected.
@@ -183,5 +180,3 @@ void EventBus::setBankPoster(Bank bank)
             // Handle invalid bank input.
     }
 }
-
-
