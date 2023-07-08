@@ -145,11 +145,6 @@ void EventBus::postEvent(BankEventType eventType,
                          const std::string &eventValue,
                          EventSource source)
 {
-    // lineBankCallbacks[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
-
-    //(*currentBankCallbacks)[channelStripID].callbackArray[eventType](eventValue, LINE_BANK, channelStripID);
-    // The [] method creates a new element if the ID does not exist..... we dont want that.
-    // ->at() will throw instead.
     currentBankCallbacks->at(channelStripID).callbackArray[eventType](eventValue, currentBank, channelStripID, source);
 }
 

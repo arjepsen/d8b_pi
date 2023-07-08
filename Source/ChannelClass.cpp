@@ -58,7 +58,8 @@ Channel::Channel()
     associatedChannelStrips[initialAssociateBank] = initialStripSet;
 
     // Subscribe to events on the given bank and strip.
-    eventBus.bankEventSubscribe(
+    eventBus.bankEventSubscribe
+    (
         initialAssociateBank,
         initialAssociateChannelStripID,
         [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID, EventSource source)
@@ -66,20 +67,24 @@ Channel::Channel()
         [this](const std::string &vpotValue, const Bank bank, const std::string &channelStripID, EventSource source)
         { this->channelStripVpotEventCallback(vpotValue, bank, channelStripID, source); },
         [this](const std::string &buttonValue, const Bank bank, const std::string &channelStripID, EventSource source)
-        { this->channelStripVpotEventCallback(buttonValue, bank, channelStripID, source); },
+        { this->channelStripButtonEventCallback(buttonValue, bank, channelStripID, source); },
         [this](const Bank bank, const std::string &channelStripID)
-        { this->removeChStripAssociationCallback(bank, channelStripID); });
+        { this->removeChStripAssociationCallback(bank, channelStripID); }
+    );
 
-
+    // Set initial Vpot handler method
+    currentVpotFunction = &Channel::handleVpotPan;
 
 
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
     mute = false;
 
+    pan = 0x7F; // Center
+
     // solo = false;
 
-    // pan = 127;  // Center (0x7F)
+
 
     // assignments[0] = true;  // Assign to L-R. All others should default to false.
 
@@ -87,6 +92,9 @@ Channel::Channel()
 
     // Increment the nextChannelNumber for the next channel construction.
     nextChannelNumber++;
+
+
+    // HERE AT THE BOTTOM MAYBE WE SHOULD SEND INITIAL SETTINGS TO THE DSP BOARD??
 }
 
 // Implement other member functions...
@@ -172,6 +180,22 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue,
     // 3 - SEND DSP (OR BRAIN?) COMMAND TO UPDATE WHAT THE VPOT IS CHOSEN TO CONTROL
     // 4 - UPDATE PRIVATE MEMBER
     // 5 - SEND AN ASSOCIATE EVENT POST FOR UPDATING THE UI
+    // --------------------------------------------------------------------------------
+
+    // So , I guess here it could make sense to use a pointer to a function, depending on what mode is selected:
+    // A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
+    // B - Aux Send Level (Aux1-8 buttons)
+    // C - Aux 9-10 / 11-12 send level for the stereo pair
+    // D - Aux 9-10 / 11-12 PAN pan control for the stereo pair.
+    // E - Level to tape
+    // F - Digital trim.
+
+    //The pots send values in same form as the faders. BUT the value is Fy for CCW and 0y for CW rotation, where y is the value depending on how fast the pot was turned.
+
+
+    // We may need to also do some map or array here, depending on bank?
+    (this->*currentVpotFunction)(vpotValue);
+
 }
 
 void Channel::channelStripButtonEventCallback(const std::string buttonID,
@@ -191,17 +215,64 @@ void Channel::removeChStripAssociationCallback(const Bank bank, const std::strin
     associatedChannelStrips[bank].erase(channelStripID);
 }
 
+// ARE WE USING THIS??
 std::string Channel::getID()
 {
     return channelID;
 }
 
-// void Channel::linkDspDescriptor(int *dspDescriptor)
-// {
-//     printf("############============= LIIIINKIIIIING ==============##########################\n");
-//     dspDescriptorPtr = dspDescriptor;
-//     if (!dspDescriptor)
-//         printf("passed pointer invalid\n");
-//     if (!dspDescriptorPtr)
-//         printf("link invalid\n");
-// }
+// ===========================================  VPOT EVENT HANDLERS  =======================================
+
+// ####################################################################################################################
+// The Brain board sends a message with the value "Fy" where "y" is the value to change, when the pan pot is moved CCW.
+// On a CW movement, the value is in the form "0y".
+// The value "y" is higher, the faster the pot is turned.
+// This method adds the current pan value with the received value. Since it's a byte, it wraps around, so Fy values 
+// becomes subtractive.
+// ####################################################################################################################
+void Channel::handleVpotPan(const std::string& vpotValue)
+{
+    // Convert hex string to signed int8_t.
+    int8_t panChangeValue = static_cast<int8_t>(std::stoi(vpotValue, nullptr, 16));
+    
+    // Perform the arithmetic operation using an signed 16-bit integer.
+     int16_t tempCalc = static_cast<int16_t>(pan) + panChangeValue;
+    
+    // Clamp the new value to the range 0-254.
+    uint8_t newPanValue = static_cast<uint8_t>(std::max(0, std::min(254, static_cast<int>(tempCalc))));
+
+    // Only continue if pan value is different than before
+    if (newPanValue != pan)
+    {        
+        // Use a stringstream to construct the DSP command  (xxFEFFXyyOFDFFXP, x is channelID, y is pan value)
+        std::stringstream ss;
+
+        // Add ID and first part
+        ss << channelID << "dFEFFX";
+
+        // Add the pan value
+        ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(newPanValue);
+
+        // Add last part of the command.
+        ss << "OFDFFXP";
+
+        // Send the DSP command
+        dspCom.send(ss.str());
+
+        // Update internal member value
+        pan = newPanValue;
+
+        // Post a ui event, for updating ..well..you know...the...uhm.....ui....
+        ASSOICIATIVE EventSource
+        UI EVENT POST..
+        check up against fader work, to see how it's done.
+    }
+}
+
+
+void Channel:: handleVpotAuxSend(const std::string& vpotValue)
+{
+    //WORK ON THESE
+
+
+}

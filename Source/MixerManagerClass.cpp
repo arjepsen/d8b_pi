@@ -274,11 +274,13 @@ void MixerManager::handleBufferMessage()
             }
             case 'v': // V-Pot turned
             {
-                printf("Pot Message: %s", message.c_str());
+                //printf("Pot Message: %s\n", message.c_str());
                 // Decipher which pot.
-                // Send relevant DSP command.
-                // Send relevant Brain command (led's)
-                // update UI
+
+                std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                std::string value = message.substr(2, 2);       // Get fader position from message
+
+                eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
                 break;
             }
         }

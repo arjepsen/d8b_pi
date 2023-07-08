@@ -22,6 +22,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+//#include <functional> // For pointers to vpot function depending on vpot mode.
 
 class Channel
 {
@@ -37,11 +38,35 @@ private:
     const uint8_t channelNumber;
     const std::string channelID; // unique ID for each channel (1 - 48)
 
+    // Map of all the channelstrips that are configured to control this channel.
     std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
+
+	// Type definition of the pointer to the current function to handle vpot events. 
+	typedef void (Channel::*VpotFunction)(const std::string&);
+
+	// Pointer to the currently selection vpot event handler function
+	VpotFunction currentVpotFunction;
+
+	// These are the possible vpot event handlers
+	void handleVpotPan(const std::string& message);
+	void handleVpotAuxSend(const std::string& message);
+
+	//... more....
+	// A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
+    // B - Aux Send Level (Aux1-8 buttons)
+    // C - Aux 9-10 / 11-12 send level for the stereo pair
+    // D - Aux 9-10 / 11-12 PAN pan control for the stereo pair.
+    // E - Level to tape
+    // F - Digital trim.
+
+
 
     std::string volume;
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
-    // uint8_t pan;             // (0 - FE) - weird things happen on "FF".
+    uint8_t pan;             // (0 - FE) - weird things happen on "FF".
+
+
+	//std::string panValue = "7F";	// Center
 
     bool mute; // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
                // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
@@ -81,8 +106,9 @@ public:
     void channelStripFaderEventCallback(const std::string faderValue, Bank bank, const std::string &channelStripID, EventSource source);
     void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID, EventSource source);
     void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID, EventSource source);
-
     void removeChStripAssociationCallback(const Bank bank, const std::string channelStripID);
+
+	void setVpotFunction(std::function<void(int)> func);	// {vPotFunction = func}
 };
 
 // // Should these be classes also??
