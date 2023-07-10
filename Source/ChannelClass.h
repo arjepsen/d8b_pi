@@ -22,6 +22,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include "LedIDMaps.h"
 //#include <functional> // For pointers to vpot function depending on vpot mode.
 
 class Channel
@@ -42,14 +43,14 @@ private:
     std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
 
 	// Type definition of the pointer to the current function to handle vpot events. 
-	typedef void (Channel::*VpotFunction)(const std::string&);
+	typedef void (Channel::*VpotFunction)(const std::string&, const Bank);
 
 	// Pointer to the currently selection vpot event handler function
 	VpotFunction currentVpotFunction;
 
 	// These are the possible vpot event handlers
-	void handleVpotPan(const std::string& message);
-	void handleVpotAuxSend(const std::string& message);
+	void handleVpotPan(const std::string& message, const Bank bank);
+	void handleVpotAuxSend(const std::string& message, const Bank bank);
 
 	//... more....
 	// A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
@@ -64,7 +65,25 @@ private:
     std::string volume;
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     uint8_t pan;             // (0 - FE) - weird things happen on "FF".
+	bool panDotCenter;
+	
 
+	// enum RingLED
+	// {
+	// 	RING_LED_1,
+	// 	RING_LED_2,
+	// 	RING_LED_3,
+	// 	RING_LED_4,
+	// 	RING_LED_5,
+	// 	RING_LED_6,
+	// 	RING_LED_7,
+	// 	RING_LED_8,
+	// 	RING_LED_9,
+	// 	RING_LED_10,
+	// 	RING_LED_11
+	// };
+
+	ChStripLed currentRingLED;
 
 	//std::string panValue = "7F";	// Center
 

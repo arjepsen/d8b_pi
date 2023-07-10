@@ -67,6 +67,7 @@
       <FILE id="cfuxAA" name="FXSlotClass.h" compile="0" resource="0" file="Source/FXSlotClass.h"/>
       <FILE id="tFH2YC" name="IOSlotClass.cpp" compile="1" resource="0" file="Source/IOSlotClass.cpp"/>
       <FILE id="EvBIqa" name="IOSlotClass.h" compile="0" resource="0" file="Source/IOSlotClass.h"/>
+      <FILE id="MHezWp" name="LedIDMaps.h" compile="0" resource="0" file="Source/LedIDMaps.h"/>
       <FILE id="ZS1o2I" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="XN9V5Z" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="dvH6xz" name="MainComponent.cpp" compile="1" resource="0"

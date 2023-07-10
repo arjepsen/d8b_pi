@@ -1327,6 +1327,11 @@ void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
 // ####################################################
 void ChannelStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
 {
+
+    float decimalValue = std::stoi(vpotHexValue, nullptr, 16);
+
+    juce::MessageManager::callAsync([this, decimalValue]()
+                                    { vPot.get()->setValue(decimalValue, juce::dontSendNotification); });
     // THE BELOW ISNT WORKING - THE BRAIN SENDS A NUMBER BASED ON HOW FAST THE VPOT IS TURNED,
     // AND IN WHICH DIRECTION - IT IS NOT A SPECIFIC SETTING. SO THE NEW SETTING HAS TO BE
     // CALCULATED.....
