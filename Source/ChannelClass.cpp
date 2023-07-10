@@ -81,7 +81,7 @@ Channel::Channel()
     mute = false;
 
     pan = 0x7F; // Center
-    panDotStatus = true;
+    panDotCenter = true;
 
     // solo = false;
 
@@ -202,7 +202,7 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue,
 
     // This points to the method, related to current selected vpots functionality.
     // It is only responsible for sending the relevant DSP command.    
-    (this->*currentVpotFunction)(vpotValue, bank);
+    (this->*currentVpotFunction)(vpotValue, bank, source);
 
     // DSP command was sent. Now we need to update the console and UI, including associated channelstrips.
     // HOW DO WE HANDLE SEPERATION BETWEEN SUPPORTED FUNCTIONALITY?
@@ -212,8 +212,6 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue,
     // PRESUMABLY THIS IS IN THE METHOD THAT CHANGES THE METHOD POINTED TO.
 
     // This also means, that associated channelstrips should get updated by the pointed function, not here.
-
-
 }
 
 void Channel::channelStripButtonEventCallback(const std::string buttonID,
@@ -248,7 +246,7 @@ std::string Channel::getID()
 // This method adds the current pan value with the received value. Since it's a byte, it wraps around, so Fy values 
 // becomes subtractive.
 // ####################################################################################################################
-void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank)
+void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, EventSource &source)
 {
     // Convert hex string to signed int8_t.
     int8_t panChangeValue = static_cast<int8_t>(std::stoi(vpotValue, nullptr, 16));
@@ -269,8 +267,7 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank)
         std::string panValueString = ss.str();
 
         // Clear the stringstream
-        ss.str("");
-        ss.clear();
+        ss = std::stringstream();
 
         // Add ID and first part
         ss << channelID << "dFEFFX" << panValueString << "OFDFFXP";
@@ -280,6 +277,7 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank)
 
         // Update internal member value
         pan = newPanValue;
+        printf("\n\nPan value is now: %d\n", pan);
 
         bool updateDot = false;
 
@@ -290,32 +288,30 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank)
         else if (pan < 78) newRingLED = RING_3;
         else if (pan < 100) newRingLED = RING_4;
         else if (pan < 120) newRingLED = RING_5;
-        // For centers, check if we're dead center, if so engage dot.
-        else if (pan < 136) 
-        {
-            newRingLED = RING_6;
-            if (pan == 127)
-            {
-                panDotCenter = true;
-                updateDot = true;
-            }
-            else
-            {
-                if (panDotCenter)
-                    updateDot = true;
-            }
-        }
+        else if (pan < 136) newRingLED = RING_6;
         else if (pan < 156) newRingLED = RING_7;
         else if (pan < 178) newRingLED = RING_8;
         else if (pan < 202) newRingLED = RING_9;
         else if (pan < 228) newRingLED = RING_10;
         else newRingLED = RING_11;
 
+        // Check dead center for dot.
+        if (pan == 127)
+        {
+            panDotCenter = true;
+            updateDot = true;
+        }
+        else if (panDotCenter)
+        {
+            panDotCenter = false;
+            updateDot = true;
+        }
+
         // Retreive the set of associated channelStrips on the current bank
         std::unordered_set<std::string> associatedStrips = associatedChannelStrips[bank];   
 
         // If ring LED needs to change, turn on the new one, an turn off the old one.
-        if (currentRingLED != newRingLED)
+        if (currentRingLED != newRingLED || updateDot)
         {
             for (auto &stripID : associatedStrips)
             {
@@ -327,30 +323,29 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank)
                 brainCom.send(ledOff);
                 brainCom.send(ledOn);
 
-                // Check if we need to handle dot
+                // Check for need to update dot
                 if (updateDot)
                 {
                     // Start the command string.
-                    std::string dotCmd = CH_STRIP_LED_MAP.at(stripID)[RING_DOT];
+                    std::string dotCommand = CH_STRIP_LED_MAP.at(stripID)[RING_DOT];
 
                     // Append last part, depending on whether we need to turn on or off.
-                    dotCmd.append(panDotCenter ? "j" : "i");
-                    CHECK OP PÅ LOGIKKEN, OG SØRG FOPR AT FÅ ÆNDRET FLAGET IGEN....
-                    
+                    dotCommand.append(panDotCenter ? "i" : "j");
+                    brainCom.send(dotCommand);
                 }
             }
-
             // Update the registry
             currentRingLED = newRingLED;
         }
 
-        // Send a post to update the UI
-        eventBus.associateChStripEventPost(associatedStrips, VPOT_EVENT, panValueString);
+        // If this was a console event, post event for UI update
+        if (source == CONSOLE_EVENT)
+            eventBus.associateChStripEventPost(associatedStrips, VPOT_EVENT, panValueString);
     }
 }
 
 
-void Channel:: handleVpotAuxSend(const std::string& vpotValue, const Bank bank)
+void Channel:: handleVpotAuxSend(const std::string& vpotValue, const Bank bank, EventSource& source)
 {
     //WORK ON THESE
 

@@ -113,7 +113,7 @@ ChannelStripComponent::ChannelStripComponent ()
     addAndMakeVisible (vPot.get());
     vPot->setRange (-127, 127, 1);
     vPot->setSliderStyle (juce::Slider::Rotary);
-    vPot->setTextBoxStyle (juce::Slider::TextBoxBelow, true, 71, 20);
+    vPot->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 71, 20);
     vPot->setColour (juce::Slider::rotarySliderOutlineColourId, juce::Colour (0xff181f22));
     vPot->setColour (juce::Slider::textBoxBackgroundColourId, juce::Colour (0xff131919));
     vPot->setColour (juce::Slider::textBoxOutlineColourId, juce::Colour (0xff242627));
@@ -1019,6 +1019,9 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     else if (sliderThatWasMoved == vPot.get())
     {
         //[UserSliderCode_vPot] -- add your slider handling code here..
+
+        SET UP CALL FOR WHEN UI POT IS TURNED
+
         //[/UserSliderCode_vPot]
     }
     else if (sliderThatWasMoved == aux11_12Pan.get())
@@ -1327,20 +1330,14 @@ void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
 // ####################################################
 void ChannelStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
 {
-
+    // Convert string hex value to a float
     float decimalValue = std::stoi(vpotHexValue, nullptr, 16);
+
+    // Adjust to fit the -127 to 127 range
+    decimalValue -= 127.0;
 
     juce::MessageManager::callAsync([this, decimalValue]()
                                     { vPot.get()->setValue(decimalValue, juce::dontSendNotification); });
-    // THE BELOW ISNT WORKING - THE BRAIN SENDS A NUMBER BASED ON HOW FAST THE VPOT IS TURNED,
-    // AND IN WHICH DIRECTION - IT IS NOT A SPECIFIC SETTING. SO THE NEW SETTING HAS TO BE
-    // CALCULATED.....
-    // BUT SINCE THIS IS THE COMPONENT.... MAYBE WE ALREADY DID THAT CALCULATION IN THE CHANNEL CLASS?
-
-    // int decimalValue = std::stoi(vpotHexValue, nullptr, 16);
-    // float logValue = precomputedLog10Values[decimalValue];
-    // juce::MessageManager::callAsync([this, logValue]()
-    //                                 { vPot.get()->setValue(logValue, juce::dontSendNotification); });
 }
 
 // #####################################################################################################
@@ -1456,7 +1453,7 @@ BEGIN_JUCER_METADATA
           virtualName="" explicitFocusOrder="0" pos="2 596 71 80" rotaryslideroutline="ff181f22"
           textboxbkgd="ff131919" textboxoutline="ff242627" min="-127.0"
           max="127.0" int="1.0" style="Rotary" textBoxPos="TextBoxBelow"
-          textBoxEditable="0" textBoxWidth="71" textBoxHeight="20" skewFactor="1.0"
+          textBoxEditable="1" textBoxWidth="71" textBoxHeight="20" skewFactor="1.0"
           needsCallback="1"/>
   <TEXTBUTTON name="Select Button" id="9388e21ee855ae90" memberName="selectBtn"
               virtualName="" explicitFocusOrder="0" pos="2 684 71 20" bgColOff="ff2e8d9a"

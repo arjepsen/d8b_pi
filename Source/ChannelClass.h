@@ -43,14 +43,14 @@ private:
     std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
 
 	// Type definition of the pointer to the current function to handle vpot events. 
-	typedef void (Channel::*VpotFunction)(const std::string&, const Bank);
+	typedef void (Channel::*VpotFunction)(const std::string&, const Bank, EventSource&);
 
 	// Pointer to the currently selection vpot event handler function
 	VpotFunction currentVpotFunction;
 
 	// These are the possible vpot event handlers
-	void handleVpotPan(const std::string& message, const Bank bank);
-	void handleVpotAuxSend(const std::string& message, const Bank bank);
+	void handleVpotPan(const std::string& message, const Bank bank, EventSource& source);
+	void handleVpotAuxSend(const std::string& message, const Bank bank, EventSource& source);
 
 	//... more....
 	// A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
