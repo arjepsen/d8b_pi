@@ -138,7 +138,7 @@ void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
 
 // ##############################################################################################
 // This essentially the event post method that other classes will use.
-// It is issentially just a pointer to one of the four internal classes, corresponding to a bank.
+// It is essentially just a pointer to one of the four internal classes, corresponding to a bank.
 // ##############################################################################################
 void EventBus::postEvent(BankEventType eventType,
                          const std::string &channelStripID,

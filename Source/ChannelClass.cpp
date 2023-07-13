@@ -202,7 +202,7 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue,
 
     // This points to the method, related to current selected vpots functionality.
     // It is only responsible for sending the relevant DSP command.    
-    (this->*currentVpotFunction)(vpotValue, bank, source);
+    (this->*currentVpotFunction)(vpotValue, bank, channelStripID, source);
 
     // DSP command was sent. Now we need to update the console and UI, including associated channelstrips.
     // HOW DO WE HANDLE SEPERATION BETWEEN SUPPORTED FUNCTIONALITY?
@@ -246,103 +246,129 @@ std::string Channel::getID()
 // This method adds the current pan value with the received value. Since it's a byte, it wraps around, so Fy values 
 // becomes subtractive.
 // ####################################################################################################################
-void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, EventSource &source)
+void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::string channelStripID, EventSource &source)
 {
-    // Convert hex string to signed int8_t.
-    int8_t panChangeValue = static_cast<int8_t>(std::stoi(vpotValue, nullptr, 16));
-    
-    // Perform the arithmetic operation using an signed 16-bit integer.
-     int16_t tempCalc = static_cast<int16_t>(pan) + panChangeValue;
-    
-    // Clamp the new value to the range 0-254.
-    uint8_t newPanValue = static_cast<uint8_t>(std::max(0, std::min(254, static_cast<int>(tempCalc))));
+    uint8_t newPanValue;
 
-    // Only continue if pan value is different than before
-    if (newPanValue != pan)
-    {        
-        // Use a stringstream to construct the DSP command  (xxFEFFXyyOFDFFXP, x is channelID, y is pan value)
-        std::stringstream ss;
+    // Use a stringstream to construct the DSP command  (xxFEFFXyyOFDFFXP, x is channelID, y is pan value)
+    std::stringstream ss;
 
+    std::string panValueString;
+
+    // Handle the event one way if it was fired by the console.
+    if (source == CONSOLE_EVENT)
+    {    
+        // This is a console event, we're receivng the value show how fast the pot was turned.
+        // Check current saved value, to calculate new value, then convert to 2-digit hex string.
+
+        // The console sends a value showing how fast the pot was turned.
+        // Convert the value to integer, then calculate new value from last, and convert back to 2-digit hex string.
+
+        // Convert hex string to signed int8_t.
+        int8_t panChangeValue = static_cast<int8_t>(std::stoi(vpotValue, nullptr, 16));
+        
+        // Perform the arithmetic operation using an signed 16-bit integer.
+        int16_t tempCalc = static_cast<int16_t>(pan) + panChangeValue;
+        
+        // Clamp the new value to the range 0-254.
+        newPanValue = static_cast<uint8_t>(std::max(0, std::min(254, static_cast<int>(tempCalc))));
+
+        // Convert to 2-digit hex string.
         ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(newPanValue);
-        std::string panValueString = ss.str();
+        
+        // Write to std::string variable.
+        panValueString = ss.str();
 
         // Clear the stringstream
         ss = std::stringstream();
-
-        // Add ID and first part
-        ss << channelID << "dFEFFX" << panValueString << "OFDFFXP";
-
-        // Send the DSP command
-        dspCom.send(ss.str());
-
-        // Update internal member value
-        pan = newPanValue;
-        printf("\n\nPan value is now: %d\n", pan);
-
-        bool updateDot = false;
-
-        // Determine which LED's should be lit
-        ChStripLed newRingLED;
-        if (pan < 28) newRingLED = RING_1;
-        else if (pan < 54) newRingLED = RING_2;
-        else if (pan < 78) newRingLED = RING_3;
-        else if (pan < 100) newRingLED = RING_4;
-        else if (pan < 120) newRingLED = RING_5;
-        else if (pan < 136) newRingLED = RING_6;
-        else if (pan < 156) newRingLED = RING_7;
-        else if (pan < 178) newRingLED = RING_8;
-        else if (pan < 202) newRingLED = RING_9;
-        else if (pan < 228) newRingLED = RING_10;
-        else newRingLED = RING_11;
-
-        // Check dead center for dot.
-        if (pan == 127)
-        {
-            panDotCenter = true;
-            updateDot = true;
-        }
-        else if (panDotCenter)
-        {
-            panDotCenter = false;
-            updateDot = true;
-        }
-
-        // Retreive the set of associated channelStrips on the current bank
-        std::unordered_set<std::string> associatedStrips = associatedChannelStrips[bank];   
-
-        // If ring LED needs to change, turn on the new one, an turn off the old one.
-        if (currentRingLED != newRingLED || updateDot)
-        {
-            for (auto &stripID : associatedStrips)
-            {
-                // Look up the ID for the led to turn off, and the one to turn on.
-                // Construct the Brain command to send.
-                std::string ledOff = CH_STRIP_LED_MAP.at(stripID)[currentRingLED] + "j";
-                std::string ledOn = CH_STRIP_LED_MAP.at(stripID)[newRingLED] + "i";
-
-                brainCom.send(ledOff);
-                brainCom.send(ledOn);
-
-                // Check for need to update dot
-                if (updateDot)
-                {
-                    // Start the command string.
-                    std::string dotCommand = CH_STRIP_LED_MAP.at(stripID)[RING_DOT];
-
-                    // Append last part, depending on whether we need to turn on or off.
-                    dotCommand.append(panDotCenter ? "i" : "j");
-                    brainCom.send(dotCommand);
-                }
-            }
-            // Update the registry
-            currentRingLED = newRingLED;
-        }
-
-        // If this was a console event, post event for UI update
-        if (source == CONSOLE_EVENT)
-            eventBus.associateChStripEventPost(associatedStrips, VPOT_EVENT, panValueString);
     }
-}
+    else
+    {
+        // This is a UI event, so we're receiving the value that the pot has been moved to as a hex string.
+        panValueString = vpotValue;
+
+        // Convert to uint8_t for saving to pan member.
+        newPanValue = static_cast<uint8_t>(std::stoi(vpotValue, nullptr, 16));
+    }
+
+    // Add ID and first part
+    ss << channelID << "dFEFFX" << panValueString << "OFDFFXP";
+
+    // Send the DSP command
+    dspCom.send(ss.str());
+
+    // Update internal member value
+    pan = newPanValue;
+
+    bool updateDot = false;
+
+    // Determine which LED's should be lit
+    ChStripLed newRingLED;
+    if (pan < 28) newRingLED = RING_1;
+    else if (pan < 54) newRingLED = RING_2;
+    else if (pan < 78) newRingLED = RING_3;
+    else if (pan < 100) newRingLED = RING_4;
+    else if (pan < 120) newRingLED = RING_5;
+    else if (pan < 136) newRingLED = RING_6;
+    else if (pan < 156) newRingLED = RING_7;
+    else if (pan < 178) newRingLED = RING_8;
+    else if (pan < 202) newRingLED = RING_9;
+    else if (pan < 228) newRingLED = RING_10;
+    else newRingLED = RING_11;
+
+    // Check dead center for dot.
+    if (pan == 127)
+    {
+        panDotCenter = true;
+        updateDot = true;
+    }
+    else if (panDotCenter)
+    {
+        panDotCenter = false;
+        updateDot = true;
+    }
+
+    // Retreive the set of associated channelStrips on the current bank
+    std::unordered_set<std::string> associatedStrips = associatedChannelStrips[bank];   
+
+    // If ring LED needs to change, turn on the new one, an turn off the old one.
+    if (currentRingLED != newRingLED || updateDot)
+    {
+        for (auto &stripID : associatedStrips)
+        {
+            // Look up the ID for the led to turn off, and the one to turn on.
+            // Construct the Brain command to send.
+            std::string ledOff = CH_STRIP_LED_MAP.at(stripID)[currentRingLED] + "j";
+            std::string ledOn = CH_STRIP_LED_MAP.at(stripID)[newRingLED] + "i";
+
+            brainCom.send(ledOff);
+            brainCom.send(ledOn);
+
+            // Check for need to update dot
+            if (updateDot)
+            {
+                // Start the command string.
+                std::string dotCommand = CH_STRIP_LED_MAP.at(stripID)[RING_DOT];
+
+                // Append last part, depending on whether we need to turn on or off.
+                dotCommand.append(panDotCenter ? "i" : "j");
+                brainCom.send(dotCommand);
+            }
+        }
+        // Update the registry
+        currentRingLED = newRingLED;
+    }
+
+    // If this was a console event, post event for UI update
+    if (source == UI_EVENT)
+    {
+        // Remove the calling channel strip ID from the associate set
+        associatedStrips.erase(channelStripID);
+    }
+
+    // Post event for the associated strips.
+    eventBus.associateChStripEventPost(associatedStrips, VPOT_EVENT, panValueString);
+}   CHECK THAT UI ALSO WORKS
 
 
 void Channel:: handleVpotAuxSend(const std::string& vpotValue, const Bank bank, EventSource& source)

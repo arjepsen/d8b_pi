@@ -1020,7 +1020,19 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     {
         //[UserSliderCode_vPot] -- add your slider handling code here..
 
-        SET UP CALL FOR WHEN UI POT IS TURNED
+        // Shift the value from -127 - 127 to 0 - 255
+        uint8_t shiftedValue = static_cast<uint8_t>(sliderThatWasMoved->getValue() + 127.0);
+
+        // Use a stringstream to convert the uint8_t to a 2-digit upper case hex string
+        std::stringstream ss;
+        ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(shiftedValue);
+
+        // The hex string is now in ss.str()
+        std::string dspVpotValue = ss.str();
+
+        // Post the event for the Channel object to handle.
+        eventBus.postEvent(VPOT_EVENT, channelStripComponentID, dspVpotValue, UI_EVENT);
+
 
         //[/UserSliderCode_vPot]
     }
