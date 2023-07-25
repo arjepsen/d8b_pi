@@ -23,6 +23,9 @@
 #define DSP_SLAVE_FIRMWARE_FILE "../DataFiles/slave.asc"
 #define DSP_CONFIG_FILE "../DataFiles/Config.asc"
 #define DSP_CMD1_FILE "../DataFiles/dspCmd1.asc"
+#define DSP_CMD1_APOGEE_FILE "../DataFiles/dspCmd1Apogee.asc"
+#define DSP_CMD2_APOGEE_FILE "../DataFiles/dspCmd2Apogee.asc"
+#define APOGEE_FW_THING "../DataFiles/ApogeeThing.asc"
 #define BUF_SIZE 1024
 
 // Display intensity commands.

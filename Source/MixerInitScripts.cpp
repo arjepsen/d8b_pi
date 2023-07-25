@@ -69,7 +69,7 @@ InitErrorType initializeMixer()
         retries++;
         usleep(200000); // Sleep 200ms
         if (retries >= MAX_RETRIES)
-            return RESET_BRAIN_TIMEOUT;
+            return RESET_BRAIN_TIMEOUT; // Maybe something wrong with brain connection
     }
 
     // Same for DSP
@@ -83,7 +83,7 @@ InitErrorType initializeMixer()
             DEBUG_MSG("DSP connected.\n");
         usleep(200000);
         if (retries >= MAX_RETRIES)
-            return RESET_DSP_TIMEOUT;
+            return RESET_DSP_TIMEOUT;   // Maybe something wrong with DSP connection
     }
 
 
@@ -247,18 +247,37 @@ InitErrorType initializeMixer()
     while (true)
     {
         std::string dspResponse = getDspResponse(DSP);
+        printf("\n\nDSP RESPONSE IS: %s\n\n", dspResponse.c_str());
         if (dspResponse.substr(0, 3) == "R35")
         {
+            // Maybe this is only for Mackie clock card?
             DEBUG_MSG("DSP Replied: %s\n", dspResponse.c_str());
             break;
         }
         else
+        {
             retries++;
+            printf("Number of retries are now: %d", retries);
+        }
+
         if (retries > MAX_RETRIES)
-            return UPLOAD_DSP_FAILED;
+            printf("NOT R35 RESPONSE\n");
+
+            if (clockIO->getCardID() == APOGEE_CLOCK_ID_STRING)
+            {
+                printf("Clock card ID'ed as an APOGEE card. Send something extra before slave firmware\n");
+                write(DSP, APOGEE_FW_THING, strlen(APOGEE_FW_THING));
+                dspResponse = getDspResponse(DSP);
+                printf("\n\nDSP APOGEE RESPONSE IS: %s\n\n", dspResponse.c_str());
+            }
+
+
+            break;
+            //return UPLOAD_DSP_FAILED;
     }
 
     // ===================== SEND SLAVE PART OF DSP FIRMWARE ==================
+
 
     DEBUG_MSG("Uploading 'slave' dsp firmware\n");
 
@@ -337,17 +356,28 @@ InitErrorType initializeMixer()
     write(BRAIN, MORE_CONFIG_MESSAGE, strlen(MORE_CONFIG_MESSAGE));
 
     // Send file.
-    sendFirmwareFile(DSP_CMD1_FILE, DSP);
-
-    sleep(1);
-
-    // Seems like there is an "8000" response from the DSP, when things are fine....
-    std::string dspReply = "";
-    do
+    if (clockIO->getCardID() != APOGEE_CLOCK_ID_STRING)
     {
-        dspReply = getDspResponse(DSP);
-        DEBUG_MSG("DSP reply: %s\n", dspReply.c_str());
-    } while (dspReply != "8000");
+        sendFirmwareFile(DSP_CMD1_FILE, DSP);
+    }
+    else
+    {
+        sendFirmwareFile(DSP_CMD1_APOGEE_FILE, DSP);
+        getDspResponse(DSP);
+        sendFirmwareFile(DSP_CMD2_APOGEE_FILE, DSP);
+
+    }
+    
+
+    // sleep(1);
+
+    // // Seems like there is an "8000" response from the DSP, when things are fine....
+    // std::string dspReply = "";
+    // do
+    // {
+    //     dspReply = getDspResponse(DSP);
+    //     DEBUG_MSG("DSP reply: %s\n", dspReply.c_str());
+    // } while (dspReply != "8000");
 
     sleep(1);
     // Sometimes it seems DSP is sending numbers decreasing to 0000.. wait till it stops sending:
@@ -355,6 +385,9 @@ InitErrorType initializeMixer()
     getDspResponse(DSP);
     getDspResponse(DSP);
     getDspResponse(DSP);
+
+
+    std::string dspReply = "";
     do
     {
         dspReply = getDspResponse(DSP);
@@ -362,6 +395,7 @@ InitErrorType initializeMixer()
     } while (dspReply != "");
 
     sleep(1);
+
 
 
 

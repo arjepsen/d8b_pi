@@ -368,7 +368,7 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
 
     // Post event for the associated strips.
     eventBus.associateChStripEventPost(associatedStrips, VPOT_EVENT, panValueString);
-}   CHECK THAT UI ALSO WORKS
+}  
 
 
 void Channel:: handleVpotAuxSend(const std::string& vpotValue, const Bank bank, EventSource& source)
