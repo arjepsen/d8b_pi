@@ -26,6 +26,7 @@ MenuBar::MenuBar()
 
     // Not sure what setSize here would do....
     // setSize(100, 10);
+    
 }
 
 MenuBar::~MenuBar() {}
