@@ -51,7 +51,7 @@ public:
     // Get the single instance of FaderValueLookup
     static FaderValueLookup& getInstance();
 
-    // Delete copy constructor and assignment operator
+    // Delete copy constructor and assignment operator (singleton)
     FaderValueLookup(const FaderValueLookup&) = delete;
     FaderValueLookup &operator=(const FaderValueLookup &) = delete;
 
