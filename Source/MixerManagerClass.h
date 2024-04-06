@@ -9,6 +9,9 @@
     of the program. Everything should pass through here, so we have
     seperation of concerns.
     This should be a "singleton" class, so only one instance can exist.
+
+    But having everything pass through here might be to heavy?
+    Instead, we try to implement asort of event bus...
   ==============================================================================
 */
 
