@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 7.0.5
+  Created with Projucer version: 7.0.11
 
   ------------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     writeButton.reset (new juce::TextButton ("Write Button"));
     addAndMakeVisible (writeButton.get());
-    writeButton->setButtonText (TRANS("WRITE"));
+    writeButton->setButtonText (TRANS ("WRITE"));
     writeButton->addListener (this);
     writeButton->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff595959));
 
@@ -123,7 +123,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     selectBtn.reset (new juce::TextButton ("Select Button"));
     addAndMakeVisible (selectBtn.get());
-    selectBtn->setButtonText (TRANS("SELECT"));
+    selectBtn->setButtonText (TRANS ("SELECT"));
     selectBtn->addListener (this);
     selectBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2e8d9a));
     selectBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xff69cee8));
@@ -132,7 +132,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     soloBtn.reset (new juce::TextButton ("Solo Button"));
     addAndMakeVisible (soloBtn.get());
-    soloBtn->setButtonText (TRANS("SOLO"));
+    soloBtn->setButtonText (TRANS ("SOLO"));
     soloBtn->addListener (this);
     soloBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xffb08620));
     soloBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffe1ba59));
@@ -141,7 +141,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     muteBtn.reset (new juce::TextButton ("Mute Button"));
     addAndMakeVisible (muteBtn.get());
-    muteBtn->setButtonText (TRANS("MUTE"));
+    muteBtn->setButtonText (TRANS ("MUTE"));
     muteBtn->addListener (this);
     muteBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff025c02));
     muteBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -150,7 +150,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     recordBtn.reset (new juce::TextButton ("Record Button"));
     addAndMakeVisible (recordBtn.get());
-    recordBtn->setButtonText (TRANS("RECORD"));
+    recordBtn->setButtonText (TRANS ("RECORD"));
     recordBtn->addListener (this);
     recordBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff7a2e2e));
     recordBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -161,8 +161,8 @@ ChannelStripComponent::ChannelStripComponent ()
     addAndMakeVisible (channelSelector.get());
     channelSelector->setEditableText (false);
     channelSelector->setJustificationType (juce::Justification::centred);
-    channelSelector->setTextWhenNothingSelected (TRANS("1"));
-    channelSelector->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    channelSelector->setTextWhenNothingSelected (TRANS ("1"));
+    channelSelector->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
     channelSelector->addListener (this);
 
     channelSelector->setBounds (2, 524, 71, 20);
@@ -185,25 +185,25 @@ ChannelStripComponent::ChannelStripComponent ()
     addAndMakeVisible (postEqInsert.get());
     postEqInsert->setEditableText (false);
     postEqInsert->setJustificationType (juce::Justification::centred);
-    postEqInsert->setTextWhenNothingSelected (TRANS("POST"));
-    postEqInsert->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    postEqInsert->addItem (TRANS("Reset"), 1);
-    postEqInsert->addItem (TRANS("P01"), 2);
-    postEqInsert->addItem (TRANS("P02"), 3);
-    postEqInsert->addItem (TRANS("P03"), 4);
-    postEqInsert->addItem (TRANS("P04"), 5);
-    postEqInsert->addItem (TRANS("P05"), 6);
-    postEqInsert->addItem (TRANS("P06"), 7);
-    postEqInsert->addItem (TRANS("P07"), 8);
-    postEqInsert->addItem (TRANS("P08"), 9);
-    postEqInsert->addItem (TRANS("P09"), 10);
-    postEqInsert->addItem (TRANS("P10"), 11);
-    postEqInsert->addItem (TRANS("P11"), 12);
-    postEqInsert->addItem (TRANS("P12"), 13);
-    postEqInsert->addItem (TRANS("P13"), 14);
-    postEqInsert->addItem (TRANS("P14"), 15);
-    postEqInsert->addItem (TRANS("P15"), 16);
-    postEqInsert->addItem (TRANS("P16"), 17);
+    postEqInsert->setTextWhenNothingSelected (TRANS ("POST"));
+    postEqInsert->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
+    postEqInsert->addItem (TRANS ("Reset"), 1);
+    postEqInsert->addItem (TRANS ("P01"), 2);
+    postEqInsert->addItem (TRANS ("P02"), 3);
+    postEqInsert->addItem (TRANS ("P03"), 4);
+    postEqInsert->addItem (TRANS ("P04"), 5);
+    postEqInsert->addItem (TRANS ("P05"), 6);
+    postEqInsert->addItem (TRANS ("P06"), 7);
+    postEqInsert->addItem (TRANS ("P07"), 8);
+    postEqInsert->addItem (TRANS ("P08"), 9);
+    postEqInsert->addItem (TRANS ("P09"), 10);
+    postEqInsert->addItem (TRANS ("P10"), 11);
+    postEqInsert->addItem (TRANS ("P11"), 12);
+    postEqInsert->addItem (TRANS ("P12"), 13);
+    postEqInsert->addItem (TRANS ("P13"), 14);
+    postEqInsert->addItem (TRANS ("P14"), 15);
+    postEqInsert->addItem (TRANS ("P15"), 16);
+    postEqInsert->addItem (TRANS ("P16"), 17);
     postEqInsert->addListener (this);
 
     postEqInsert->setBounds (2, 316, 71, 20);
@@ -363,7 +363,7 @@ ChannelStripComponent::ChannelStripComponent ()
     aux1Send->setBounds (16, 368, 54, 8);
 
     postEqInsertLabel.reset (new juce::Label ("Post EQ Insert Label",
-                                              TRANS("P01")));
+                                              TRANS ("P01")));
     addAndMakeVisible (postEqInsertLabel.get());
     postEqInsertLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     postEqInsertLabel->setJustificationType (juce::Justification::centred);
@@ -404,7 +404,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     eqBtn.reset (new juce::TextButton ("Channel EQ Button"));
     addAndMakeVisible (eqBtn.get());
-    eqBtn->setButtonText (TRANS("EQ"));
+    eqBtn->setButtonText (TRANS ("EQ"));
     eqBtn->addListener (this);
     eqBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
 
@@ -412,14 +412,14 @@ ChannelStripComponent::ChannelStripComponent ()
 
     compressorBtn.reset (new juce::TextButton ("Channel Compressor Button"));
     addAndMakeVisible (compressorBtn.get());
-    compressorBtn->setButtonText (TRANS("C"));
+    compressorBtn->setButtonText (TRANS ("C"));
     compressorBtn->addListener (this);
     compressorBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
 
     compressorBtn->setBounds (6, 196, 30, 20);
 
     preEqInsertLabel.reset (new juce::Label ("Pre EQ Insert Label",
-                                             TRANS("P01")));
+                                             TRANS ("P01")));
     addAndMakeVisible (preEqInsertLabel.get());
     preEqInsertLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     preEqInsertLabel->setJustificationType (juce::Justification::centred);
@@ -435,32 +435,32 @@ ChannelStripComponent::ChannelStripComponent ()
     addAndMakeVisible (preEqInsert.get());
     preEqInsert->setEditableText (false);
     preEqInsert->setJustificationType (juce::Justification::centred);
-    preEqInsert->setTextWhenNothingSelected (TRANS("PRE"));
-    preEqInsert->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    preEqInsert->addItem (TRANS("Reset"), 1);
-    preEqInsert->addItem (TRANS("P01"), 2);
-    preEqInsert->addItem (TRANS("P02"), 3);
-    preEqInsert->addItem (TRANS("P03"), 4);
-    preEqInsert->addItem (TRANS("P04"), 5);
-    preEqInsert->addItem (TRANS("P05"), 6);
-    preEqInsert->addItem (TRANS("P06"), 7);
-    preEqInsert->addItem (TRANS("P07"), 8);
-    preEqInsert->addItem (TRANS("P08"), 9);
-    preEqInsert->addItem (TRANS("P09"), 10);
-    preEqInsert->addItem (TRANS("P10"), 11);
-    preEqInsert->addItem (TRANS("P11"), 12);
-    preEqInsert->addItem (TRANS("P12"), 13);
-    preEqInsert->addItem (TRANS("P13"), 14);
-    preEqInsert->addItem (TRANS("P14"), 15);
-    preEqInsert->addItem (TRANS("P15"), 16);
-    preEqInsert->addItem (TRANS("P16"), 17);
+    preEqInsert->setTextWhenNothingSelected (TRANS ("PRE"));
+    preEqInsert->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
+    preEqInsert->addItem (TRANS ("Reset"), 1);
+    preEqInsert->addItem (TRANS ("P01"), 2);
+    preEqInsert->addItem (TRANS ("P02"), 3);
+    preEqInsert->addItem (TRANS ("P03"), 4);
+    preEqInsert->addItem (TRANS ("P04"), 5);
+    preEqInsert->addItem (TRANS ("P05"), 6);
+    preEqInsert->addItem (TRANS ("P06"), 7);
+    preEqInsert->addItem (TRANS ("P07"), 8);
+    preEqInsert->addItem (TRANS ("P08"), 9);
+    preEqInsert->addItem (TRANS ("P09"), 10);
+    preEqInsert->addItem (TRANS ("P10"), 11);
+    preEqInsert->addItem (TRANS ("P11"), 12);
+    preEqInsert->addItem (TRANS ("P12"), 13);
+    preEqInsert->addItem (TRANS ("P13"), 14);
+    preEqInsert->addItem (TRANS ("P14"), 15);
+    preEqInsert->addItem (TRANS ("P15"), 16);
+    preEqInsert->addItem (TRANS ("P16"), 17);
     preEqInsert->addListener (this);
 
     preEqInsert->setBounds (2, 28, 71, 20);
 
     gateBtn.reset (new juce::TextButton ("Channel Gate Button"));
     addAndMakeVisible (gateBtn.get());
-    gateBtn->setButtonText (TRANS("G"));
+    gateBtn->setButtonText (TRANS ("G"));
     gateBtn->addListener (this);
     gateBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::grey);
 
@@ -468,7 +468,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     chAssignLRBtn.reset (new juce::TextButton ("L/R Assignment Button"));
     addAndMakeVisible (chAssignLRBtn.get());
-    chAssignLRBtn->setButtonText (TRANS("L R"));
+    chAssignLRBtn->setButtonText (TRANS ("L R"));
     chAssignLRBtn->addListener (this);
     chAssignLRBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     chAssignLRBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -477,7 +477,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus7AssignBtn.reset (new juce::TextButton ("Bus 7 Assign Button"));
     addAndMakeVisible (bus7AssignBtn.get());
-    bus7AssignBtn->setButtonText (TRANS("7"));
+    bus7AssignBtn->setButtonText (TRANS ("7"));
     bus7AssignBtn->addListener (this);
     bus7AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus7AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -486,7 +486,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus8AssignBtn.reset (new juce::TextButton ("Bus 8 Assign Button"));
     addAndMakeVisible (bus8AssignBtn.get());
-    bus8AssignBtn->setButtonText (TRANS("8"));
+    bus8AssignBtn->setButtonText (TRANS ("8"));
     bus8AssignBtn->addListener (this);
     bus8AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus8AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -495,7 +495,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus5AssignBtn.reset (new juce::TextButton ("Bus 5 Assign Button"));
     addAndMakeVisible (bus5AssignBtn.get());
-    bus5AssignBtn->setButtonText (TRANS("5"));
+    bus5AssignBtn->setButtonText (TRANS ("5"));
     bus5AssignBtn->addListener (this);
     bus5AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus5AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -504,7 +504,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus6AssignBtn.reset (new juce::TextButton ("Bus 6 Assign Button"));
     addAndMakeVisible (bus6AssignBtn.get());
-    bus6AssignBtn->setButtonText (TRANS("6"));
+    bus6AssignBtn->setButtonText (TRANS ("6"));
     bus6AssignBtn->addListener (this);
     bus6AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus6AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -513,7 +513,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus3AssignBtn.reset (new juce::TextButton ("Bus 3 Assign Button"));
     addAndMakeVisible (bus3AssignBtn.get());
-    bus3AssignBtn->setButtonText (TRANS("3"));
+    bus3AssignBtn->setButtonText (TRANS ("3"));
     bus3AssignBtn->addListener (this);
     bus3AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus3AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -522,7 +522,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus4AssignBtn.reset (new juce::TextButton ("Bus 4 Assign Button"));
     addAndMakeVisible (bus4AssignBtn.get());
-    bus4AssignBtn->setButtonText (TRANS("4"));
+    bus4AssignBtn->setButtonText (TRANS ("4"));
     bus4AssignBtn->addListener (this);
     bus4AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus4AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -531,7 +531,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus1AssignBtn.reset (new juce::TextButton ("Bus 1 Assign Button"));
     addAndMakeVisible (bus1AssignBtn.get());
-    bus1AssignBtn->setButtonText (TRANS("1"));
+    bus1AssignBtn->setButtonText (TRANS ("1"));
     bus1AssignBtn->addListener (this);
     bus1AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus1AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -540,7 +540,7 @@ ChannelStripComponent::ChannelStripComponent ()
 
     bus2AssignBtn.reset (new juce::TextButton ("Bus 2 Assign Button"));
     addAndMakeVisible (bus2AssignBtn.get());
-    bus2AssignBtn->setButtonText (TRANS("2"));
+    bus2AssignBtn->setButtonText (TRANS ("2"));
     bus2AssignBtn->addListener (this);
     bus2AssignBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff2a8061));
     bus2AssignBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colours::red);
@@ -565,12 +565,12 @@ ChannelStripComponent::ChannelStripComponent ()
     addAndMakeVisible (juce__comboBox4.get());
     juce__comboBox4->setEditableText (false);
     juce__comboBox4->setJustificationType (juce::Justification::centred);
-    juce__comboBox4->setTextWhenNothingSelected (TRANS("-"));
-    juce__comboBox4->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    juce__comboBox4->addItem (TRANS(" - "), 1);
-    juce__comboBox4->addItem (TRANS("tape out 1 - (ch. 25)"), 2);
-    juce__comboBox4->addItem (TRANS("tape out 2 - (ch. 26)"), 3);
-    juce__comboBox4->addItem (TRANS("tape out 3 - (ch. 27)"), 4);
+    juce__comboBox4->setTextWhenNothingSelected (TRANS ("-"));
+    juce__comboBox4->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
+    juce__comboBox4->addItem (TRANS (" - "), 1);
+    juce__comboBox4->addItem (TRANS ("tape out 1 - (ch. 25)"), 2);
+    juce__comboBox4->addItem (TRANS ("tape out 2 - (ch. 26)"), 3);
+    juce__comboBox4->addItem (TRANS ("tape out 3 - (ch. 27)"), 4);
     juce__comboBox4->addSeparator();
     juce__comboBox4->addListener (this);
 
@@ -698,7 +698,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 500, width = 11, height = 8;
-        juce::String text (TRANS("P"));
+        juce::String text (TRANS ("P"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -710,7 +710,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 476, width = 12, height = 8;
-        juce::String text (TRANS("P"));
+        juce::String text (TRANS ("P"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -722,7 +722,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 488, width = 11, height = 8;
-        juce::String text (TRANS("11"));
+        juce::String text (TRANS ("11"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -734,7 +734,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 464, width = 11, height = 8;
-        juce::String text (TRANS("9"));
+        juce::String text (TRANS ("9"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -746,7 +746,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 452, width = 11, height = 8;
-        juce::String text (TRANS("8"));
+        juce::String text (TRANS ("8"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -758,7 +758,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 440, width = 11, height = 8;
-        juce::String text (TRANS("7"));
+        juce::String text (TRANS ("7"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -770,7 +770,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 428, width = 11, height = 8;
-        juce::String text (TRANS("6"));
+        juce::String text (TRANS ("6"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -782,7 +782,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 416, width = 11, height = 8;
-        juce::String text (TRANS("5"));
+        juce::String text (TRANS ("5"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -794,7 +794,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 404, width = 11, height = 8;
-        juce::String text (TRANS("4"));
+        juce::String text (TRANS ("4"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -806,7 +806,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 392, width = 11, height = 8;
-        juce::String text (TRANS("3"));
+        juce::String text (TRANS ("3"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -818,7 +818,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 380, width = 11, height = 8;
-        juce::String text (TRANS("2"));
+        juce::String text (TRANS ("2"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -830,7 +830,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 368, width = 11, height = 8;
-        juce::String text (TRANS("1"));
+        juce::String text (TRANS ("1"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -842,7 +842,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 2, y = 344, width = 71, height = 20;
-        juce::String text (TRANS("AUXES"));
+        juce::String text (TRANS ("AUXES"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -863,7 +863,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 4, y = 180, width = 11, height = 8;
-        juce::String text (TRANS("D"));
+        juce::String text (TRANS ("D"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -875,7 +875,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 4, y = 166, width = 11, height = 8;
-        juce::String text (TRANS("T"));
+        juce::String text (TRANS ("T"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -887,7 +887,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 7, y = 846, width = 14, height = 8;
-        juce::String text (TRANS("U -"));
+        juce::String text (TRANS ("U -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -899,7 +899,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 893, width = 20, height = 8;
-        juce::String text (TRANS("10 -"));
+        juce::String text (TRANS ("10 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -911,7 +911,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 934, width = 20, height = 8;
-        juce::String text (TRANS("30 -"));
+        juce::String text (TRANS ("30 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -923,7 +923,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 956, width = 20, height = 8;
-        juce::String text (TRANS("40 -"));
+        juce::String text (TRANS ("40 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -935,7 +935,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 870, width = 20, height = 8;
-        juce::String text (TRANS("5 -"));
+        juce::String text (TRANS ("5 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -947,7 +947,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 827, width = 20, height = 8;
-        juce::String text (TRANS("5 -"));
+        juce::String text (TRANS ("5 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -959,7 +959,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 803, width = 20, height = 8;
-        juce::String text (TRANS("10 -"));
+        juce::String text (TRANS ("10 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -971,7 +971,7 @@ void ChannelStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 914, width = 20, height = 8;
-        juce::String text (TRANS("20 -"));
+        juce::String text (TRANS ("20 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
