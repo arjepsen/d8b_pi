@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 7.0.5
+  Created with Projucer version: 7.0.11
 
   ------------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ MasterStripComponent::MasterStripComponent ()
     masterVpot->setBounds (0, 583, 120, 88);
 
     masterInsertRLabel.reset (new juce::Label ("Master Insert Right Label",
-                                               TRANS("--\n")));
+                                               TRANS ("--\n")));
     addAndMakeVisible (masterInsertRLabel.get());
     masterInsertRLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     masterInsertRLabel->setJustificationType (juce::Justification::centred);
@@ -87,36 +87,36 @@ MasterStripComponent::MasterStripComponent ()
 
     masterInsertR.reset (new juce::ComboBox ("Master Insert Right"));
     addAndMakeVisible (masterInsertR.get());
-    masterInsertR->setTooltip (TRANS("Allows any plugin to be patched into the main mix outputs.\n"
+    masterInsertR->setTooltip (TRANS ("Allows any plugin to be patched into the main mix outputs.\n"
     "(Post fader insert)"));
     masterInsertR->setEditableText (false);
     masterInsertR->setJustificationType (juce::Justification::centred);
-    masterInsertR->setTextWhenNothingSelected (TRANS("INSERT R"));
-    masterInsertR->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    masterInsertR->addItem (TRANS("Reset"), 1);
-    masterInsertR->addItem (TRANS("P01"), 2);
-    masterInsertR->addItem (TRANS("P02"), 3);
-    masterInsertR->addItem (TRANS("P03"), 4);
-    masterInsertR->addItem (TRANS("P04"), 5);
-    masterInsertR->addItem (TRANS("P05"), 6);
-    masterInsertR->addItem (TRANS("P06"), 7);
-    masterInsertR->addItem (TRANS("P07"), 8);
-    masterInsertR->addItem (TRANS("P08"), 9);
-    masterInsertR->addItem (TRANS("P09"), 10);
-    masterInsertR->addItem (TRANS("P10"), 11);
-    masterInsertR->addItem (TRANS("P11"), 12);
-    masterInsertR->addItem (TRANS("P12"), 13);
-    masterInsertR->addItem (TRANS("P13"), 14);
-    masterInsertR->addItem (TRANS("P14"), 15);
-    masterInsertR->addItem (TRANS("P15"), 16);
-    masterInsertR->addItem (TRANS("P16"), 17);
+    masterInsertR->setTextWhenNothingSelected (TRANS ("INSERT R"));
+    masterInsertR->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
+    masterInsertR->addItem (TRANS ("Reset"), 1);
+    masterInsertR->addItem (TRANS ("P01"), 2);
+    masterInsertR->addItem (TRANS ("P02"), 3);
+    masterInsertR->addItem (TRANS ("P03"), 4);
+    masterInsertR->addItem (TRANS ("P04"), 5);
+    masterInsertR->addItem (TRANS ("P05"), 6);
+    masterInsertR->addItem (TRANS ("P06"), 7);
+    masterInsertR->addItem (TRANS ("P07"), 8);
+    masterInsertR->addItem (TRANS ("P08"), 9);
+    masterInsertR->addItem (TRANS ("P09"), 10);
+    masterInsertR->addItem (TRANS ("P10"), 11);
+    masterInsertR->addItem (TRANS ("P11"), 12);
+    masterInsertR->addItem (TRANS ("P12"), 13);
+    masterInsertR->addItem (TRANS ("P13"), 14);
+    masterInsertR->addItem (TRANS ("P14"), 15);
+    masterInsertR->addItem (TRANS ("P15"), 16);
+    masterInsertR->addItem (TRANS ("P16"), 17);
     masterInsertR->addListener (this);
 
     masterInsertR->setBounds (16, 94, 88, 18);
 
     mastersBankBtn.reset (new juce::TextButton ("Masters Bank Button"));
     addAndMakeVisible (mastersBankBtn.get());
-    mastersBankBtn->setButtonText (TRANS("Masters"));
+    mastersBankBtn->setButtonText (TRANS ("Masters"));
     mastersBankBtn->addListener (this);
     mastersBankBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
     mastersBankBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
@@ -125,7 +125,7 @@ MasterStripComponent::MasterStripComponent ()
 
     effectsBankBtn.reset (new juce::TextButton ("Effects Bank Button"));
     addAndMakeVisible (effectsBankBtn.get());
-    effectsBankBtn->setButtonText (TRANS("Effects"));
+    effectsBankBtn->setButtonText (TRANS ("Effects"));
     effectsBankBtn->addListener (this);
     effectsBankBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
     effectsBankBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
@@ -134,26 +134,26 @@ MasterStripComponent::MasterStripComponent ()
 
     tapeBanksBtn.reset (new juce::TextButton ("Tape Bank Button"));
     addAndMakeVisible (tapeBanksBtn.get());
-    tapeBanksBtn->setButtonText (TRANS("Tape"));
+    tapeBanksBtn->setButtonText (TRANS ("Tape"));
     tapeBanksBtn->addListener (this);
     tapeBanksBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
     tapeBanksBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
 
     tapeBanksBtn->setBounds (16, 712, 88, 20);
 
-    tapeBanksBtn2.reset (new juce::TextButton ("Tape Bank Button"));
-    addAndMakeVisible (tapeBanksBtn2.get());
-    tapeBanksBtn2->setButtonText (TRANS("Tape"));
-    tapeBanksBtn2->addListener (this);
-    tapeBanksBtn2->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
-    tapeBanksBtn2->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
+    lineBanksBtn.reset (new juce::TextButton ("Line Bank Button"));
+    addAndMakeVisible (lineBanksBtn.get());
+    lineBanksBtn->setButtonText (TRANS ("Line"));
+    lineBanksBtn->addListener (this);
+    lineBanksBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
+    lineBanksBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
 
-    tapeBanksBtn2->setBounds (16, 686, 88, 20);
+    lineBanksBtn->setBounds (16, 686, 88, 20);
 
     panMasterBtn.reset (new juce::TextButton ("Pan Master Button"));
     addAndMakeVisible (panMasterBtn.get());
-    panMasterBtn->setTooltip (TRANS("V-Pot set to function as front/rear pan position control for any selected channel in surround modes"));
-    panMasterBtn->setButtonText (TRANS("PAN"));
+    panMasterBtn->setTooltip (TRANS ("V-Pot set to function as front/rear pan position control for any selected channel in surround modes"));
+    panMasterBtn->setButtonText (TRANS ("PAN"));
     panMasterBtn->addListener (this);
     panMasterBtn->setColour (juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
 
@@ -161,8 +161,8 @@ MasterStripComponent::MasterStripComponent ()
 
     soloMasterBtn.reset (new juce::TextButton ("Solo Master Btn"));
     addAndMakeVisible (soloMasterBtn.get());
-    soloMasterBtn->setTooltip (TRANS("Solos any selected Aux bus"));
-    soloMasterBtn->setButtonText (TRANS("SOLO"));
+    soloMasterBtn->setTooltip (TRANS ("Solos any selected Aux bus"));
+    soloMasterBtn->setButtonText (TRANS ("SOLO"));
     soloMasterBtn->addListener (this);
     soloMasterBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff90883a));
 
@@ -170,8 +170,8 @@ MasterStripComponent::MasterStripComponent ()
 
     cuePan1Btn.reset (new juce::TextButton ("Cue Pan 1 Button"));
     addAndMakeVisible (cuePan1Btn.get());
-    cuePan1Btn->setTooltip (TRANS("Set channel Vpots to control aux 9/10 pan\n"));
-    cuePan1Btn->setButtonText (TRANS("1"));
+    cuePan1Btn->setTooltip (TRANS ("Set channel Vpots to control aux 9/10 pan\n"));
+    cuePan1Btn->setButtonText (TRANS ("1"));
     cuePan1Btn->addListener (this);
     cuePan1Btn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -179,8 +179,8 @@ MasterStripComponent::MasterStripComponent ()
 
     cuePan2Btn.reset (new juce::TextButton ("Cue Pan 2 Button"));
     addAndMakeVisible (cuePan2Btn.get());
-    cuePan2Btn->setTooltip (TRANS("Set channel Vpots to control aux 11/12 pan"));
-    cuePan2Btn->setButtonText (TRANS("2"));
+    cuePan2Btn->setTooltip (TRANS ("Set channel Vpots to control aux 11/12 pan"));
+    cuePan2Btn->setButtonText (TRANS ("2"));
     cuePan2Btn->addListener (this);
     cuePan2Btn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -188,8 +188,8 @@ MasterStripComponent::MasterStripComponent ()
 
     cueLvl1Btn.reset (new juce::TextButton ("Cue Level 1 Button"));
     addAndMakeVisible (cueLvl1Btn.get());
-    cueLvl1Btn->setTooltip (TRANS("Set channel Vpots to control aux 9/10 level"));
-    cueLvl1Btn->setButtonText (TRANS("1"));
+    cueLvl1Btn->setTooltip (TRANS ("Set channel Vpots to control aux 9/10 level"));
+    cueLvl1Btn->setButtonText (TRANS ("1"));
     cueLvl1Btn->addListener (this);
     cueLvl1Btn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -197,8 +197,8 @@ MasterStripComponent::MasterStripComponent ()
 
     cueLvl2Btn.reset (new juce::TextButton ("Cue Level 2 Button"));
     addAndMakeVisible (cueLvl2Btn.get());
-    cueLvl2Btn->setTooltip (TRANS("Vpots to control aux 9/10 level"));
-    cueLvl2Btn->setButtonText (TRANS("2"));
+    cueLvl2Btn->setTooltip (TRANS ("Vpots to control aux 9/10 level"));
+    cueLvl2Btn->setButtonText (TRANS ("2"));
     cueLvl2Btn->addListener (this);
     cueLvl2Btn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -206,9 +206,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux1LevelsBtn.reset (new juce::TextButton ("Aux 1 Levels Button"));
     addAndMakeVisible (aux1LevelsBtn.get());
-    aux1LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 1 send level.\n"
+    aux1LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 1 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux1LevelsBtn->setButtonText (TRANS("1"));
+    aux1LevelsBtn->setButtonText (TRANS ("1"));
     aux1LevelsBtn->addListener (this);
     aux1LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -216,9 +216,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux2LevelsBtn.reset (new juce::TextButton ("Aux 2 Levels Button"));
     addAndMakeVisible (aux2LevelsBtn.get());
-    aux2LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 2 send level.\n"
+    aux2LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 2 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux2LevelsBtn->setButtonText (TRANS("2"));
+    aux2LevelsBtn->setButtonText (TRANS ("2"));
     aux2LevelsBtn->addListener (this);
     aux2LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -226,9 +226,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux3LevelsBtn.reset (new juce::TextButton ("Aux 3 Levels Button"));
     addAndMakeVisible (aux3LevelsBtn.get());
-    aux3LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 3 send level.\n"
+    aux3LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 3 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux3LevelsBtn->setButtonText (TRANS("3"));
+    aux3LevelsBtn->setButtonText (TRANS ("3"));
     aux3LevelsBtn->addListener (this);
     aux3LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -236,9 +236,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux4LevelsBtn.reset (new juce::TextButton ("Aux 4 Levels Button"));
     addAndMakeVisible (aux4LevelsBtn.get());
-    aux4LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 4 send level.\n"
+    aux4LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 4 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux4LevelsBtn->setButtonText (TRANS("4"));
+    aux4LevelsBtn->setButtonText (TRANS ("4"));
     aux4LevelsBtn->addListener (this);
     aux4LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -246,9 +246,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux5LevelsBtn.reset (new juce::TextButton ("Aux 5 Levels Button"));
     addAndMakeVisible (aux5LevelsBtn.get());
-    aux5LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 5 send level.\n"
+    aux5LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 5 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux5LevelsBtn->setButtonText (TRANS("5"));
+    aux5LevelsBtn->setButtonText (TRANS ("5"));
     aux5LevelsBtn->addListener (this);
     aux5LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -256,9 +256,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux6LevelsBtn.reset (new juce::TextButton ("Aux 6 Levels Button"));
     addAndMakeVisible (aux6LevelsBtn.get());
-    aux6LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 6 send level.\n"
+    aux6LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 6 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux6LevelsBtn->setButtonText (TRANS("6"));
+    aux6LevelsBtn->setButtonText (TRANS ("6"));
     aux6LevelsBtn->addListener (this);
     aux6LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -266,9 +266,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux7LevelsBtn.reset (new juce::TextButton ("Aux 7 Levels Button"));
     addAndMakeVisible (aux7LevelsBtn.get());
-    aux7LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 7 send level.\n"
+    aux7LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 7 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux7LevelsBtn->setButtonText (TRANS("7"));
+    aux7LevelsBtn->setButtonText (TRANS ("7"));
     aux7LevelsBtn->addListener (this);
     aux7LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -276,9 +276,9 @@ MasterStripComponent::MasterStripComponent ()
 
     aux8LevelsBtn.reset (new juce::TextButton ("Aux 8 Levels Button"));
     addAndMakeVisible (aux8LevelsBtn.get());
-    aux8LevelsBtn->setTooltip (TRANS("Sets channel Vpots to control AUX 8 send level.\n"
+    aux8LevelsBtn->setTooltip (TRANS ("Sets channel Vpots to control AUX 8 send level.\n"
     "Master Vpot controls AUX out level"));
-    aux8LevelsBtn->setButtonText (TRANS("8"));
+    aux8LevelsBtn->setButtonText (TRANS ("8"));
     aux8LevelsBtn->addListener (this);
     aux8LevelsBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -286,8 +286,8 @@ MasterStripComponent::MasterStripComponent ()
 
     digitalTrimBtn.reset (new juce::TextButton ("Digital Trim Button"));
     addAndMakeVisible (digitalTrimBtn.get());
-    digitalTrimBtn->setTooltip (TRANS("Sets channel Vpots to control digital input level (pre DSP)"));
-    digitalTrimBtn->setButtonText (TRANS("TRIM"));
+    digitalTrimBtn->setTooltip (TRANS ("Sets channel Vpots to control digital input level (pre DSP)"));
+    digitalTrimBtn->setButtonText (TRANS ("TRIM"));
     digitalTrimBtn->addListener (this);
     digitalTrimBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -295,8 +295,8 @@ MasterStripComponent::MasterStripComponent ()
 
     trackingLvlBtn.reset (new juce::TextButton ("Tracking Level Button"));
     addAndMakeVisible (trackingLvlBtn.get());
-    trackingLvlBtn->setTooltip (TRANS("Sets Channel Vpots to control final post-DSP output level to multitrack outputs."));
-    trackingLvlBtn->setButtonText (TRANS("LEVEL"));
+    trackingLvlBtn->setTooltip (TRANS ("Sets Channel Vpots to control final post-DSP output level to multitrack outputs."));
+    trackingLvlBtn->setButtonText (TRANS ("LEVEL"));
     trackingLvlBtn->addListener (this);
     trackingLvlBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff184699));
 
@@ -304,7 +304,7 @@ MasterStripComponent::MasterStripComponent ()
 
     metersTopBtn.reset (new juce::TextButton ("Meters On Top Button"));
     addAndMakeVisible (metersTopBtn.get());
-    metersTopBtn->setButtonText (TRANS("TOP"));
+    metersTopBtn->setButtonText (TRANS ("TOP"));
     metersTopBtn->addListener (this);
     metersTopBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff172c52));
 
@@ -312,7 +312,7 @@ MasterStripComponent::MasterStripComponent ()
 
     metersBotmBtn.reset (new juce::TextButton ("Meters On Bottom Button"));
     addAndMakeVisible (metersBotmBtn.get());
-    metersBotmBtn->setButtonText (TRANS("BOTM"));
+    metersBotmBtn->setButtonText (TRANS ("BOTM"));
     metersBotmBtn->addListener (this);
     metersBotmBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff172c52));
 
@@ -320,8 +320,8 @@ MasterStripComponent::MasterStripComponent ()
 
     masterSelectBtn.reset (new juce::TextButton ("Master Select Button"));
     addAndMakeVisible (masterSelectBtn.get());
-    masterSelectBtn->setTooltip (TRANS("Activates Master fader in the Fat Channel Display."));
-    masterSelectBtn->setButtonText (TRANS("SELECT"));
+    masterSelectBtn->setTooltip (TRANS ("Activates Master fader in the Fat Channel Display."));
+    masterSelectBtn->setButtonText (TRANS ("SELECT"));
     masterSelectBtn->addListener (this);
     masterSelectBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff189994));
 
@@ -329,15 +329,15 @@ MasterStripComponent::MasterStripComponent ()
 
     masterWriteBtn.reset (new juce::TextButton ("Master Write Button"));
     addAndMakeVisible (masterWriteBtn.get());
-    masterWriteBtn->setTooltip (TRANS("Activates the Master Strip to record selected automation data by the Main fader og Aux Masters"));
-    masterWriteBtn->setButtonText (TRANS("WRITE"));
+    masterWriteBtn->setTooltip (TRANS ("Activates the Master Strip to record selected automation data by the Main fader og Aux Masters"));
+    masterWriteBtn->setButtonText (TRANS ("WRITE"));
     masterWriteBtn->addListener (this);
     masterWriteBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff565555));
 
     masterWriteBtn->setBounds (20, 168, 80, 18);
 
     masterInsertRLabel2.reset (new juce::Label ("Master Insert Right Label",
-                                                TRANS("--\n")));
+                                                TRANS ("--\n")));
     addAndMakeVisible (masterInsertRLabel2.get());
     masterInsertRLabel2->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     masterInsertRLabel2->setJustificationType (juce::Justification::centred);
@@ -351,29 +351,29 @@ MasterStripComponent::MasterStripComponent ()
 
     masterInsertL.reset (new juce::ComboBox ("Master Insert Left"));
     addAndMakeVisible (masterInsertL.get());
-    masterInsertL->setTooltip (TRANS("Allows any plugin to be patched into the main mix outputs.\n"
+    masterInsertL->setTooltip (TRANS ("Allows any plugin to be patched into the main mix outputs.\n"
     "(Post fader insert)"));
     masterInsertL->setEditableText (false);
     masterInsertL->setJustificationType (juce::Justification::centred);
-    masterInsertL->setTextWhenNothingSelected (TRANS("INSERT L"));
-    masterInsertL->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    masterInsertL->addItem (TRANS("Reset"), 1);
-    masterInsertL->addItem (TRANS("P01"), 2);
-    masterInsertL->addItem (TRANS("P02"), 3);
-    masterInsertL->addItem (TRANS("P03"), 4);
-    masterInsertL->addItem (TRANS("P04"), 5);
-    masterInsertL->addItem (TRANS("P05"), 6);
-    masterInsertL->addItem (TRANS("P06"), 7);
-    masterInsertL->addItem (TRANS("P07"), 8);
-    masterInsertL->addItem (TRANS("P08"), 9);
-    masterInsertL->addItem (TRANS("P09"), 10);
-    masterInsertL->addItem (TRANS("P10"), 11);
-    masterInsertL->addItem (TRANS("P11"), 12);
-    masterInsertL->addItem (TRANS("P12"), 13);
-    masterInsertL->addItem (TRANS("P13"), 14);
-    masterInsertL->addItem (TRANS("P14"), 15);
-    masterInsertL->addItem (TRANS("P15"), 16);
-    masterInsertL->addItem (TRANS("P16"), 17);
+    masterInsertL->setTextWhenNothingSelected (TRANS ("INSERT L"));
+    masterInsertL->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
+    masterInsertL->addItem (TRANS ("Reset"), 1);
+    masterInsertL->addItem (TRANS ("P01"), 2);
+    masterInsertL->addItem (TRANS ("P02"), 3);
+    masterInsertL->addItem (TRANS ("P03"), 4);
+    masterInsertL->addItem (TRANS ("P04"), 5);
+    masterInsertL->addItem (TRANS ("P05"), 6);
+    masterInsertL->addItem (TRANS ("P06"), 7);
+    masterInsertL->addItem (TRANS ("P07"), 8);
+    masterInsertL->addItem (TRANS ("P08"), 9);
+    masterInsertL->addItem (TRANS ("P09"), 10);
+    masterInsertL->addItem (TRANS ("P10"), 11);
+    masterInsertL->addItem (TRANS ("P11"), 12);
+    masterInsertL->addItem (TRANS ("P12"), 13);
+    masterInsertL->addItem (TRANS ("P13"), 14);
+    masterInsertL->addItem (TRANS ("P14"), 15);
+    masterInsertL->addItem (TRANS ("P15"), 16);
+    masterInsertL->addItem (TRANS ("P16"), 17);
     masterInsertL->addListener (this);
 
     masterInsertL->setBounds (14, 38, 88, 18);
@@ -401,7 +401,7 @@ MasterStripComponent::~MasterStripComponent()
     mastersBankBtn = nullptr;
     effectsBankBtn = nullptr;
     tapeBanksBtn = nullptr;
-    tapeBanksBtn2 = nullptr;
+    lineBanksBtn = nullptr;
     panMasterBtn = nullptr;
     soloMasterBtn = nullptr;
     cuePan1Btn = nullptr;
@@ -453,7 +453,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 7, y = 846, width = 59, height = 8;
-        juce::String text (TRANS("U -"));
+        juce::String text (TRANS ("U -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -465,7 +465,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 893, width = 65, height = 8;
-        juce::String text (TRANS("10 -"));
+        juce::String text (TRANS ("10 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -477,7 +477,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 934, width = 65, height = 8;
-        juce::String text (TRANS("30 -"));
+        juce::String text (TRANS ("30 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -489,7 +489,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 956, width = 65, height = 8;
-        juce::String text (TRANS("40 -"));
+        juce::String text (TRANS ("40 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -501,7 +501,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 870, width = 65, height = 8;
-        juce::String text (TRANS("5 -"));
+        juce::String text (TRANS ("5 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -513,7 +513,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 827, width = 65, height = 8;
-        juce::String text (TRANS("5 -"));
+        juce::String text (TRANS ("5 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -525,7 +525,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 803, width = 65, height = 8;
-        juce::String text (TRANS("10 -"));
+        juce::String text (TRANS ("10 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -537,7 +537,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 5, y = 914, width = 65, height = 8;
-        juce::String text (TRANS("20 -"));
+        juce::String text (TRANS ("20 -"));
         juce::Colour fillColour = juce::Colours::aliceblue;
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -549,7 +549,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 506, width = 120, height = 20;
-        juce::String text (TRANS("CUE PAN"));
+        juce::String text (TRANS ("CUE PAN"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -561,7 +561,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = -4, y = 460, width = 120, height = 20;
-        juce::String text (TRANS("CUE LEVEL"));
+        juce::String text (TRANS ("CUE LEVEL"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -573,7 +573,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 330, width = 120, height = 20;
-        juce::String text (TRANS("AUXES"));
+        juce::String text (TRANS ("AUXES"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -585,7 +585,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 286, width = 120, height = 20;
-        juce::String text (TRANS("DIGITAL"));
+        juce::String text (TRANS ("DIGITAL"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -597,7 +597,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 242, width = 120, height = 20;
-        juce::String text (TRANS("TRACKING"));
+        juce::String text (TRANS ("TRACKING"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -609,7 +609,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 196, width = 120, height = 20;
-        juce::String text (TRANS("METERS"));
+        juce::String text (TRANS ("METERS"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -641,7 +641,7 @@ void MasterStripComponent::paint (juce::Graphics& g)
 
     {
         int x = 0, y = 122, width = 120, height = 20;
-        juce::String text (TRANS("MASTER"));
+        juce::String text (TRANS ("MASTER"));
         juce::Colour fillColour = juce::Colour (0xffa4a2a2);
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
@@ -732,10 +732,10 @@ void MasterStripComponent::buttonClicked (juce::Button* buttonThatWasClicked)
         //[UserButtonCode_tapeBanksBtn] -- add your button handler code here..
         //[/UserButtonCode_tapeBanksBtn]
     }
-    else if (buttonThatWasClicked == tapeBanksBtn2.get())
+    else if (buttonThatWasClicked == lineBanksBtn.get())
     {
-        //[UserButtonCode_tapeBanksBtn2] -- add your button handler code here..
-        //[/UserButtonCode_tapeBanksBtn2]
+        //[UserButtonCode_lineBanksBtn] -- add your button handler code here..
+        //[/UserButtonCode_lineBanksBtn]
     }
     else if (buttonThatWasClicked == panMasterBtn.get())
     {
@@ -999,9 +999,9 @@ BEGIN_JUCER_METADATA
               virtualName="" explicitFocusOrder="0" pos="16 712 88 20" bgColOff="ff3d3f4b"
               bgColOn="ffc8c892" buttonText="Tape" connectedEdges="0" needsCallback="1"
               radioGroupId="0"/>
-  <TEXTBUTTON name="Tape Bank Button" id="e5d0d1771b8f7c35" memberName="tapeBanksBtn2"
+  <TEXTBUTTON name="Line Bank Button" id="e5d0d1771b8f7c35" memberName="lineBanksBtn"
               virtualName="" explicitFocusOrder="0" pos="16 686 88 20" bgColOff="ff3d3f4b"
-              bgColOn="ffc8c892" buttonText="Tape" connectedEdges="0" needsCallback="1"
+              bgColOn="ffc8c892" buttonText="Line" connectedEdges="0" needsCallback="1"
               radioGroupId="0"/>
   <TEXTBUTTON name="Pan Master Button" id="aee37e87e43cb4ee" memberName="panMasterBtn"
               virtualName="" explicitFocusOrder="0" pos="8 560 46 18" tooltip="V-Pot set to function as front/rear pan position control for any selected channel in surround modes"

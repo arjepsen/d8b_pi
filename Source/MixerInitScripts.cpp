@@ -21,10 +21,9 @@
 #define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
 #endif
 
-
 InitErrorType initializeMixer()
 {
-    const int MAX_RETRIES = 5;  // Used for defining how many retries various attempts will have.
+    const int MAX_RETRIES = 5; // Used for defining how many retries various attempts will have.
 
     // ================== SET UP COM PORTS =============================
 
@@ -32,15 +31,14 @@ InitErrorType initializeMixer()
     MixerManager &mixerManager = MixerManager::getInstance();
 
     // Fetch the com ports:
-    const char *BRAIN_DEVICE = mixerManager.getBrainPort().c_str();
-    const char *DSP_DEVICE = mixerManager.getDspPort().c_str();
+    // const char *BRAIN_DEVICE = mixerManager.getBrainPort().c_str();
+    // const char *DSP_DEVICE = mixerManager.getDspPort().c_str();
 
-    DEBUG_MSG("Brain device: %s\n", BRAIN_DEVICE);
-    DEBUG_MSG("DSP device: %s\n", DSP_DEVICE);
 
     // Make a file descriptor for the 115200 baud rate brain connection.
-    int BRAIN = openSerialPort(BRAIN_DEVICE, B115200); // Not const, since it can change to boost later.
-    const int DSP = openSerialPort(DSP_DEVICE, B115200);
+    //int BRAIN = openSerialPort(BRAIN_DEVICE, B115200); // Not const, since it can change to boost later.
+    int BRAIN = openSerialPort(mixerManager.getBrainPort().c_str(), B115200);
+    const int DSP = openSerialPort(mixerManager.getDspPort().c_str(), B115200);
 
     if (BRAIN == -1 || DSP == -1)
     {
@@ -64,7 +62,9 @@ InitErrorType initializeMixer()
     while (replyChar != 'R')
     {
         if (read(BRAIN, &replyChar, 1) == 1 && replyChar == 'R')
+        {
             DEBUG_MSG("Brain connected.\n");
+        }
 
         retries++;
         usleep(200000); // Sleep 200ms
@@ -83,9 +83,8 @@ InitErrorType initializeMixer()
             DEBUG_MSG("DSP connected.\n");
         usleep(200000);
         if (retries >= MAX_RETRIES)
-            return RESET_DSP_TIMEOUT;   // Maybe something wrong with DSP connection
+            return RESET_DSP_TIMEOUT; // Maybe something wrong with DSP connection
     }
-
 
     // ================== DISPLAY WELCOME MESSAGE ============================
 
@@ -103,7 +102,6 @@ InitErrorType initializeMixer()
     write(BRAIN, WELCOME_STRING, strlen(WELCOME_STRING));
     sleep(2); // Let it stay there a fews secs for admirations sake.
 
-
     // ====================== SEND BRAIN FIRMWARE =======================================
 
     // Clear Screen
@@ -120,23 +118,22 @@ InitErrorType initializeMixer()
 
         // Upload fast firmware.
         sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
-        
+
         // Close the old slow filedescriptor of yestoreyore:
         close(BRAIN);
 
         // Initialize new connection speed:
-        BRAIN = openSerialPort(BRAIN_DEVICE, B230400);
+        BRAIN = openSerialPort(mixerManager.getBrainPort().c_str(), B230400);
     }
     else
     {
-        // Guess we will stay with old slow speed then. 
+        // Guess we will stay with old slow speed then.
         write(BRAIN, UPLOAD_FIRMWARE_MESSAGE1, strlen(UPLOAD_FIRMWARE_MESSAGE1));
         write(BRAIN, UPLOAD_FIRMWARE_MESSAGE2, strlen(UPLOAD_FIRMWARE_MESSAGE2));
         sendFirmwareFile(BRAINWARE_FILE, BRAIN);
     }
 
     DEBUG_MSG("sending brain \n");
-    
 
     // Check response from Brain it should look something like:
     // R0027v0129v0202v0326v042Fv053Dv0623v073Ev083Cv0918v0A3Fv0B3Cv0C3Ev0D0Cv0E1Av0F2Cv1024v1127v1205v131Fv1419v1524v163Bv1705v1804v1A31v1B2Av1C39v1D37v1E2Dv1F03v2014v
@@ -146,12 +143,19 @@ InitErrorType initializeMixer()
     {
         std::string brainResponse = getBrainResponse(BRAIN);
         if (brainResponse.substr(0, 3) == "R00")
+        {
+            DEBUG_MSG("Brain reply to firmware: %s\n", brainResponse.c_str());
             break;
+        }
+
         retries++;
         if (retries > MAX_RETRIES)
+        {
+            DEBUG_MSG("Brain seems unresponsive to receiving firmware");
             return UPLOAD_BRAIN_FAILED;
+        }
+            
     }
-
 
     // ====================== I/O CARD LIST ====================================
     // This section detects and prints out a list of I/O cards.
@@ -182,9 +186,8 @@ InitErrorType initializeMixer()
     // Admire the beauty of it.
     sleep(1);
 
-
     // =================== LIST DIGITAL IO & CLOCK ================================
-    
+
     DEBUG_MSG("Displaying Digital IO & Clock\n");
 
     // Clear screen
@@ -211,7 +214,7 @@ InitErrorType initializeMixer()
     // ================== "S" ================================
 
     // Next, send an "s".... unsure exactly what this command does.
-    tcflush(BRAIN, TCIOFLUSH);  // First clear buffer.
+    tcflush(BRAIN, TCIOFLUSH); // First clear buffer.
     write(BRAIN, "s", 1);
 
     // Then check response.
@@ -220,10 +223,15 @@ InitErrorType initializeMixer()
     {
         std::string brainResponse = getBrainResponse(BRAIN);
         if (brainResponse == BRAIN_S_RESPONSE)
+        {
             break;
+        }
         retries++;
         if (retries > MAX_RETRIES)
+        {
             return S_RESPONSE_FAILED;
+        }
+            
     }
 
     usleep(20000);
@@ -243,11 +251,12 @@ InitErrorType initializeMixer()
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
     // Here the DSP replies "R350D" - check it.
+    DEBUG_MSG("Checking DSP reply to firmware upload\n");
     retries = 0;
     while (true)
     {
         std::string dspResponse = getDspResponse(DSP);
-        printf("\n\nDSP RESPONSE IS: %s\n\n", dspResponse.c_str());
+        DEBUG_MSG("\n\nDSP RESPONSE IS: %s\n\n", dspResponse.c_str());
         if (dspResponse.substr(0, 3) == "R35")
         {
             // Maybe this is only for Mackie clock card?
@@ -257,27 +266,37 @@ InitErrorType initializeMixer()
         else
         {
             retries++;
-            printf("Number of retries are now: %d", retries);
+            DEBUG_MSG("Number of retries are now: %d\n", retries);
         }
 
         if (retries > MAX_RETRIES)
-            printf("NOT R35 RESPONSE\n");
-
-            if (clockIO->getCardID() == APOGEE_CLOCK_ID_STRING)
-            {
-                printf("Clock card ID'ed as an APOGEE card. Send something extra before slave firmware\n");
-                write(DSP, APOGEE_FW_THING, strlen(APOGEE_FW_THING));
-                dspResponse = getDspResponse(DSP);
-                printf("\n\nDSP APOGEE RESPONSE IS: %s\n\n", dspResponse.c_str());
-            }
-
-
-            break;
+        {
+            DEBUG_MSG("NOT R35 RESPONSE\n");
             //return UPLOAD_DSP_FAILED;
+        }
+        // if (clockIO->getCardID() == APOGEE_CLOCK_ID_STRING)
+        // {
+        //     printf("Clock card ID'ed as an APOGEE card. Send something extra before slave firmware\n");
+        //     write(DSP, APOGEE_FW_THING, strlen(APOGEE_FW_THING));
+        //     dspResponse = getDspResponse(DSP);
+        //     printf("\n\nDSP APOGEE RESPONSE IS: %s\n\n", dspResponse.c_str());
+        // }
+
+        break;
+        // return UPLOAD_DSP_FAILED;
+    }
+
+    // Something extra is sent to the dsp board, if we are using an apogee card.
+    // TODO: Should this be within the above loop or not???
+    if (clockIO->getCardID() == APOGEE_CLOCK_ID_STRING)
+    {
+        printf("Clock card ID'ed as an APOGEE card. Send something extra before slave firmware\n");
+        write(DSP, APOGEE_FW_THING, strlen(APOGEE_FW_THING));
+        std::string dspResponse = getDspResponse(DSP);
+        printf("\n\nDSP APOGEE RESPONSE IS: %s\n\n", dspResponse.c_str());
     }
 
     // ===================== SEND SLAVE PART OF DSP FIRMWARE ==================
-
 
     DEBUG_MSG("Uploading 'slave' dsp firmware\n");
 
@@ -293,7 +312,7 @@ InitErrorType initializeMixer()
     // =================== DSP PLUGINS (Config.asc file) ===========================
 
     DEBUG_MSG("Uploading 'Config.asc' twice\n");
-    
+
     // Clear Screen
     write(BRAIN, "01u", 3);
     usleep(20000);
@@ -309,9 +328,9 @@ InitErrorType initializeMixer()
     sleep(1);
 
     // =========================== INIT FX CARDS =============================
-    
+
     DEBUG_MSG("Initializing FX cards\n");
-    
+
     // Clear Screen
     write(BRAIN, "01u", 3);
     usleep(20000);
@@ -365,9 +384,7 @@ InitErrorType initializeMixer()
         sendFirmwareFile(DSP_CMD1_APOGEE_FILE, DSP);
         getDspResponse(DSP);
         sendFirmwareFile(DSP_CMD2_APOGEE_FILE, DSP);
-
     }
-    
 
     // sleep(1);
 
@@ -386,7 +403,6 @@ InitErrorType initializeMixer()
     getDspResponse(DSP);
     getDspResponse(DSP);
 
-
     std::string dspReply = "";
     do
     {
@@ -395,9 +411,6 @@ InitErrorType initializeMixer()
     } while (dspReply != "");
 
     sleep(1);
-
-
-
 
     // // ==================== Load Standard config.. or some user choice =================
 
@@ -449,7 +462,6 @@ InitErrorType initializeMixer()
 
     return INIT_SUCCESS;
 }
-
 
 // ######################## OTHER HELPER FUNCTIONS #################################
 
@@ -591,7 +603,10 @@ std::string getDspResponse(int dspDescriptor)
             if (response == 'd')
                 break;
             else
+            {
                 dspReplyStream.put(response);
+                DEBUG_MSG("dsp response: %c\n", response);
+            }
         }
         else if (result == 0)
         {

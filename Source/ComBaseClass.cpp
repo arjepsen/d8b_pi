@@ -94,9 +94,10 @@ speed_t ComBase::getBaudRate()
 void ComBase::startReceiverThread()
 {
 	// So this would be called from mixermanager
-	// Maybe "openserialport" should be private (protected), and here we first check if port/baudrate is set.
+	// TODO: Maybe "openserialport" should be private (protected), and here we first check if port/baudrate is set.
 	// Then also check if initialization is done. (maybe by checkinng the filedescriptor?)
-	//////////////////7
+  // TODO: Better error handling.
+	//////////////////
 
 	// First check if Port is set:
 	if (port == "")

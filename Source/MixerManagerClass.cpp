@@ -105,11 +105,13 @@ bool MixerManager::setDspPort(std::string deviceString)
 
 const std::string MixerManager::getBrainPort() const
 {
+    DEBUG_MSG("Manager getting brainport: %s\n", settings.getBrainPort().c_str());
     return settings.getBrainPort();
 }
 
 const std::string MixerManager::getDspPort() const
 {
+    DEBUG_MSG("Manager getting dspport: %s\n", settings.getDspPort().c_str());
     return settings.getDspPort();
 }
 
@@ -259,7 +261,7 @@ void MixerManager::handleBufferMessage()
         printf("LineBank recieved: %s\n", message.c_str());
 
         // Check last char for message Category:
-        char msgCategory = message.back(); // Might need to make a check to ensure message is not empty....?
+        char msgCategory = message.back(); // TODO: Might need to make a check to ensure message is not empty....?
 
         switch (msgCategory)
         {

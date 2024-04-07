@@ -24,6 +24,14 @@
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define SETTINGS_COMPONENT_DEBUG_MESSAGES
+
+#ifdef SETTINGS_COMPONENT_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("SETTING_CMPNT_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
 //[/MiscUserDefs]
 
 //==============================================================================
@@ -202,6 +210,7 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
         // Get the chosen string, and update our settings.
         const std::string portString = brainPortComboBox.get()->getText().toStdString();
         mixerManager.setBrainPort(portString);
+        DEBUG_MSG("Brain set to: %s\n", portString.c_str());
         //[/UserComboBoxCode_brainPortComboBox]
     }
     else if (comboBoxThatHasChanged == dspPortComboBox.get())
@@ -213,6 +222,7 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 
         const std::string portString = dspPortComboBox.get()->getText().toStdString();
         mixerManager.setDspPort(portString);
+        DEBUG_MSG("DSP set to: %s\n", portString.c_str());
         //[/UserComboBoxCode_dspPortComboBox]
     }
     else if (comboBoxThatHasChanged == brainBaudRateComboBox.get())
@@ -226,7 +236,7 @@ void SettingsComponent::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
             mixerManager.setBrainBoostState(true);
         else
         {
-            printf("SOMETHINGS WRONG WITH OUR TURBO COMBO");
+            DEBUG_MSG("SOMETHINGS WRONG WITH OUR TURBO COMBO");
             exit(1);
         }
         //[/UserComboBoxCode_brainBaudRateComboBox]
@@ -248,6 +258,10 @@ void SettingsComponent::buttonClicked (juce::Button* buttonThatWasClicked)
         // Check for incorrect port assignment.
         std::string brainPort = mixerManager.getBrainPort();
         std::string dspPort = mixerManager.getDspPort();
+
+        DEBUG_MSG("initialize clicked - check port assignment:\n");
+        DEBUG_MSG("Brain: %s,  DSP: %s\n", brainPort.c_str(), dspPort.c_str());
+
         if (brainPort == "" || dspPort == "" || brainPort == dspPort)
         {
             juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
@@ -264,6 +278,8 @@ void SettingsComponent::buttonClicked (juce::Button* buttonThatWasClicked)
             // This is so we can disable the button, while the init script runs.
             mixerManager.initMixer(initMixerBtn.get());
         }
+
+        // TODO: If boot finishes correctly, close the settings window.
 
         //[/UserButtonCode_initMixerBtn]
     }
