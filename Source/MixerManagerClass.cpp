@@ -265,7 +265,7 @@ void MixerManager::handleBufferMessage()
 
         switch (msgCategory)
         {
-            case 'f': // FADER MOVED.
+            case 'f': // Fader was moved
             {
                 std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 std::string value = message.substr(2, 2);       // Get fader position from message

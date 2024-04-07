@@ -11,6 +11,20 @@
 #include "EventBusClass.h"
 #include <stdexcept>
 
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define EVENTBUS_DEBUG_MESSAGES
+
+#ifdef EVENTBUS_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("EVENTBUS_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
+
+
+/**
+ * Constructor for the event bus.
+ * TODO: give it a thorough description
+*/
 EventBus::EventBus()
 {
     // Iterate over the array of eventtypes
@@ -33,17 +47,24 @@ EventBus::EventBus()
     setBankPoster(LINE_BANK);
 }
 
+// Destructor
 EventBus::~EventBus() {}
 
-// ##############################################################################################################
-// This method is used to "subscribe" to events on the different banks, by handing over two callback methods.
-// The first method, is the callback that will be run when the event type happens on the given channel strip ID
-// (like moving a fader on strip 2).
-// The second callback, is used to remove the "old" callback, in cases where a channel "moves" it's subscription
-// to a different channelstrip. (otherwise the channel would still respond to the old channelstrip.)
-// NOTE: No channelstrip can be "empty" - there has to be a subscription.
-//  (maybe this could be changed in the future?)
-// ##############################################################################################################
+
+/*****************************************************************************************************************************
+ * @brief This method is used to subscribe to events on a given channelstrip on a given bank.
+ *      The method must receive a specification of which bank and channelstrip, and 
+ *      the callback methods for fader- vpot- and button activity on that strip.
+ *      It must also receive a callback for removing the subscription. This is necessary, since a channel can be configured
+ *      to any strip on any bank.
+ * 
+ * @param bank                          Specify which bank.
+ * @param channelStripID                Specify which channelstrip on the given bank
+ * @param faderCallback                 Hand over the callback to call, when a fader is moved on the specified strip.
+ * @param vpotCallback                  Callback for vpot movements on the strip.
+ * @param buttonCallback                Callback for button presses on the strip.
+ * @param removeSubscriptionCallback    Callback for removing the current subscription.
+ *****************************************************************************************************************************/
 void EventBus::bankEventSubscribe(Bank bank,
                                   const std::string &channelStripID,
                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> faderCallback,
@@ -53,7 +74,7 @@ void EventBus::bankEventSubscribe(Bank bank,
 {
     if (channelStripID.length() != 2)
     {
-        printf("WRONG LENGTH OF CHANNEL STRIP ID\n");
+        DEBUG_MSG("WRONG LENGTH OF CHANNEL STRIP ID\n");
         exit(1);
     }
 
@@ -137,7 +158,7 @@ void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ##############################################################################################
-// This essentially the event post method that other classes will use.
+// This is the event post method that other classes will use.
 // It is essentially just a pointer to one of the four internal classes, corresponding to a bank.
 // ##############################################################################################
 void EventBus::postEvent(BankEventType eventType,

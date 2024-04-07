@@ -6,7 +6,8 @@
     Author:  anders
 
 
-    Handler class for the Line bank (Bank 1)
+    Handler class for the Line bank messages (Bank 1)
+    (meaning, messages sent by the console, on physical interaction)
   ==============================================================================
 */
 

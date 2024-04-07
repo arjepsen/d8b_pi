@@ -17,6 +17,15 @@ BrainCom::BrainCom(){}
 BrainCom::~BrainCom(){}
 
 
+// UNCOMMENT TO ENABLE DEBUG MESSAGES.
+#define BRAINCOM_DEBUG_MESSAGES
+
+#ifdef BRAINCOM_DEBUG_MESSAGES
+#define DEBUG_MSG(format, ...) printf("BRAINCOM_DBG: " format, ##__VA_ARGS__)
+#else
+#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
+#endif
+
 // // #######################################
 // // Method for flushing the receiver buffer
 // // #######################################
@@ -36,7 +45,7 @@ void BrainCom::messageReceiver()
     // Make sure the thread hasn't already been started - only one thread allowed!
     if (receiverThreadRunning)
     {
-        printf("ERROR - thread already running!");
+        DEBUG_MSG("ERROR - thread already running!");
         exit(1);
     }
 
@@ -51,7 +60,7 @@ void BrainCom::messageReceiver()
     // Clear com buffer for starting out
     tcflush(boardCom, TCIOFLUSH);
 
-    printf("Running brain message loop\n");
+    DEBUG_MSG("Running brain message loop\n");
     // Run the infinite loop.
     while (true)
     {
@@ -61,6 +70,7 @@ void BrainCom::messageReceiver()
         {
             message += recvChar;
 
+            // TODO: maybe we can optimize this? Might not need everything from a to z?
             // A lower case letter means message complete.
             if (recvChar >= 'a' && recvChar <= 'z')
             {
@@ -68,7 +78,7 @@ void BrainCom::messageReceiver()
 
                 if (recvChar == 'l' || recvChar == 'k')
                 {
-                    printf("hearbeat: %c\n", recvChar);
+                    DEBUG_MSG("hearbeat: %c\n", recvChar);
                     heartbeatReceived();
                 }
                 else
@@ -89,7 +99,7 @@ void BrainCom::messageReceiver()
     }
 
     // We probably shouldn't get here... but just in case.
-    printf("BRAIN LOOP EXITED!!\n");
+    DEBUG_MSG("BRAIN LOOP EXITED!!\n");
 }
 
 // ##################################################################################

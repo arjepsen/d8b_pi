@@ -1,0 +1,34 @@
+Essentially the mixer console contains two boards, that has a dsp chip on it:
+The Brain board, and the DSP board.
+
+The boards sends messages to the CPU about stuff that happens on the console,
+and the CPU sends commands to the boards, when something should happen.
+The "CPU" is a term for the computer that handles the graphical interface, and communication with the two boards.
+
+So, if we move a fader, a pot or press a button, a message is sent from the Brain board to the CPU.
+Then the CPU would send a message to the DSP board about how to handle the audio...
+
+
+Overall parts of the program:
+One part is displaying a graphical interface.
+Another part is handling messages to and from the console.
+
+There is four "banks" in the mixer, so the messages that are sent to and from the mixer, can be dependant on 
+the currently selected bank.
+So There are several maps of method callbacks set up - one for each bank.
+And then a pointer to such a map is used, to handle the current selection.
+
+Then other classes can "subscribe" to an event, by registering a callback with the event bus.
+
+An important challenge here is, that each channelstrip should be configurable, so that any strip in any bank, 
+can be configured to handle any specific channel.
+
+
+
+
+
+
+
+Things to explain:
+What is a "channel"
+What is a bank.
