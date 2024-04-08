@@ -72,16 +72,11 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
-  $(JUCE_OBJDIR)/BankMastersMessageHandlerClass_b6fa6ec9.o \
-  $(JUCE_OBJDIR)/BankEffectsMessageHandlerClass_ee7520f8.o \
-  $(JUCE_OBJDIR)/BankLineMessageHandlerClass_a2c5f366.o \
-  $(JUCE_OBJDIR)/BankTapeMessageHandlerClass_66e47a78.o \
   $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o \
   $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
   $(JUCE_OBJDIR)/BrainComClass_e5f52a6e.o \
   $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o \
   $(JUCE_OBJDIR)/ChannelIDMap_ed0868a7.o \
-  $(JUCE_OBJDIR)/ChannelStripClass_9e933684.o \
   $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o \
   $(JUCE_OBJDIR)/CircularBuffer_936e7c8.o \
   $(JUCE_OBJDIR)/ComBaseClass_ed57a2f.o \
@@ -118,26 +113,6 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(JUCE_OBJDIR)/execinfo.cmd $
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
 
-$(JUCE_OBJDIR)/BankMastersMessageHandlerClass_b6fa6ec9.o: ../../Source/BankMastersMessageHandlerClass.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling BankMastersMessageHandlerClass.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/BankEffectsMessageHandlerClass_ee7520f8.o: ../../Source/BankEffectsMessageHandlerClass.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling BankEffectsMessageHandlerClass.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/BankLineMessageHandlerClass_a2c5f366.o: ../../Source/BankLineMessageHandlerClass.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling BankLineMessageHandlerClass.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/BankTapeMessageHandlerClass_66e47a78.o: ../../Source/BankTapeMessageHandlerClass.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling BankTapeMessageHandlerClass.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
 $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o: ../../Source/BrainLookupTable.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling BrainLookupTable.cpp"
@@ -161,11 +136,6 @@ $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o: ../../Source/ChannelClass.cpp
 $(JUCE_OBJDIR)/ChannelIDMap_ed0868a7.o: ../../Source/ChannelIDMap.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling ChannelIDMap.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/ChannelStripClass_9e933684.o: ../../Source/ChannelStripClass.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling ChannelStripClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o: ../../Source/ChannelStripComponent.cpp
