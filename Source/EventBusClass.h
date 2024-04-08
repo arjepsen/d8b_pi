@@ -64,6 +64,7 @@ private:
         std::function<void(Bank, const std::string &)> unsubscribeCallback;
     };
 
+    // We instantiate four maps of BankEventHandlers - meaning we will have a map of the structs for each bank.
     std::unordered_map<std::string, BankEventHandlers> lineBankCallbacks;
     std::unordered_map<std::string, BankEventHandlers> tapeBankCallbacks;
     std::unordered_map<std::string, BankEventHandlers> effectsBankCallbacks;
@@ -78,6 +79,15 @@ private:
     // This .... holds the callbacks for the MasterStripComponent
     std::array<std::function<void(const std::string&)>, EVENT_TYPE_COUNT> masterStripComponentCallback;
 
+
+    // The Master section - according to the original d8b manual - is everything to the right of channel 24.
+    // Let's create a data structure for the callbacks for these buttons and vpots.
+    // No un-subscription - they cant be moved.
+    // Maybe seperate maps for vpots and buttons. (Should we handle all buttons here??)
+    std::unordered_map<std::string, std::function<void(const std::string&)>> masterSectionVpotCallbacks;
+    std::unordered_map<std::string, std::function<void(const std::string&)>> masterSectionButtonCallbacks;
+
+    // Create a Bank variable for holding the currently selected bank.
     Bank currentBank;
 
 public:

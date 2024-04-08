@@ -71,7 +71,9 @@
         "typeinfo": "cpp",
         "ranges": "cpp",
         "*.mm": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "charconv": "cpp",
+        "variant": "cpp"
     },
     "cmake.configureOnOpen": false
 }

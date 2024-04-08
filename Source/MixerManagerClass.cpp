@@ -253,6 +253,7 @@ void MixerManager::handleBufferMessage()
     printf("Running Reader Thread\n");
     while (true)
     {
+        // Get the next message from the buffer
         std::string message = circBuffer.pop();
 
         // Check last char for message Category:
@@ -269,13 +270,13 @@ void MixerManager::handleBufferMessage()
             }
             case 'v': // V-Pot turned
             {
-                //printf("Pot Message: %s\n", message.c_str());
                 // Decipher which pot.
-
-                std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
                 std::string value = message.substr(2, 2);       // Get fader position from message
 
-                eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
+                //eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
+                eventBus.postEvent(VPOT_EVENT, vPotID, value, CONSOLE_EVENT);
                 break;
             }
             case 's':

@@ -167,6 +167,9 @@ void EventBus::postEvent(BankEventType eventType,
                          const std::string &eventValue,
                          EventSource source)
 {
+    // TODO: This throws an instance of "std::out_of_range" if the channelStripID is not in the map.
+    // Maybe we should do some error handling.
+    // BUT also: maybe we should rename, so that this would also include the vpots that does not belong to a channel strip?
     currentBankCallbacks->at(channelStripID).callbackArray[eventType](eventValue, currentBank, channelStripID, source);
 }
 

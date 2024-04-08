@@ -268,6 +268,8 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
     // Handle the event one way if it was fired by the console.
     if (source == CONSOLE_EVENT)
     {    
+
+        printf("pot moved: ");
         // The console sends a value showing how fast the pot was turned.
         // Convert the value to integer, then calculate new value from last, and convert back to 2-digit hex string.
 
