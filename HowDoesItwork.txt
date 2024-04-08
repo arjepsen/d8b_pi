@@ -22,8 +22,26 @@ Then other classes can "subscribe" to an event, by registering a callback with t
 
 An important challenge here is, that each channelstrip should be configurable, so that any strip in any bank, 
 can be configured to handle any specific channel.
+A channel can even be configured to more than one strip on the same bank. This creates a bit of trickyness in handling
+a channel event, as it needs to update the ui, but also all other associated strips on the current bank.
 
 
+
+So:
+WHEN A CONSOLE PHYSICAL EVENT (like moving a fader) HAPPENS:
+1: The Brain board sends a message on the brain com uart.
+2: The BrainComClass' messageReceiver thread reads the message, and write it to the circular buffer singleton.
+3: The messageHandler thread in the mixerManager class pops the message off the buffer, and posts an event in the 
+    eventBus instance (like: eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);)
+    As seen in the example, the call specifies what the interaction was, and whether it was a console event, or ui event.
+4: The eventBus has a pointer to a data structure for the currently selected bank.
+    This structure holds an array of callbacks (fader, vpot, button) for the channel that is associated with the given 
+    channel strip. So the eventBus.postEvent() method will call the corresponding callback from the channel.
+5: The channel callback will first send a DSP command for the given channel.
+    Next, it will retreive a "set" of other associated channel strips on the current bank, which is copied, so
+    the set reflects both ui and console. The "calling" channel strip ID is removed from the corresponding set.
+    Then commands are sent to the console for any associated channel strips to be moved.
+    Finally, a new "associated" event post is called, for the ui to be updated.
 
 
 

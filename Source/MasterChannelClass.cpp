@@ -60,6 +60,7 @@ void MasterChannel::masterStripFaderEventCallback(const std::string faderValue,
 {
     // Construct DSP volume command, and send it.
     // Interestingly, this command can be divided: 4Cc9XyyQ for left side and 4CcAXyyQ for right side. (yy is value)
+    // TODO: is it always the same value for both sideS???
     std::string dspMasterVolumeCommand = "4Cc9X" + faderValue + "QAX" + faderValue + "Q";
 
 	dspCom.send(dspMasterVolumeCommand);

@@ -53,9 +53,11 @@ private:
     EventBus(const EventBus &) = delete;
     EventBus &operator=(const EventBus &) = delete;
 
-    // Structure to hold callbacks, the first is for the channelobject, the second is for removing a
+    // Structure to hold callbacks, the first element is for the channelobject, the second is for removing a
     // strip from the channel object's association map.
-
+    // The first element is an array which holds the callbacks for the channel: 
+    // [faderCallback, VpotCallback, ButtonCallback]
+    // The second element is the unsubscribe callback for the channel.
     struct BankEventHandlers
     {
         std::array<std::function<void(const std::string &, Bank, const std::string &, EventSource)>, EVENT_TYPE_COUNT> callbackArray;
@@ -120,7 +122,7 @@ public:
 
     // this should receive a set of associate channels, an event type, and the value. DO WE NEED BANK?
     // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
-    void associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+    void associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
     void associateMasterEventPost(BankEventType eventType, std::string eventValue);
     
     

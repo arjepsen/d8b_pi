@@ -41,7 +41,7 @@ Channel::Channel()
     int initialAssociateStripNumber = channelNumber;
     Bank initialAssociateBank = LINE_BANK;
 
-    // Adjust for channels above 24.
+    // TODO: Adjust for channels above 24.
     if (channelNumber > 23)
     {
         initialAssociateStripNumber -= 23;
@@ -78,6 +78,9 @@ Channel::Channel()
 
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
+    // TODO: We need to be able to save and recall settings across reboots.
+    // On construction, we should read saved values and set them.
+    // Default saved values must be present, and recreated if not present.
     mute = false;
 
     pan = 0x7F; // Center
@@ -95,7 +98,7 @@ Channel::Channel()
     nextChannelNumber++;
 
 
-    // HERE AT THE BOTTOM MAYBE WE SHOULD SEND INITIAL SETTINGS TO THE DSP BOARD??
+    // TODO: HERE AT THE BOTTOM MAYBE WE SHOULD SEND INITIAL SETTINGS TO THE DSP BOARD??
 }
 
 // Implement other member functions...
@@ -131,11 +134,12 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
     // Construct DSP volume command, and send it.
     std::string volumeCommand = channelID + "cX" + faderValue + "Q";
 
+    // Only send dsp command if channel is not muted.
     if (!mute)
         // write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
         dspCom.send(volumeCommand);
 
-    // Update volume member
+    // Update volume member - even if muted, so we know what level to go at, when unmuting.
     volume = faderValue;
 
     // Retrieve the set of associated CONSOLE channel strips on the current bank.
@@ -164,7 +168,8 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
     }
 
     // Now make an event post, for the UI strips to get updated
-    eventBus.associateChStripEventPost(associatedUiStrips, FADER_EVENT, faderValue);
+    // It runs a for loop, so works even if set is empty.
+    eventBus.associateChStripUiEventPost(associatedUiStrips, FADER_EVENT, faderValue);
 }
 
 void Channel::channelStripVpotEventCallback(const std::string vpotValue,
@@ -219,8 +224,14 @@ void Channel::channelStripButtonEventCallback(const std::string buttonID,
                                               const std::string &channelStripID,
                                               EventSource source)
 {
-    // SOME WORK TO BE DONE HERE...
+    // TODO: SOME WORK TO BE DONE HERE...
+
+    // So what we wanna do here is:
+    // 1: check which button.
+    printf("BUTTON CLICKED");
 }
+
+
 
 // ####################################################################################################
 // This method is a callback for removing the supplied channel strip from the set of associated strips.
@@ -252,15 +263,11 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
 
     // Use a stringstream to construct the DSP command  (xxFEFFXyyOFDFFXP, x is channelID, y is pan value)
     std::stringstream ss;
-
     std::string panValueString;
 
     // Handle the event one way if it was fired by the console.
     if (source == CONSOLE_EVENT)
     {    
-        // This is a console event, we're receivng the value show how fast the pot was turned.
-        // Check current saved value, to calculate new value, then convert to 2-digit hex string.
-
         // The console sends a value showing how fast the pot was turned.
         // Convert the value to integer, then calculate new value from last, and convert back to 2-digit hex string.
 
@@ -300,8 +307,6 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
     // Update internal member value
     pan = newPanValue;
 
-    bool updateDot = false;
-
     // Determine which LED's should be lit
     ChStripLed newRingLED;
     if (pan < 28) newRingLED = RING_1;
@@ -316,7 +321,8 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
     else if (pan < 228) newRingLED = RING_10;
     else newRingLED = RING_11;
 
-    // Check dead center for dot.
+    // Check dead center for dot LED.
+    bool updateDot = false;
     if (pan == 127)
     {
         panDotCenter = true;
@@ -367,13 +373,13 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
     }
 
     // Post event for the associated strips.
-    eventBus.associateChStripEventPost(associatedStrips, VPOT_EVENT, panValueString);
+    eventBus.associateChStripUiEventPost(associatedStrips, VPOT_EVENT, panValueString);
 }  
 
 
 void Channel:: handleVpotAuxSend(const std::string& vpotValue, const Bank bank, EventSource& source)
 {
-    //WORK ON THESE
+    // TODO: WORK ON THESE
 
 
 }

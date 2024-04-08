@@ -72,6 +72,7 @@ void EventBus::bankEventSubscribe(Bank bank,
                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> buttonCallback,
                                   std::function<void(Bank, const std::string &)> removeSubscriptionCallback)
 {
+    // Check validity of strip ID
     if (channelStripID.length() != 2)
     {
         DEBUG_MSG("WRONG LENGTH OF CHANNEL STRIP ID\n");
@@ -106,7 +107,7 @@ void EventBus::bankEventSubscribe(Bank bank,
 // this method to post an event that will update the channelStripComponents in the UI, by calling their callback from
 // the lookup tables array "chStripComponentCallbacks".
 // ####################################################################################################################
-void EventBus::associateChStripEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
+void EventBus::associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
 {
     // Iterate over the set, reference channelstripID to map of channelStripComponent callbacks, run the callback.
     for (auto &stripID : channelStrips)

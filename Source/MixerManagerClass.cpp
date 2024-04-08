@@ -255,11 +255,6 @@ void MixerManager::handleBufferMessage()
     {
         std::string message = circBuffer.pop();
 
-        // CHANGING TO HANDLE BANK IN EVENT BUS
-        //messageHandler->handleMessage(message);
-
-        printf("LineBank recieved: %s\n", message.c_str());
-
         // Check last char for message Category:
         char msgCategory = message.back(); // TODO: Might need to make a check to ensure message is not empty....?
 
@@ -269,8 +264,6 @@ void MixerManager::handleBufferMessage()
             {
                 std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 std::string value = message.substr(2, 2);       // Get fader position from message
-
-                
                 eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
                 break;
             }
@@ -285,6 +278,17 @@ void MixerManager::handleBufferMessage()
                 eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
                 break;
             }
+            case 's':
+            case 'u':
+            {
+                // Button was pressed. "s" means pressed, "u" means depressed.
+                std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                std::string value = message.substr(2, 2);       // Get fader position from message
+                eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
+                break;
+
+            }
+
         }
     }
 }

@@ -3,3 +3,9 @@ physcial / UI fader interaction. - WORKING.
 Next, get the master fader up and running.
 
 Then start working on buttons. (maybe wait with pans untill banks are implemented?)
+
+
+BUTTONS:
+Tricky thing - we have implemented the eventPost with parameters for channel strip ID, but the buttons 
+send their unique id, plus an s/u.
+So how do we best identify the right channel to handle the button press?
