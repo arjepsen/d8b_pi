@@ -5,6 +5,15 @@ Next, get the master fader up and running.
 Then start working on buttons. (maybe wait with pans untill banks are implemented?)
 
 
+
+VPOTS - on master section:
+Create a new class; MasterSectionClass.
+In it's instantiation, it should register/subscribe it's callbacks for the master section vpots.
+These needs to be registered in/for all four banks. The fader callback should be null.
+Then also change the callback structure for how to handle the buttons.
+
+
+
 BUTTONS:
 Tricky thing - we have implemented the eventPost with parameters for channel strip ID, but the buttons 
 send their unique id, plus an s/u.

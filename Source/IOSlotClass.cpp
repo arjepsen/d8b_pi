@@ -86,8 +86,6 @@ IOSlot::IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery) //: ioCard(nullptr)
                 break;
             }
         }
-        
-
     }
     DEBUG_MSG("IO card ID: %s\n", ioCardID.c_str());
     DEBUG_MSG("\n      === End of constructor ===\n\n");

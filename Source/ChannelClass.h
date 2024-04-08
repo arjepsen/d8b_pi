@@ -66,22 +66,7 @@ private:
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     uint8_t pan;             // (0 - FE) - weird things happen on "FF".
 	bool panDotCenter;
-	
 
-	// enum RingLED
-	// {
-	// 	RING_LED_1,
-	// 	RING_LED_2,
-	// 	RING_LED_3,
-	// 	RING_LED_4,
-	// 	RING_LED_5,
-	// 	RING_LED_6,
-	// 	RING_LED_7,
-	// 	RING_LED_8,
-	// 	RING_LED_9,
-	// 	RING_LED_10,
-	// 	RING_LED_11
-	// };
 
 	ChStripLed currentRingLED;
 

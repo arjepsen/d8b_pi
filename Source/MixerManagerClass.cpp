@@ -283,9 +283,12 @@ void MixerManager::handleBufferMessage()
             case 'u':
             {
                 // Button was pressed. "s" means pressed, "u" means depressed.
-                std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-                std::string value = message.substr(2, 2);       // Get fader position from message
-                eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
+                //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                //std::string value = message.substr(2, 2);       // Get fader position from message
+                //eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
+                // So what to do.
+                // how do we handle differentiation between channel buttons, and others?
+
                 break;
 
             }
