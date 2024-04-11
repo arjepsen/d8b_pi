@@ -37,7 +37,8 @@ Channel::Channel()
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance())
 {
-    // Set up variables for initial channel strip event subscription
+    // Set up variables for initial channel strip event subscription.
+    // TODO: Upon boot, this should be loaded from saved file.
     int initialAssociateStripNumber = channelNumber;
     Bank initialAssociateBank = LINE_BANK;
 
@@ -58,8 +59,7 @@ Channel::Channel()
     associatedChannelStrips[initialAssociateBank] = initialStripSet;
 
     // Subscribe to events on the given bank and strip.
-    eventBus.bankEventSubscribe
-    (
+    eventBus.bankEventSubscribe(
         initialAssociateBank,
         initialAssociateChannelStripID,
         [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID, EventSource source)
@@ -69,13 +69,10 @@ Channel::Channel()
         [this](const std::string &buttonValue, const Bank bank, const std::string &channelStripID, EventSource source)
         { this->channelStripButtonEventCallback(buttonValue, bank, channelStripID, source); },
         [this](const Bank bank, const std::string &channelStripID)
-        { this->removeChStripAssociationCallback(bank, channelStripID); }
-    );
+        { this->removeChStripAssociationCallback(bank, channelStripID); });
 
     // Set initial Vpot handler method
     currentVpotFunction = &Channel::handleVpotPan;
-
-
 
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
     // TODO: We need to be able to save and recall settings across reboots.
@@ -88,15 +85,12 @@ Channel::Channel()
 
     // solo = false;
 
-
-
     // assignments[0] = true;  // Assign to L-R. All others should default to false.
 
     // Initialize other member variables to default values...
 
     // Increment the nextChannelNumber for the next channel construction.
     nextChannelNumber++;
-
 
     // TODO: HERE AT THE BOTTOM MAYBE WE SHOULD SEND INITIAL SETTINGS TO THE DSP BOARD??
 }
@@ -153,7 +147,6 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
     if (source == CONSOLE_EVENT)
     {
         associatedConsoleStrips.erase(channelStripID);
-        
     }
     else
     {
@@ -194,24 +187,22 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue,
     // E - Level to tape
     // F - Digital trim. (only for the 48 audio channels)
 
-    //The pots send values in same form as the faders. BUT the value is Fy for CCW and 0y for CW rotation, where y is the value depending on how fast the pot was turned.
-    // ---------------------------------------------------------------------------------------------
+    // The pots send values in same form as the faders. BUT the value is Fy for CCW and 0y for CW rotation, where y is the value depending on how fast the pot was turned.
+    //  ---------------------------------------------------------------------------------------------
 
     // So, channelstrip vpot functionality is global, so same across all banks. (except for channels that dont support - like aux for bus)
 
     // Here's a list of what the different channels support:
     // Ch. 1- 48: all.
-    // Ch. 49 - 
-
-
+    // Ch. 49 -
 
     // This points to the method, related to current selected vpots functionality.
-    // It is only responsible for sending the relevant DSP command.    
+    // It is only responsible for sending the relevant DSP command.
     (this->*currentVpotFunction)(vpotValue, bank, channelStripID, source);
 
     // DSP command was sent. Now we need to update the console and UI, including associated channelstrips.
     // HOW DO WE HANDLE SEPERATION BETWEEN SUPPORTED FUNCTIONALITY?
-    
+
     // ALL CHANNELS WILL SUPPORT _SOME_ POT ACTION, SO THEY SHOULD SUBSCRIBE TO THE EVENT.
     // THEN WE CAN MANAGE IN-CLASS, BY MANAGING WHICH FUNCTIONS AR POINTED TO?
     // PRESUMABLY THIS IS IN THE METHOD THAT CHANGES THE METHOD POINTED TO.
@@ -231,8 +222,6 @@ void Channel::channelStripButtonEventCallback(const std::string buttonID,
     printf("BUTTON CLICKED");
 }
 
-
-
 // ####################################################################################################
 // This method is a callback for removing the supplied channel strip from the set of associated strips.
 // This is called from the event bus, when an association is updated.
@@ -242,7 +231,7 @@ void Channel::removeChStripAssociationCallback(const Bank bank, const std::strin
     associatedChannelStrips[bank].erase(channelStripID);
 }
 
-// ARE WE USING THIS??
+// TODO: ARE WE USING THIS??
 std::string Channel::getID()
 {
     return channelID;
@@ -254,10 +243,10 @@ std::string Channel::getID()
 // The Brain board sends a message with the value "Fy" where "y" is the value to change, when the pan pot is moved CCW.
 // On a CW movement, the value is in the form "0y".
 // The value "y" is higher, the faster the pot is turned.
-// This method adds the current pan value with the received value. Since it's a byte, it wraps around, so Fy values 
+// This method adds the current pan value with the received value. Since it's a byte, it wraps around, so Fy values
 // becomes subtractive.
 // ####################################################################################################################
-void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::string channelStripID, EventSource &source)
+void Channel::handleVpotPan(const std::string &vpotValue, const Bank bank, std::string channelStripID, EventSource &source)
 {
     uint8_t newPanValue;
 
@@ -267,7 +256,7 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
 
     // Handle the event one way if it was fired by the console.
     if (source == CONSOLE_EVENT)
-    {    
+    {
 
         printf("pot moved: ");
         // The console sends a value showing how fast the pot was turned.
@@ -275,16 +264,16 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
 
         // Convert hex string to signed int8_t.
         int8_t panChangeValue = static_cast<int8_t>(std::stoi(vpotValue, nullptr, 16));
-        
+
         // Perform the arithmetic operation using an signed 16-bit integer.
         int16_t tempCalc = static_cast<int16_t>(pan) + panChangeValue;
-        
+
         // Clamp the new value to the range 0-254.
         newPanValue = static_cast<uint8_t>(std::max(0, std::min(254, static_cast<int>(tempCalc))));
 
         // Convert to 2-digit hex string.
         ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(newPanValue);
-        
+
         // Write to std::string variable.
         panValueString = ss.str();
 
@@ -311,17 +300,28 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
 
     // Determine which LED's should be lit
     ChStripLed newRingLED;
-    if (pan < 28) newRingLED = RING_1;
-    else if (pan < 54) newRingLED = RING_2;
-    else if (pan < 78) newRingLED = RING_3;
-    else if (pan < 100) newRingLED = RING_4;
-    else if (pan < 120) newRingLED = RING_5;
-    else if (pan < 136) newRingLED = RING_6;
-    else if (pan < 156) newRingLED = RING_7;
-    else if (pan < 178) newRingLED = RING_8;
-    else if (pan < 202) newRingLED = RING_9;
-    else if (pan < 228) newRingLED = RING_10;
-    else newRingLED = RING_11;
+    if (pan < 28)
+        newRingLED = RING_1;
+    else if (pan < 54)
+        newRingLED = RING_2;
+    else if (pan < 78)
+        newRingLED = RING_3;
+    else if (pan < 100)
+        newRingLED = RING_4;
+    else if (pan < 120)
+        newRingLED = RING_5;
+    else if (pan < 136)
+        newRingLED = RING_6;
+    else if (pan < 156)
+        newRingLED = RING_7;
+    else if (pan < 178)
+        newRingLED = RING_8;
+    else if (pan < 202)
+        newRingLED = RING_9;
+    else if (pan < 228)
+        newRingLED = RING_10;
+    else
+        newRingLED = RING_11;
 
     // Check dead center for dot LED.
     bool updateDot = false;
@@ -337,7 +337,7 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
     }
 
     // Retreive the set of associated channelStrips on the current bank
-    std::unordered_set<std::string> associatedStrips = associatedChannelStrips[bank];   
+    std::unordered_set<std::string> associatedStrips = associatedChannelStrips[bank];
 
     // If ring LED needs to change, turn on the new one, an turn off the old one.
     if (currentRingLED != newRingLED || updateDot)
@@ -376,12 +376,16 @@ void Channel::handleVpotPan(const std::string& vpotValue, const Bank bank, std::
 
     // Post event for the associated strips.
     eventBus.associateChStripUiEventPost(associatedStrips, VPOT_EVENT, panValueString);
-}  
+}
 
-
-void Channel:: handleVpotAuxSend(const std::string& vpotValue, const Bank bank, EventSource& source)
+void Channel::handleVpotAuxSend(const std::string &vpotValue, const Bank bank, EventSource &source)
 {
     // TODO: WORK ON THESE
+}
 
+// ===========================================  BUTTON EVENT HANDLERS  =======================================
 
+void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID, EventSource source)
+{
+    // 1 - make a map of 
 }

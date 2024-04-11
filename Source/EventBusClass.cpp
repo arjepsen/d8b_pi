@@ -20,11 +20,10 @@
 #define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
 #endif
 
-
 /**
  * Constructor for the event bus.
  * TODO: give it a thorough description
-*/
+ */
 EventBus::EventBus()
 {
     // Iterate over the array of eventtypes
@@ -50,14 +49,13 @@ EventBus::EventBus()
 // Destructor
 EventBus::~EventBus() {}
 
-
 /*****************************************************************************************************************************
  * @brief This method is used to subscribe to events on a given channelstrip on a given bank.
- *      The method must receive a specification of which bank and channelstrip, and 
+ *      The method must receive a specification of which bank and channelstrip, and
  *      the callback methods for fader- vpot- and button activity on that strip.
  *      It must also receive a callback for removing the subscription. This is necessary, since a channel can be configured
  *      to any strip on any bank.
- * 
+ *
  * @param bank                          Specify which bank.
  * @param channelStripID                Specify which channelstrip on the given bank
  * @param faderCallback                 Hand over the callback to call, when a fader is moved on the specified strip.
@@ -88,6 +86,7 @@ void EventBus::bankEventSubscribe(Bank bank,
                                  : (throw std::runtime_error("ERROR IN DETERMINING BANK FOR EVENT CALLBACK\n"));
 
     // Check if a subscription already exists, if so, run its unsubscribe callback.
+
     if (callbackMap.find(channelStripID) != callbackMap.end())
     {
         callbackMap[channelStripID].unsubscribeCallback(bank, channelStripID);
@@ -100,7 +99,31 @@ void EventBus::bankEventSubscribe(Bank bank,
     callbackMap[channelStripID].unsubscribeCallback = removeSubscriptionCallback;
 }
 
+void EventBus::channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
+                         FaderCallbackFunction faderCallback,
+						 VpotCallbackFunction vpotCallback,
+                         std::function<void(Bank, const std::string &)> unsubscribeCallback)
+{
+        // Check validity of strip ID
+    if (channelStripID.length() != 2)
+    {
+        DEBUG_MSG("WRONG LENGTH OF CHANNEL STRIP ID\n");
+        exit(1);
+    }
 
+    // Unsubscribe if callback already exists. Use reference to avoid repeated lookups.
+    auto currentUnsubscribeMap = &unsubscribeCallbackMap[bank];
+    if (currentUnsubscribeMap->find(channelStripID) != currentUnsubscribeMap->end())
+    {
+        (*currentUnsubscribeMap)[channelStripID](bank, channelStripID);
+    }
+
+    // Write in the new callbacks
+    faderCallbackMap[bank][channelStripID] = faderCallback;
+    vPotCallbackMap[bank][channelStripID] = vpotCallback;
+    // TODO: Also handle buttons... what is their structure?
+
+}
 
 // ####################################################################################################################
 // When an event has fired, which calls a callback in a channel object (like moving a fader), the channel will the use
@@ -150,7 +173,7 @@ void EventBus::chStripComponentSubscribe(const std::string stripID,
 // This method is used to add the masterChannelStripComponent callbacks.
 // #####################################################################
 void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
-                                   std::function<void(const std::string &)> masterStripCompCallback)
+                                             std::function<void(const std::string &)> masterStripCompCallback)
 {
     // Set the callback
     masterStripComponentCallback[eventType] = masterStripCompCallback;
@@ -171,6 +194,16 @@ void EventBus::postEvent(BankEventType eventType,
     // Maybe we should do some error handling.
     // BUT also: maybe we should rename, so that this would also include the vpots that does not belong to a channel strip?
     currentBankCallbacks->at(channelStripID).callbackArray[eventType](eventValue, currentBank, channelStripID, source);
+}
+
+// Ok, so now (april'24) we're trying to divide the event posts into seperate methods.
+// The reason for this, is that we're trying to handle the seperation between controls on the channelstrips, vs.
+// controls on the master section. Faders are only on channel strips, but vpots and buttons also exist outside them....
+void EventBus::postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source)
+{
+    // Fader events are ONLY channel strip events.
+    // value, bank, id, source
+    faderCallbacks[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
 }
 
 // ##################################################################################
@@ -199,4 +232,9 @@ void EventBus::setBankPoster(Bank bank)
         default:;
             // Handle invalid bank input.
     }
+}
+
+Bank EventBus::getCurrentBank()
+{
+    return currentBank;
 }

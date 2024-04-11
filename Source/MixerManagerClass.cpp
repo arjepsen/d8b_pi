@@ -265,7 +265,8 @@ void MixerManager::handleBufferMessage()
             {
                 std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 std::string value = message.substr(2, 2);       // Get fader position from message
-                eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
+                //eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
+                eventBus.postFaderEvent(channelStripID, value, CONSOLE_EVENT);
                 break;
             }
             case 'v': // V-Pot turned
