@@ -8,11 +8,13 @@
   ==============================================================================
 */
 
+// TODO: Change from std::string to c-style strings where applicable.
 #include "ChannelClass.h"
 #include "ChannelIDMap.h"
 #include <iomanip>
 #include <sstream>
 #include <unistd.h>
+#include "ButtonLookupTable.h"
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define CHANNEL_DEBUG_MESSAGES
@@ -31,19 +33,19 @@ uint8_t Channel::nextChannelNumber = 0;
 // Convert channel number to channelStripID for the associate map.
 // #####################################################################################
 Channel::Channel()
-    : channelID{dspChannelIDs[nextChannelNumber]}, // Get unique channel ID for dsp commands.
-      channelNumber{nextChannelNumber},            // Set unique channel number.
+    : CH_ID_STR{DSP_CH_ID_ARRAY[nextChannelNumber]}, // Get unique channel ID for dsp commands.
+      CH_NUMBER{nextChannelNumber},            // Set unique channel number.
       eventBus(EventBus::getInstance()),           // Get the singleton instances
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance())
 {
     // Set up variables for initial channel strip event subscription.
     // TODO: Upon boot, this should be loaded from saved file.
-    int initialAssociateStripNumber = channelNumber;
+    int initialAssociateStripNumber = CH_NUMBER;
     Bank initialAssociateBank = LINE_BANK;
 
     // TODO: Adjust for channels above 24.
-    if (channelNumber > 23)
+    if (CH_NUMBER > 23)
     {
         initialAssociateStripNumber -= 23;
         initialAssociateBank = TAPE_BANK;
@@ -106,7 +108,7 @@ void Channel::setVolume(std::string volumeValue)
     volume = volumeValue;
 
     // Construct DSP command, and send it.
-    std::string volumeCommand = channelID + "cX" + volumeValue + "Q";
+    std::string volumeCommand = CH_ID_STR + "cX" + volumeValue + "Q";
     if (!mute)
         // write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
         dspCom.send(volumeCommand);
@@ -126,7 +128,7 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
     // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
 
     // Construct DSP volume command, and send it.
-    std::string volumeCommand = channelID + "cX" + faderValue + "Q";
+    std::string volumeCommand = CH_ID_STR + "cX" + faderValue + "Q";
 
     // Only send dsp command if channel is not muted.
     if (!mute)
@@ -136,6 +138,7 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
     // Update volume member - even if muted, so we know what level to go at, when unmuting.
     volume = faderValue;
 
+    // TODO: Maybe the following should be makde a seperate method - other callbacks use it.
     // Retrieve the set of associated CONSOLE channel strips on the current bank.
     // (the other banks will have their stuff set, when bank is changed.)
     std::unordered_set<std::string> associatedConsoleStrips = associatedChannelStrips[bank];
@@ -210,16 +213,50 @@ void Channel::channelStripVpotEventCallback(const std::string vpotValue,
     // This also means, that associated channelstrips should get updated by the pointed function, not here.
 }
 
-void Channel::channelStripButtonEventCallback(const std::string buttonID,
+void Channel::channelStripButtonEventCallback(const int chStripNumber,
                                               const Bank bank,
-                                              const std::string &channelStripID,
-                                              EventSource source)
+                                              const ButtonType btnType,
+                                              const ButtonAction btnAction)
 {
     // TODO: SOME WORK TO BE DONE HERE...
-
-    // So what we wanna do here is:
-    // 1: check which button.
     printf("BUTTON CLICKED");
+
+    // We receive the strip number, to handle associated strips.
+    // The button type (mute, solo, etc.)
+    // the action (pressed/released)
+    // And the source of the event - console or ui.
+
+    // Maybe create a map of dsp commands before-hand?
+    // So how does bank selection affect the channelstrip buttons?
+    
+    // Handle the button event, depending on which button:
+    switch(btnType)
+    {
+        case MUTE_BTN:
+            // 1: Send a dsp command for setting volume to 0 on this channel.
+            //    xxcXC0Q where xx is the channelID string (CH_ID_STR). 
+            //    BUT, dont update the channels' volume record. Keep this value for unmuting.
+            //    REMEMBER - master channel volume command is different (4Cc9X0QAX0Q)
+            //    // but... no mute on master....?
+            //   TODO: Cheac what other "channels" do (master, effect, midi etc.)
+            // 2: Do update the mute variable in the channel object.
+            // 3: retrieve associated channels (only current bank - when do we update the others?)
+            std::unordered_set<std::string> associatedConsoleStrips = associatedChannelStrips[bank];
+            
+
+            // 4: Turn on/off the led on all the associated channels, including the "activated" on
+
+            // Iterate through the set of associated channelStrips, 
+            // and activate/deactivate their mute button LED
+            for (auto &stripID : associatedChannelStrips[bank])
+            {
+                std::string faderCommand = stripID + faderValue + "f";
+                brainCom.send(faderCommand);
+            }
+
+    }
+
+    
 }
 
 // ####################################################################################################
@@ -234,7 +271,7 @@ void Channel::removeChStripAssociationCallback(const Bank bank, const std::strin
 // TODO: ARE WE USING THIS??
 std::string Channel::getID()
 {
-    return channelID;
+    return CH_ID_STR;
 }
 
 // ===========================================  VPOT EVENT HANDLERS  =======================================
@@ -290,7 +327,7 @@ void Channel::handleVpotPan(const std::string &vpotValue, const Bank bank, std::
     }
 
     // Add ID and first part
-    ss << channelID << "dFEFFX" << panValueString << "OFDFFXP";
+    ss << CH_ID_STR << "dFEFFX" << panValueString << "OFDFFXP";
 
     // Send the DSP command
     dspCom.send(ss.str());

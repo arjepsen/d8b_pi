@@ -17,5 +17,5 @@
 // Brain Message Lookup Table Conversion Map
 extern std::unordered_map<std::string, std::string> lineBankChannelMap;
 extern std::unordered_map<std::string, std::string> tapeBankChannelMap;
-extern const char dspChannelIDs[][3];
-extern const char channelStripIDs[24][3];
+extern const char DSP_CH_ID_ARRAY[][3];
+extern const char CH_STRIP_ID_ARRAY[24][3];

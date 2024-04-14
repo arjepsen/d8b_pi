@@ -203,8 +203,11 @@ void EventBus::postFaderEvent(const std::string &channelStripID, const std::stri
 {
     // Fader events are ONLY channel strip events.
     // value, bank, id, source
-    faderCallbacks[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
+    faderCallbackMap[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
 }
+
+
+void EventBus::postButtonEvent(const)
 
 // ##################################################################################
 // This method is used to change poster method, depending on which bank is selected.

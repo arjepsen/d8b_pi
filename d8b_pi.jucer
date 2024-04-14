@@ -82,6 +82,8 @@
       <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
             file="Source/SettingsWindow.h"/>
     </GROUP>
+    <FILE id="ZUGizH" name="ButtonLookupTable.h" compile="0" resource="0"
+          file="Source/ButtonLookupTable.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
