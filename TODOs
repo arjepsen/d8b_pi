@@ -44,3 +44,8 @@ Maybe wait for now, to see how performance is.
 
 
 NEXT TO WORK ON: pan pots. Might need to work on the master channel stuff that changes what those does first??
+
+
+
+.at() are used in several places over operator[], for boundschecking safety.
+Check it through, and see if any place can be optimized for the []

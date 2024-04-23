@@ -6,6 +6,12 @@ CircularBuffer::CircularBuffer()
 
 CircularBuffer::~CircularBuffer() {}
 
+
+/***********************************************************
+ * @brief Method used for pushing a message on to the queue.
+ * 
+ * @param message 
+ **********************************************************/
 void CircularBuffer::push(const char *message)
 {
     std::unique_lock<std::mutex> lock(mutex_);

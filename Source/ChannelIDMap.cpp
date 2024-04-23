@@ -74,7 +74,7 @@ std::unordered_map<std::string, std::string> tapeBankChannelMap =
 };
 
 
-const char DSP_CH_ID_ARRAY[][3] = 
+const char DSP_CH_ID_ARRAY[][DSP_ID_LENGTH] = 
 {
 	"06", "1E", "07", "1F", "08", "20", "09", "21", "0A", "22", "0B", "23",	// ch. 1-12
 	"00", "18", "01", "19", "02", "1A", "03", "1B", "04", "1C", "05", "1D",	// ch. 13-24
@@ -82,7 +82,7 @@ const char DSP_CH_ID_ARRAY[][3] =
 	"12", "2A", "13", "2B", "0C", "24", "0D", "25", "0E", "26", "0F", "27"	// ch. 37-48
 };
 
-const char CH_STRIP_ID_ARRAY[24][3] =
+const char CH_STRIP_ID_ARRAY[CHANNEL_STRIP_COUNT][DSP_ID_LENGTH] =
 {
   "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", // strip 1-12
   "0C", "0D", "0E", "0F", "10", "11", "12", "13", "14", "15", "16", "17", // strip 13-24

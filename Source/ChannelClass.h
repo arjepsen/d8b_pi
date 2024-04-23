@@ -17,7 +17,7 @@
 #include "BrainComClass.h"
 #include "DspComClass.h"
 #include "EventBusClass.h"
-#include "LedIDMaps.h"
+// #include "LedIDMaps.h"    // included in implementation.
 #include <array>
 #include <cstdint>
 #include <string>
@@ -37,10 +37,12 @@ class Channel
     // int *brainDescriptorPtr; // Reference to the Brain file descriptor.
 
     const uint8_t CH_NUMBER;
-    const std::string CH_ID_STR; // unique ID for each channel (1 - 48)
+    // const std::string CH_ID_STR; // unique ID for each channel (1 - 48)
+    const char *const CH_ID_STR;
 
     // Map of all the channelstrips that are configured to control this channel.
-    std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
+    //std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
+    std::unordered_map<Bank, std::unordered_set<char[3]>> associatedChannelStrips;
 
     // Type definition of the pointer to the current function to handle vpot events.
     typedef void (Channel::*VpotFunction)(const std::string &, const Bank, std::string, EventSource &);
@@ -60,7 +62,8 @@ class Channel
     // E - Level to tape
     // F - Digital trim.
 
-    std::string volume;
+    //std::string volume;
+    char volume[3]; // Max volume is "FF\0", including null terminator.
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     uint8_t pan; // (0 - FE) - weird things happen on "FF".
     bool panDotCenter;
@@ -96,7 +99,8 @@ class Channel
     Channel();
     // uint8_t getVolume() { return volume; }
 
-    void setVolume(std::string);
+    //void setVolume(std::string);
+    void setVolume(char * volumeString)
     std::string getID();
 
     // void setChannelStrip(std::string stripID);

@@ -261,7 +261,7 @@ void MixerManager::handleBufferMessage()
 
         switch (msgCategory)
         {
-            case 'f': // Fader was moved
+            case 'f': // Fader was moved, command has format: XXYYf
             {
                 std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 std::string value = message.substr(2, 2);       // Get fader position from message
@@ -288,11 +288,12 @@ void MixerManager::handleBufferMessage()
                 //std::string value = message.substr(2, 2);       // Get fader position from message
                 //eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
                 // So what to do.
-                // how do we handle differentiation between channel buttons, and others?
+                // how do we handle differentiation between channel buttons, and others
 
                 break;
 
             }
+            // TODO: handle other possible messages from the brain, but in particular also DSP
 
         }
     }
