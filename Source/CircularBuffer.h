@@ -1,32 +1,40 @@
 #pragma once
 
-#include <array>
+//#include <array>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <string>
 
 constexpr size_t BUFFER_LENGTH = 30; // The max number of elements in the buffer
-constexpr size_t BUFFER_WIDTH = 256; // The max number of characters in each element
+constexpr size_t BUFFER_WIDTH = 100; // The max number of characters in each element
+// TODO: check the "width" - should max fit the longest mesage that can be received.
+// BE AWARE OF LONG STRINGS DURING MIXER BOOT
 
 class CircularBuffer
 {
-public:
-    //CircularBuffer();
-    static CircularBuffer &getInstance();   // Return reference to this instance.
+  public:
+    // CircularBuffer();
+    static CircularBuffer &getInstance(); // Return reference to this instance.
 
-    void push(const char* message);
-    std::string pop();
+    void push(const char *message, size_t msgLength);
+    size_t pop(char *message);	// Returns the length of the message.
+    // std::string pop();
 
-private:
+  private:
     CircularBuffer();
     ~CircularBuffer();
 
     // Delete copy constructor & assignment operator, no copying a singleton!
     CircularBuffer(const CircularBuffer &) = delete;
-    CircularBuffer &operator = (const CircularBuffer&) = delete;
+    CircularBuffer &operator=(const CircularBuffer &) = delete;
 
-    std::array<std::array<char, BUFFER_WIDTH>, BUFFER_LENGTH> buffer_;
+    //std::array<std::array<char, BUFFER_WIDTH>, BUFFER_LENGTH> buffer_;
+
+	// Define the circular buffer array, and a second array to keep the length of each message.
+	char buffer_[BUFFER_LENGTH][BUFFER_WIDTH];
+	size_t messageLengths_[BUFFER_LENGTH];
+
     std::atomic<size_t> head_;
     std::atomic<size_t> tail_;
     std::mutex mutex_;

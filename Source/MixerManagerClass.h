@@ -87,7 +87,8 @@ private:
     // Component pointers
     ChannelStripComponent *chStripComponents;
 
-
+    // Create a buffer with the defined width from the circular buffer.
+    char msgBuffer[BUFFER_WIDTH];
 
 	// Various members/variables
     bool isInitializing; // Flag for avoid starting multiple init threads.

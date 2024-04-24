@@ -53,8 +53,17 @@ void BrainCom::messageReceiver()
     write(boardCom, "01u", 3);
     usleep(20000);
 
+    // Set up a single char receiver variable (we receive one byte at a time)
     char recvChar = '\0';
-    std::string message = "";
+
+    // Set up the message string buffer - use width defined in circular buffer.
+    //std::string message = "";
+    char message[BUFFER_WIDTH];
+
+    // Set up a variable for which index to write next char to in the message array.
+    size_t msgIndex = 0;
+
+    // Variable for result of reading/receiving operation.
     int result;
 
     // Clear com buffer for starting out
@@ -68,33 +77,48 @@ void BrainCom::messageReceiver()
 
         if (result == 1) // One char was recevied.
         {
-            message += recvChar;
+            // Write the received char at the given index.
+            message[msgIndex] = recvChar;
+
+            // Increment index
+            msgIndex++;
 
             // TODO: maybe we can optimize this? Might not need everything from a to z?
-            // A lower case letter means message complete.
+            // A lower case letter means message complete. Push, and reset.
             if (recvChar >= 'a' && recvChar <= 'z')
             {
-                // printf("brain message: %s\n", message.c_str());
-
+                // We might receive heartbeat in the middle of a message.
+                // In that case, don't increment index, or reset.
                 if (recvChar == 'l' || recvChar == 'k')
                 {
                     DEBUG_MSG("hearbeat: %c\n", recvChar);
+                    msgIndex--; // Decrement, to erase from messages.
                     heartbeatReceived();
                 }
                 else
-                    circBuffer.push(message.c_str()); // Push message to the circular buffer.
-                message = "";                         // Reset message string.
+                {
+                    // Full message received. Add null terminator.
+                    message[msgIndex] = '\0';
+                    circBuffer.push(message, msgIndex); // Push message to the circular buffer.
+
+                    // Reset index for next message
+                    msgIndex = 0;
+                }
+
+                // Message was handled, reset for next message.
+                //message = "";
             }
+        }
+
+        else if (result == 0) // 0 chars recevied - EOF
+        {
+            // Should we add any special functionality here??
         }
 
         else if (result < 0)
         {
             perror("Error reading from file descriptor");
             exit(1);
-        }
-        else if (result == 0) // 0 chars recevied - EOF
-        {
-            // Should we add any special functionality here??
         }
     }
 

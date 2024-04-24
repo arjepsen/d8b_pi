@@ -251,19 +251,27 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
 void MixerManager::handleBufferMessage()
 {
     printf("Running Reader Thread\n");
+
+    // Run the message receiver thread loop
     while (true)
     {
         // Get the next message from the buffer
-        std::string message = circBuffer.pop();
+        //std::string message = circBuffer.pop();
+        size_t msgLength = circBuffer.pop(msgBuffer);
 
         // Check last char for message Category:
-        char msgCategory = message.back(); // TODO: Might need to make a check to ensure message is not empty....?
+        char msgCategory = msgBuffer[msgLength]; // TODO: Might need to make a check to ensure message is not empty....?
 
         switch (msgCategory)
         {
             case 'f': // Fader was moved, command has format: XXYYf
             {
-                std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                HER FRA: FLYT ID ENUMERATION UD FRA LEDIDMAPS
+
+                ID_INTEGER = id[0] << 8) | id[1];
+
+
                 std::string value = message.substr(2, 2);       // Get fader position from message
                 //eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
                 eventBus.postFaderEvent(channelStripID, value, CONSOLE_EVENT);

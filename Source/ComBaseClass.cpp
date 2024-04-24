@@ -18,9 +18,13 @@ ComBase::ComBase() : circBuffer(CircularBuffer::getInstance()) {}
 
 ComBase::~ComBase() {}
 
-// ############################################################################
-// This method is used to set up and open the communication port.
-// ############################################################################
+/************************************************************************
+ * @brief Method for setting up the com port
+ * 
+ * @param comPortPath Something like /dev/ttyUSB0
+ * @param baudRate Likely 115200
+ * @return int Returns a file descriptor.
+ ************************************************************************/
 int ComBase::openSerialPort(const char *comPortPath, speed_t baudRate)
 {
     struct termios options;
@@ -61,17 +65,21 @@ int ComBase::openSerialPort(const char *comPortPath, speed_t baudRate)
     return fd;
 }
 
-// ############################################
-// Setter for the communication port:
-// ############################################
+/***********************************************
+ * @brief Setter for the com port
+ * 
+ * @param comPortPath 
+ **********************************************/
 void ComBase::setPort(std::string comPortPath)
 {
     port = comPortPath;
 }
 
-// ############################################
-// Getter for the com port:
-// ############################################
+/***********************************************
+ * @brief Getter for the com port
+ * 
+ * @return std::string 
+ ************************************************/
 std::string ComBase::getPort()
 {
     return port;
@@ -87,9 +95,11 @@ speed_t ComBase::getBaudRate()
     return baudRate;
 }
 
-// ##################################################################################################
-// This method is used to wind up the thread that reads messages and puts them in the circular buffer
-// ##################################################################################################
+
+/*************************************************************************
+ * @brief This method is for winding up the thread that reads messages,
+ *          and puts them in the circular buffer
+ ************************************************************************/
 void ComBase::startReceiverThread()
 {
     // So this would be called from mixermanager
@@ -126,15 +136,12 @@ void ComBase::startReceiverThread()
     receiverThread = std::thread(&ComBase::messageReceiver, this);
 }
 
-// #################################################################
-// This is the public method, that others will use to get stuff sent
-// #################################################################
-// void ComBase::send(const std::string &command)
-// {
-// 	std::lock_guard<std::mutex> lock(writeMutex); // Automatically locks the mutex for current scope.
-// 	write(boardCom, command.c_str(), command.length());
-// }
 
+/**************************************************************************
+ * @brief This is the pulbic method that others will use to get stuff sent
+ * 
+ * @param command 
+ ***************************************************************************/
 void ComBase::send(const char *command)
 {
 	// TODO: Check if we need this safety:

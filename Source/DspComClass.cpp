@@ -25,7 +25,9 @@ void DspCom::messageReceiver()
     // const int DSP = openSerialPort(getDspPort().c_str(), B115200);
 
     char recvChar = '\0';
-    std::string message = "";
+    //std::string message = "";
+    char message[BUFFER_WIDTH];
+    size_t msgIndex = 0;
     int result;
 
     // Clear com buffer for starting out
@@ -38,13 +40,21 @@ void DspCom::messageReceiver()
 
         if (result == 1)
         {
-            message += recvChar;
+            //message += recvChar;
+            message[msgIndex] = recvChar;
+            msgIndex++;
+
+
             if (recvChar >= 'a' && recvChar <= 'z')
             {
-                printf("dsp message: %s\n", message.c_str());
+                
                 // Lower case letter received, message complete. push to buffer.
-                circBuffer.push(message.c_str());
-                message = "";
+                message[msgIndex] = '\0';
+                circBuffer.push(message, msgIndex);
+                printf("DSP MESSAGE RECEIVED: %s\n", message);
+
+                // Reset
+                msgIndex = 0;
             }
         }
 
