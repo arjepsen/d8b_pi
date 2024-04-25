@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
+#include "SharedDataStructures.h"
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define MANAGER_DEBUG_MESSAGES
@@ -267,13 +268,20 @@ void MixerManager::handleBufferMessage()
             case 'f': // Fader was moved, command has format: XXYYf
             {
                 //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-                HER FRA: FLYT ID ENUMERATION UD FRA LEDIDMAPS
+                
+                // No bounds checking - we assume that the messages ending
+                // with 'f' and 'v' are always having the strip ID as the first two chars.
+                // So: Convert the first two chars to an integer
+                ChStripId channelStripID = static_cast<ChStripId>((msgBuffer[0] << 8) | msgBuffer[1]);
 
-                ID_INTEGER = id[0] << 8) | id[1];
-                ChStripId stripID = (msgBuffer[0] << 8) | msgBuffer[1];
+                HOW ABOUT MASTER STRIP???
 
+                // Copy the fader value of the message (index 2 & #)
+                char faderValue[2];
+                faderValue[0] = msgBuffer[2];
+                faderValue[3] = msgBuffer[3];
 
-                std::string value = message.substr(2, 2);       // Get fader position from message
+                //std::string value = message.substr(2, 2);       // Get fader position from message
                 //eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
                 eventBus.postFaderEvent(channelStripID, value, CONSOLE_EVENT);
                 break;

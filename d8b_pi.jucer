@@ -84,6 +84,8 @@
     </GROUP>
     <FILE id="ZUGizH" name="ButtonLookupTable.h" compile="0" resource="0"
           file="Source/ButtonLookupTable.h"/>
+    <FILE id="ZTg5lK" name="SharedDataStructures.h" compile="0" resource="0"
+          file="Source/SharedDataStructures.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>

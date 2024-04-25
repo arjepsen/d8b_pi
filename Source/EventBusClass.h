@@ -83,28 +83,29 @@ class EventBus
     // This .... holds the callbacks for the MasterStripComponent
     std::array<std::function<void(const std::string &)>, EVENT_TYPE_COUNT> masterStripComponentCallback;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////// april '24 --- trying to seperate faders, vpots and buttons, due to master section.... ////////////
     // first, we do need unsubscriptions for channelstrips.... and the unsubscribtions are for all three controls....
 
-	// Set up a definition of CallbackFunction, to shorten the lines.
-	using FaderCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
-	using VpotCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
-	
-	// We set up the maps using arrays of maps. We index the arrays uing the bank enumeration.
+    // Set up a definition of CallbackFunction, to shorten the lines.
+    using FaderCallbackFunction = std::function<void(const int,  Bank, const std::string &, EventSource)>;
+    using VpotCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
 
-	// Declare the fader callback maps
-	std::unordered_map<std::string, FaderCallbackFunction> faderCallbackMap[NUMBER_OF_BANKS];
+    // We set up the maps using arrays of maps. We index the arrays uing the bank enumeration.
 
-	// Declare the vpot callback maps
-	std::unordered_map<std::string, VpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
+    // Declare the fader callback maps
+    std::unordered_map<std::string, FaderCallbackFunction> faderCallbackMap[NUMBER_OF_BANKS];
 
-	// Declare the button callback maps
+	FaderCallbackFunction faderCallbackArray[NUMBER_OF_BANKS][number of channelstrips.]
 
-    
-	// Declare the channelStrip Unsubscribe maps
-	std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
 
+    // Declare the vpot callback maps
+    std::unordered_map<std::string, VpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
+
+    // Declare the button callback maps
+
+    // Declare the channelStrip Unsubscribe maps
+    std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
 
     // The Master section - according to the original d8b manual - is everything to the right of channel 24.
     // Let's create a data structure for the callbacks for these buttons and vpots.
@@ -113,8 +114,7 @@ class EventBus
     // std::unordered_map<std::string, std::function<void(const std::string&)>> masterSectionVpotCallbacks;
     // std::unordered_map<std::string, std::function<void(const std::string&)>> masterSectionButtonCallbacks;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Create a Bank variable for holding the currently selected bank.
     Bank currentBank;
@@ -180,11 +180,13 @@ class EventBus
     void setBankPoster(Bank bank);
 
     Bank getCurrentBank(); // Returns the enumeration for the currently selected bank.
-	void postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source);
-	void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
-                         FaderCallbackFunction faderCallback,
-						 VpotCallbackFunction vpotCallback,
-                         std::function<void(Bank, const std::string &)> unsubscribeCallback);
+                           // void postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source);
+    void postFaderEvent(const int channelStripID, const char &eventValue, EventSource source);
+
+    void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
+                                    FaderCallbackFunction faderCallback,
+                                    VpotCallbackFunction vpotCallback,
+                                    std::function<void(Bank, const std::string &)> unsubscribeCallback);
 };
 
 // Singleton modifications
