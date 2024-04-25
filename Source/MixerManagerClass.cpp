@@ -270,6 +270,7 @@ void MixerManager::handleBufferMessage()
                 HER FRA: FLYT ID ENUMERATION UD FRA LEDIDMAPS
 
                 ID_INTEGER = id[0] << 8) | id[1];
+                ChStripId stripID = (msgBuffer[0] << 8) | msgBuffer[1];
 
 
                 std::string value = message.substr(2, 2);       // Get fader position from message
