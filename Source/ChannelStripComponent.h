@@ -26,6 +26,7 @@
 #include "EventBusClass.h"
 #include <array>
 #include "FaderValueLookupClass.h"
+#include "SharedDataStructures.h"
 
 
 
@@ -66,7 +67,8 @@ public:
 
     // Callback functions for the "Channel associate events".
     // These ONLY update the UI - purely cosmetical - so no need know which bank. (logic already handled elsewhere).
-	void faderMoveEventCallback(std::string faderValue);
+	//void faderMoveEventCallback(std::string faderValue);
+    void faderMoveEventCallback(const char (&faderHexValue)[2]);
     void vpotTurnEventCallback(std::string vpotValue);
     void buttonEventCallback(std::string buttonValue);  // This one is a bit different... but again mainly cosmetic.
 
@@ -87,7 +89,9 @@ private:
 	EventBus &eventBus;        // Reference to EventBus singleton.
     FaderValueLookup &faderValueLookup;
 
-    std::string channelStripComponentID;
+    //std::string channelStripComponentID;
+    ChStripID channelStripComponentID;
+
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
 	// //const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
     // static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.

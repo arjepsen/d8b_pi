@@ -147,10 +147,10 @@ class EventBus
 
     // ############################################# EVENT POST DECLARATIONS #############################################
 
-    void postEvent(BankEventType eventType,
-                   const std::string &channelStripID,
-                   const std::string &eventValue,
-                   EventSource source);
+    // void postEvent(BankEventType eventType,
+    //                const std::string &channelStripID,
+    //                const std::string &eventValue,
+    //                EventSource source);
 
     ////////// April -24 - trying to seperate things a bit, since master section messes things up.
     // POSTING:

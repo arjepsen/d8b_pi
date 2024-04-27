@@ -186,16 +186,16 @@ void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
 // It is essentially just a pointer to one of the four internal classes, corresponding to a bank.
 // ##############################################################################################
 // TODO: Remove this one. We seperate it into seperate post methods below.
-void EventBus::postEvent(BankEventType eventType,
-                         const std::string &channelStripID,
-                         const std::string &eventValue,
-                         EventSource source)
-{
-    // TODO: This throws an instance of "std::out_of_range" if the channelStripID is not in the map.
-    // Maybe we should do some error handling.
-    // BUT also: maybe we should rename, so that this would also include the vpots that does not belong to a channel strip?
-    currentBankCallbacks->at(channelStripID).callbackArray[eventType](eventValue, currentBank, channelStripID, source);
-}
+// void EventBus::postEvent(BankEventType eventType,
+//                          const std::string &channelStripID,
+//                          const std::string &eventValue,
+//                          EventSource source)
+// {
+//     // TODO: This throws an instance of "std::out_of_range" if the channelStripID is not in the map.
+//     // Maybe we should do some error handling.
+//     // BUT also: maybe we should rename, so that this would also include the vpots that does not belong to a channel strip?
+//     currentBankCallbacks->at(channelStripID).callbackArray[eventType](eventValue, currentBank, channelStripID, source);
+// }
 
 // Ok, so now (april'24) we're trying to divide the event posts into seperate methods.
 // The reason for this, is that we're trying to handle the seperation between controls on the channelstrips, vs.
@@ -207,8 +207,7 @@ void EventBus::postFaderEvent(const ChStripID channelStripID, const char (&event
     // Fader events are ONLY channel strip events.
     // value, bank, id, source
     //faderCallbackMap[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
-    faderCallbackArray[currentBank][channelStripID]()
-    
+    faderCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
 }
 
 

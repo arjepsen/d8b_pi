@@ -43,9 +43,10 @@ ChannelStripComponent::ChannelStripComponent ()
 
     // Give each new channelStripComponent a unique hex ID string, from "00" and upwards.
     // This corresponds to "channelStripID" in other places of the program.
-    std::stringstream stream;
-    stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
-    channelStripComponentID = stream.str();
+    // std::stringstream stream;
+    // stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
+    // channelStripComponentID = stream.str();
+    channelStripComponentID = static_cast<ChStripID>(nextChannelStripComponentID);
 
     // // Precompute the array of logarithms the first time this class is instantiated.
     // // This is done to avoid slow log10 computations during runtime, so we can look up the result in an array.
@@ -1007,12 +1008,19 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     {
         //[UserSliderCode_fader] -- add your slider handling code here..
 
-        // Fader was moved in the UI.
-        float newFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
-        std::string dspFaderValue = faderValueLookup.dspHexLookupMap[newFaderValue];
+        // Fader was moved in the UI. 
+        // TODO: Clean up.
+
+        // float newFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
+        // std::string dspFaderValue = faderValueLookup.dspHexLookupMap[newFaderValue];
+
+        const char * faderHexString = faderValueLookup.getDspHexValue(sliderThatWasMoved->getValue());
+        char eventValue[2] = {faderHexString[0], faderHexString[1]};
+
 
         // Use event post
-        eventBus.postEvent(FADER_EVENT, channelStripComponentID, dspFaderValue, UI_EVENT);
+        //eventBus.postEvent(FADER_EVENT, channelStripComponentID, dspFaderValue, UI_EVENT);
+        eventBus.postFaderEvent(channelStripComponentID, eventValue, UI_EVENT);
 
         //[/UserSliderCode_fader]
     }
@@ -1020,18 +1028,25 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     {
         //[UserSliderCode_vPot] -- add your slider handling code here..
 
+        // The pan pot in the UI gives a value between -127 and 127 as a double.
+
         // Shift the value from -127 - 127 to 0 - 255
-        uint8_t shiftedValue = static_cast<uint8_t>(sliderThatWasMoved->getValue() + 127.0);
+        //uint8_t shiftedValue = static_cast<uint8_t>(sliderThatWasMoved->getValue() + 127.0);
+        int shiftedValue = static_cast<int>(sliderThatWasMoved->getValue() + 127.0);
 
-        // Use a stringstream to convert the uint8_t to a 2-digit upper case hex string
-        std::stringstream ss;
-        ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(shiftedValue);
+        // // Use a stringstream to convert the uint8_t to a 2-digit upper case hex string
+        // std::stringstream ss;
+        // ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(shiftedValue);
 
-        // The hex string is now in ss.str()
-        std::string dspVpotValue = ss.str();
+        // // The hex string is now in ss.str()
+        // std::string dspVpotValue = ss.str();
+
+        // Convert to 2-char hex string
+        char dspVpotValue[2];
+        sprintf(dspVpotValue, "%02X", shiftedValue);
 
         // Post the event for the Channel object to handle.
-        eventBus.postEvent(VPOT_EVENT, channelStripComponentID, dspVpotValue, UI_EVENT);
+        eventBus.postFaderEvent(channelStripComponentID, dspVpotValue, UI_EVENT);
 
 
         //[/UserSliderCode_vPot]
@@ -1322,17 +1337,32 @@ void ChannelStripComponent::setFaderPosition(double value)
 // 	faderMoveCallback = callbackFunction;
 // }
 
-// ################################################################################################
-// This is a callback method to be used by the eventBus. It will be called, when the channel object
-// has sent it's commands to the DSP, and Brain, and all that is left is to update the UI.
-// It looks up the value in the precomputed map, and sets the fader to the given value.
-// ################################################################################################
-void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
+
+/*****************************************************************************
+ * @brief This is a callback method to be used by the event bus.
+ *      It will be called when the channel object has sent its commands to the
+ *      DSP and Brain, and all that is left is to update the UI.
+ *      It will make a lookup in the precomputed values, and set the fader to 
+ *      the given value.
+ * 
+ * @param faderHexValue This is the 2-char hex string sent by the console.
+ ****************************************************************************/
+//void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
+void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2])
 {
-    int decimalValue = std::stoi(faderHexValue, nullptr, 16);
+    // Convert the 2-char hex value to an int, using bitwise operations.
+
+    //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
+    int faderIntValue = ((faderHexValue[0] << 8) | faderHexValue[1]);
+    
+    
     // double faderValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
     // setFaderPosition(precomputedLog10Values[decimalValue]);
-    float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
+
+    // Use the integer value as index lookup in the array of precomputed log values
+    float logValue = *faderValueLookup.getLog10Value(faderIntValue);
+
+    // Update the UI.
     juce::MessageManager::callAsync([this, logValue]()
                                     { fader.get()->setValue(logValue, juce::dontSendNotification); });
 }

@@ -143,7 +143,7 @@ void Channel::setVolume(char *volumeValue)
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
 void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
-                                             Bank bank, // Const???
+                                             Bank bank,
                                              const ChStripID channelStripID,
                                              EventSource source)
 {

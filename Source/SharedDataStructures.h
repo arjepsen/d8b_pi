@@ -39,3 +39,6 @@ enum ChStripID
     CH_STRIP24,
     CH_STRIP_COUNT
 };
+
+SET UP A STATIC LOOKUP ARRAY FOR CONVERTING INT TO HEX STRING
+maybe a bit like the fadervaluelookup class.....
