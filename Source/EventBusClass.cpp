@@ -185,6 +185,7 @@ void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
 // This is the event post method that other classes will use.
 // It is essentially just a pointer to one of the four internal classes, corresponding to a bank.
 // ##############################################################################################
+// TODO: Remove this one. We seperate it into seperate post methods below.
 void EventBus::postEvent(BankEventType eventType,
                          const std::string &channelStripID,
                          const std::string &eventValue,
@@ -200,12 +201,13 @@ void EventBus::postEvent(BankEventType eventType,
 // The reason for this, is that we're trying to handle the seperation between controls on the channelstrips, vs.
 // controls on the master section. Faders are only on channel strips, but vpots and buttons also exist outside them....
 //void EventBus::postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source)
-void EventBus::postFaderEvent(const int channelStripID, const char &eventValue, EventSource source)
+void EventBus::postFaderEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source)
 {
     
     // Fader events are ONLY channel strip events.
     // value, bank, id, source
-    faderCallbackMap[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
+    //faderCallbackMap[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
+    faderCallbackArray[currentBank][channelStripID]()
     
 }
 

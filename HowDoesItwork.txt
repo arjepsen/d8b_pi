@@ -50,3 +50,4 @@ WHEN A CONSOLE PHYSICAL EVENT (like moving a fader) HAPPENS:
 Things to explain:
 What is a "channel"
 What is a bank.
+The "Association" between the channelstrips and a channel.

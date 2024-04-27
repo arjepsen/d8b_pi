@@ -15,6 +15,7 @@
 #include <array>
 
 constexpr int DSP_ID_LENGTH = 3;
+constexpr int CH_STRIP_ID_LENGTH = 3;
 constexpr int CHANNEL_STRIP_COUNT = 24; // Number of channel strips, excluding the master strip.
 
 // Brain Message Lookup Table Conversion Map

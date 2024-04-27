@@ -34,6 +34,7 @@ constexpr int VOL_VALUE_LENGTH = 3;  // Max chars in the volume value string. (o
 constexpr char DSP_VOL_CMD_PRT1[] = "cX";
 constexpr char DSP_CMD_END[] = "Q";
 constexpr int DSP_VOL_CMD_LENGTH = 8; // Max dsp volume command length. (for setting array). ie. "0AcXC8Q" (can be only 7, when just one hex digit for volume)
+constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
 
 // Set first channel ID. This will increment with every channel object constructed.
 uint8_t Channel::nextChannelNumber = 0;
@@ -141,32 +142,87 @@ void Channel::setVolume(char *volumeValue)
 // First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips
 // on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
 // ###########################################################################################################################
-void Channel::channelStripFaderEventCallback(const std::string faderValue,
-                                             const Bank bank,
-                                             const std::string &channelStripID,
+void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
+                                             Bank bank, // Const???
+                                             const ChStripID channelStripID,
                                              EventSource source)
 {
-
     // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
 
-    // Construct DSP volume command, and send it.
-    // std::string volumeCommand = CH_ID_STR + "cX" + faderValue + "Q";
-    strncpy(volume, faderValue, 2);
+    // Update the channel volume member
+    volume[0] = faderValue[0];
+    volume[1] = faderValue[1];
 
     // Only send dsp command if channel is not muted.
     if (!mute)
     {
-        // Not muted, create string and send it
+        // Not muted, create string and send it.
+        // The form of the command is "XXcXYYQ", where XX is dsp channel id,
+        // and YY is the volume value (hex string)
+        char dspVolumeCommand[DSP_VOL_CMD_LENGTH];
+        snprintf(dspVolumeCommand, DSP_VOL_CMD_LENGTH, "%s%s%sQ", CH_ID_STR, "cX", volume);
+        dspCom.send(dspVolumeCommand);
 
-        dspCom.send(volumeCommand);
+        // Copy associated channelstrip bitmask.
+        int consoleMask = associatedChannelStripBitmask;
+        int uiMask = associatedChannelStripBitmask;
 
-        // Update volume member - even if muted, so we know what level to go at, when unmuting.
-        volume = faderValue;
+        // Disable "calling" strip, depending on whether ui or console.
+        if (source == CONSOLE_EVENT)
+        {
+            // Clear the bit of the calling channelstrip
+            consoleMask = associatedChannelStripBitmask & ~(1U << channelStripID);
+        }
+        else
+        {
+            // UI event, clear the ui caller bit.
+            uiMask = associatedChannelStripBitmask & ~(1U << channelStripID);
+        }
 
-        // TODO: Maybe the following should be make a seperate method - other callbacks use it.
-        // Retrieve the set of associated CONSOLE channel strips on the current bank.
-        // (the other banks will have their stuff set, when bank is changed.)
-        std::unordered_set<std::string> associatedConsoleStrips = associatedChannelStrips[bank];
+        // Create and send commands for the associated faders.
+        // The char array is not initialized, since we write to it right after,
+        // and the remaining two chars are written in the while loop, before using it.
+        char brainFaderCommand[BRAIN_FADER_CMD_LENGTH];
+        brainFaderCommand[2] = volume[0];
+        brainFaderCommand[3] = volume[1];
+        brainFaderCommand[4] = 'f';
+        //brainFaderCommand[5] = '\0';  // Write command does not send null terminator anyway.
+
+        // Now the char array contains "__XXf\0", where XX is the volume value.
+        // Iterate over the bitmask of associated strips, 
+        // write the strip id in the first two indices, send commands.
+        while(consoleMask)
+        {
+            // Get the index of the lowest set bit
+            int stripID = __builtin_ctz(consoleMask);
+            
+            // Use array lookup to convert the id to two-char hex.
+            brainFaderCommand[0] = CH_STRIP_ID_ARRAY[stripID][0];
+            brainFaderCommand[1] = CH_STRIP_ID_ARRAY[stripID][1];
+
+            // Send. We know the length, so use that method.
+            brainCom.send(brainFaderCommand, BRAIN_FADER_CMD_LENGTH);
+
+            // Clear lowest set bit
+            consoleMask &= consoleMask - 1;
+        }
+        
+        // Now post a ui event with the mask for the ui.
+
+
+        HANDLE THE UI STUFF
+
+        THEN HANDLE THE REMAINING ONE
+
+        THIS MEANS EDIT THE CALLBACKS IN THE UI.
+
+
+
+
+
+
+//========================================================
+
 
         // Make a copy for the associated UI channel strips on the current bank.
         std::unordered_set<std::string> associatedUiStrips = associatedConsoleStrips;
@@ -174,11 +230,15 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
         // Depending on whether the event was triggered by CONSOLE or UI, remove the ID that was activated
         if (source == CONSOLE_EVENT)
         {
-            associatedConsoleStrips.erase(channelStripID);
+            //associatedConsoleStrips.erase(channelStripID);
+            associatedChannelStrips[bank][channelStripID] = false;
+
         }
         else
         {
-            associatedUiStrips.erase(channelStripID);
+            //associatedUiStrips.erase(channelStripID);
+
+            // 1 - Temporarily "un-associate"
         }
 
         // Iterate through the set, send move command to move the console faders
@@ -192,6 +252,8 @@ void Channel::channelStripFaderEventCallback(const std::string faderValue,
         // It runs a for loop, so works even if set is empty.
         eventBus.associateChStripUiEventPost(associatedUiStrips, FADER_EVENT, faderValue);
     }
+}
+
 
     void Channel::channelStripVpotEventCallback(const std::string vpotValue,
                                                 const Bank bank,

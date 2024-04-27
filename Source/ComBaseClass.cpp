@@ -148,7 +148,7 @@ void ComBase::send(const char *command)
 	//if (command == nullptr) return;
 
     std::lock_guard<std::mutex> lock(writeMutex); // Automatically locks the mutex for current scope.
-    write(boardCom, command, strlen(command));
+    write(boardCom, command, strlen(command));  // Note, strlen does not include the null terminator.
 }
 
 void ComBase::send(const char *command, size_t commandLength)

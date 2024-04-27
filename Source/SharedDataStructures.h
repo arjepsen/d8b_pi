@@ -11,7 +11,7 @@
 #pragma once
 
 // Enumeration of the channelstrips
-enum ChStripId
+enum ChStripID
 {
     CH_STRIP1,
     CH_STRIP2,

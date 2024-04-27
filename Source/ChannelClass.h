@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <unordered_set>
 // #include <functional> // For pointers to vpot function depending on vpot mode.
+#include "SharedDataStructures.h"
 
 class Channel
 {
@@ -41,8 +42,13 @@ class Channel
     const char *const CH_ID_STR;
 
     // Map of all the channelstrips that are configured to control this channel.
-    //std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
-    std::unordered_map<Bank, std::unordered_set<char[3]>> associatedChannelStrips;
+    // std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
+    std::unordered_map<Bank, std::unordered_set<char[2]>> associatedChannelStrips;
+    bool associatedChannelStrips[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    
+    // Lets try using a bitmask instead.
+    unsigned int associatedChannelStripBitmask;
+
 
     // Type definition of the pointer to the current function to handle vpot events.
     typedef void (Channel::*VpotFunction)(const std::string &, const Bank, std::string, EventSource &);
@@ -62,8 +68,8 @@ class Channel
     // E - Level to tape
     // F - Digital trim.
 
-    //std::string volume;
-    char volume[3]; // Max volume is "FF\0", including null terminator.
+    // std::string volume;
+    char volume[3] = {'0', '0', '\0'}; // Initialize to "00".
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     uint8_t pan; // (0 - FE) - weird things happen on "FF".
     bool panDotCenter;
@@ -99,16 +105,16 @@ class Channel
     Channel();
     // uint8_t getVolume() { return volume; }
 
-    //void setVolume(std::string);
-    void setVolume(char * volumeString)
-    std::string getID();
+    // void setVolume(std::string);
+    void setVolume(char *volumeString);
+        //std::string getID();
 
     // void setChannelStrip(std::string stripID);
     // void linkDspDescriptor(int *dspDescriptor);
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 
-    void channelStripFaderEventCallback(const std::string faderValue, Bank bank, const std::string &channelStripID, EventSource source);
+    void channelStripFaderEventCallback(const char (&faderValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
     void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID, EventSource source);
     void channelStripButtonEventCallback(const int chStripNumber,
                                          const Bank bank,

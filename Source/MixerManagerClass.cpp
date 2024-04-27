@@ -9,6 +9,7 @@
 */
 
 #include "MixerManagerClass.h"
+#include "SharedDataStructures.h"
 #include <algorithm>
 #include <cmath>
 #include <fcntl.h>
@@ -19,7 +20,6 @@
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
-#include "SharedDataStructures.h"
 
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
 #define MANAGER_DEBUG_MESSAGES
@@ -41,7 +41,7 @@ MixerManager::MixerManager()
       dspCom(DspCom::getInstance()),
       circBuffer(CircularBuffer::getInstance()),
       isInitializing(false)
-      //messageHandler(&lineBankMessageHandler)   
+// messageHandler(&lineBankMessageHandler)
 {
     std::cout << "MixerManger Constructor" << std::endl;
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
@@ -51,8 +51,6 @@ MixerManager::MixerManager()
 
     // Pass the callback function to the message handlers.
     // MAKE DIFFERENT CALLBAKCS FOR EACH BRAIN MESSAGE (fader, vpot, btndwn, btnup)
-
-
 
     // Set up channelstrip map of pointers to channel objects. (initially Line bank, ch. 1-24)
     for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
@@ -219,7 +217,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 // ========================= MIXER INITIALIZED ===============================
                 // Set up communication singletons for threaded communication.
 
-                // Port should be set in settings class. 
+                // Port should be set in settings class.
                 brainCom.setPort(settings.getBrainPort());
                 dspCom.setPort(settings.getDspPort());
 
@@ -243,7 +241,6 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
     }
 }
 
-
 // #################################################################################
 // This method is a "dispatcher" sort of thing, which is called
 // and run in a thread. It continually pops messages off the buffer, and
@@ -257,7 +254,7 @@ void MixerManager::handleBufferMessage()
     while (true)
     {
         // Get the next message from the buffer
-        //std::string message = circBuffer.pop();
+        // std::string message = circBuffer.pop();
         size_t msgLength = circBuffer.pop(msgBuffer);
 
         // Check last char for message Category:
@@ -267,33 +264,33 @@ void MixerManager::handleBufferMessage()
         {
             case 'f': // Fader was moved, command has format: XXYYf
             {
-                //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-                
+                // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+
                 // No bounds checking - we assume that the messages ending
                 // with 'f' and 'v' are always having the strip ID as the first two chars.
                 // So: Convert the first two chars to an integer
-                ChStripId channelStripID = static_cast<ChStripId>((msgBuffer[0] << 8) | msgBuffer[1]);
+                ChStripID channelStripID = static_cast<ChStripID>((msgBuffer[0] << 8) | msgBuffer[1]);
 
-                HOW ABOUT MASTER STRIP???
+                // TODO: HOW ABOUT MASTER STRIP???
 
                 // Copy the fader value of the message (index 2 & #)
-                char faderValue[2];
-                faderValue[0] = msgBuffer[2];
-                faderValue[3] = msgBuffer[3];
+                const char faderValue[2] = {msgBuffer[2], msgBuffer[3]};
+                // faderValue[0] = msgBuffer[2];
+                // faderValue[1] = msgBuffer[3];
 
-                //std::string value = message.substr(2, 2);       // Get fader position from message
-                //eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
-                eventBus.postFaderEvent(channelStripID, value, CONSOLE_EVENT);
+                // std::string value = message.substr(2, 2);       // Get fader position from message
+                // eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
+                eventBus.postFaderEvent(channelStripID, faderValue, CONSOLE_EVENT);
                 break;
             }
             case 'v': // V-Pot turned
             {
                 // Decipher which pot.
-                //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
-                std::string value = message.substr(2, 2);       // Get fader position from message
+                std::string value = message.substr(2, 2);  // Get fader position from message
 
-                //eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
+                // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
                 eventBus.postEvent(VPOT_EVENT, vPotID, value, CONSOLE_EVENT);
                 break;
             }
@@ -301,17 +298,15 @@ void MixerManager::handleBufferMessage()
             case 'u':
             {
                 // Button was pressed. "s" means pressed, "u" means depressed.
-                //std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-                //std::string value = message.substr(2, 2);       // Get fader position from message
-                //eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
+                // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
+                // std::string value = message.substr(2, 2);       // Get fader position from message
+                // eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
                 // So what to do.
                 // how do we handle differentiation between channel buttons, and others
 
                 break;
-
             }
-            // TODO: handle other possible messages from the brain, but in particular also DSP
-
+                // TODO: handle other possible messages from the brain, but in particular also DSP
         }
     }
 }
@@ -323,8 +318,6 @@ void MixerManager::handleBufferMessage()
 // {
 //     // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
 // }
-
-
 
 // #########################################################################################
 // Method to a pointer to the channel Strip Component array from the MainComponent.

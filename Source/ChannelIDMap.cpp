@@ -82,7 +82,7 @@ const char DSP_CH_ID_ARRAY[][DSP_ID_LENGTH] =
 	"12", "2A", "13", "2B", "0C", "24", "0D", "25", "0E", "26", "0F", "27"	// ch. 37-48
 };
 
-const char CH_STRIP_ID_ARRAY[CHANNEL_STRIP_COUNT][DSP_ID_LENGTH] =
+const char CH_STRIP_ID_ARRAY[CHANNEL_STRIP_COUNT][CH_STRIP_ID_LENGTH] =
 {
   "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", // strip 1-12
   "0C", "0D", "0E", "0F", "10", "11", "12", "13", "14", "15", "16", "17", // strip 13-24

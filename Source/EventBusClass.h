@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+#include "SharedDataStructures.h"
 
 // !!!!!! DO NOT CHANGE ORDER !!!!!!! (used for indexing array)
 enum BankEventType : int
@@ -88,7 +89,8 @@ class EventBus
     // first, we do need unsubscriptions for channelstrips.... and the unsubscribtions are for all three controls....
 
     // Set up a definition of CallbackFunction, to shorten the lines.
-    using FaderCallbackFunction = std::function<void(const int,  Bank, const std::string &, EventSource)>;
+    // Fader callback takes (const char[2] &fadValue, bank, id, source)
+    using FaderCallbackFunction = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
     using VpotCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
 
     // We set up the maps using arrays of maps. We index the arrays uing the bank enumeration.
@@ -96,8 +98,9 @@ class EventBus
     // Declare the fader callback maps
     std::unordered_map<std::string, FaderCallbackFunction> faderCallbackMap[NUMBER_OF_BANKS];
 
-	FaderCallbackFunction faderCallbackArray[NUMBER_OF_BANKS][number of channelstrips.]
-
+    // Lets change to use arrays for char arrays instead of the maps of std::strings.
+    // TODO: SHOULD THIS INCLUDE THE MASTER STRIP?
+    FaderCallbackFunction faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
 
     // Declare the vpot callback maps
     std::unordered_map<std::string, VpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
@@ -181,7 +184,9 @@ class EventBus
 
     Bank getCurrentBank(); // Returns the enumeration for the currently selected bank.
                            // void postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source);
-    void postFaderEvent(const int channelStripID, const char &eventValue, EventSource source);
+    //void postFaderEvent(const int channelStripID, const char *eventValue, EventSource source);
+    void postFaderEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
+
 
     void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
                                     FaderCallbackFunction faderCallback,
