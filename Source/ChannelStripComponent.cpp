@@ -36,7 +36,8 @@ int ChannelStripComponent::nextChannelStripComponentID = 0;
 //==============================================================================
 ChannelStripComponent::ChannelStripComponent ()
     : eventBus(EventBus::getInstance()),
-      faderValueLookup(FaderValueLookup::getInstance())
+      faderValueLookup(FaderValueLookup::getInstance()),
+      intToHexLookup(IntToHexLookup::getInstance())
 {
     //[Constructor_pre] You can add your own custom stuff here..
     // ################################ MY CONSTRUCTOR STUFF##########################################
@@ -1030,6 +1031,7 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
 
         // The pan pot in the UI gives a value between -127 and 127 as a double.
 
+        // TODO: Clean up.
         // Shift the value from -127 - 127 to 0 - 255
         //uint8_t shiftedValue = static_cast<uint8_t>(sliderThatWasMoved->getValue() + 127.0);
         int shiftedValue = static_cast<int>(sliderThatWasMoved->getValue() + 127.0);
@@ -1042,10 +1044,12 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
         // std::string dspVpotValue = ss.str();
 
         // Convert to 2-char hex string
-        char dspVpotValue[2];
-        sprintf(dspVpotValue, "%02X", shiftedValue);
+        const char * hexString = intToHexLookup.getHexValue(shiftedValue);
+        char dspVpotValue[2] = {hexString[0], hexString[1]};
+        //sprintf(dspVpotValue, "%02X", shiftedValue);
 
         // Post the event for the Channel object to handle.
+        CHANGE TO POSTVPOTEVENT
         eventBus.postFaderEvent(channelStripComponentID, dspVpotValue, UI_EVENT);
 
 

@@ -86,8 +86,10 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
-	EventBus &eventBus;        // Reference to EventBus singleton.
+    // References to singletons.
+	EventBus &eventBus;
     FaderValueLookup &faderValueLookup;
+    IntToHexLookup &intToHexLookup;
 
     //std::string channelStripComponentID;
     ChStripID channelStripComponentID;

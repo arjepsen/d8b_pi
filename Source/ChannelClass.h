@@ -33,11 +33,13 @@ class Channel
     EventBus &eventBus;
     BrainCom &brainCom;
     DspCom &dspCom;
+    IntToHexLookup &intToHexLookup;
+    LEDringLookup &ledRingLookup;
 
     // int *dspDescriptorPtr; // Reference to the DSP file descriptor.
     // int *brainDescriptorPtr; // Reference to the Brain file descriptor.
 
-    const uint8_t CH_NUMBER;
+    const int CH_NUMBER;  // TODO: maybe enumerate this?
     // const std::string CH_ID_STR; // unique ID for each channel (1 - 48)
     const char *const CH_ID_STR;
 
@@ -57,8 +59,8 @@ class Channel
     VpotFunction currentVpotFunction;
 
     // These are the possible vpot event handlers
-    void handleVpotPan(const std::string &message, const Bank bank, std::string channelStripID, EventSource &source);
-    void handleVpotAuxSend(const std::string &message, const Bank bank, EventSource &source);
+    void handleVpotPan(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
+    void handleVpotAuxSend(const char (&vPotValue)[2], const Bank bank, EventSource &source);
 
     //... more....
     // A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
@@ -71,7 +73,7 @@ class Channel
     // std::string volume;
     char volume[3] = {'0', '0', '\0'}; // Initialize to "00".
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
-    uint8_t pan; // (0 - FE) - weird things happen on "FF".
+    int pan; // (0 - FE) - weird things happen on "FF".... 
     bool panDotCenter;
 
     ChStripLed currentRingLED;
@@ -115,7 +117,7 @@ class Channel
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 
     void channelStripFaderEventCallback(const char (&faderValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
-    void channelStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID, EventSource source);
+    void channelStripVpotEventCallback(const char (&vPotValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
     void channelStripButtonEventCallback(const int chStripNumber,
                                          const Bank bank,
                                          const ButtonType btnType,

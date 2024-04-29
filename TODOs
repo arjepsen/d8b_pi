@@ -49,3 +49,6 @@ NEXT TO WORK ON: pan pots. Might need to work on the master channel stuff that c
 
 .at() are used in several places over operator[], for boundschecking safety.
 Check it through, and see if any place can be optimized for the []
+
+
+The channel class, and the channelstripcomponent class subscribes seperately on the eventbus. We should probably implement some safety check, to ensure they align.

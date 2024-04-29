@@ -15,11 +15,11 @@
 #include <array>
 #include <functional>
 // #include <memory> // For unique_ptr
+#include "SharedDataStructures.h"
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
-#include "SharedDataStructures.h"
 
 // !!!!!! DO NOT CHANGE ORDER !!!!!!! (used for indexing array)
 enum BankEventType : int
@@ -44,6 +44,11 @@ enum EventSource
     CONSOLE_EVENT,
     UI_EVENT
 };
+
+
+    using ConsoleFaderCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
+    using ConsoleVpotCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
+
 
 class EventBus
 {
@@ -90,22 +95,28 @@ class EventBus
 
     // Set up a definition of CallbackFunction, to shorten the lines.
     // Fader callback takes (const char[2] &fadValue, bank, id, source)
-    using FaderCallbackFunction = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
-    using VpotCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
+    // using ConsoleFaderCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
+    // using ConsoleVpotCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
 
+
+    using AssociateUiFaderCallback = std::function<void(const char (&)[2])>;
     // We set up the maps using arrays of maps. We index the arrays uing the bank enumeration.
 
     // Declare the fader callback maps
-    std::unordered_map<std::string, FaderCallbackFunction> faderCallbackMap[NUMBER_OF_BANKS];
+    // std::unordered_map<std::string, ConsoleFaderCallback> faderCallbackMap[NUMBER_OF_BANKS];
 
     // Lets change to use arrays for char arrays instead of the maps of std::strings.
     // TODO: SHOULD THIS INCLUDE THE MASTER STRIP?
-    FaderCallbackFunction faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    ConsoleFaderCallback faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    ConsoleVpotCallback vPotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
 
     // Declare the vpot callback maps
-    std::unordered_map<std::string, VpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
+    std::unordered_map<std::string, ConsoleVpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
 
     // Declare the button callback maps
+
+    // Declare array of associated ui fader callbacks.
+    AssociateUiFaderCallback associateUiFaderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
 
     // Declare the channelStrip Unsubscribe maps
     std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
@@ -145,6 +156,10 @@ class EventBus
     // Similar - this is only used for ui updates.
     void masterStripComponentSubscribe(const BankEventType eventType, std::function<void(const std::string &)> masterStripCompCallback);
 
+
+    //////////////// NEW STUFF, NEW SUBSCRITIONING april '24. Seperate things /////////
+    void bankFaderEventSubscribe(Bank bank, ChStripID chStripID, ConsoleFaderCallback faderCallback);
+
     // ############################################# EVENT POST DECLARATIONS #############################################
 
     // void postEvent(BankEventType eventType,
@@ -175,6 +190,10 @@ class EventBus
     // this should receive a set of associate channels, an event type, and the value. DO WE NEED BANK?
     // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
     void associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+
+    // Maybe seperate these into fader, vpot, button, etc...
+    void associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2]);
+
     void associateMasterEventPost(BankEventType eventType, std::string eventValue);
 
     void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
@@ -184,13 +203,14 @@ class EventBus
 
     Bank getCurrentBank(); // Returns the enumeration for the currently selected bank.
                            // void postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source);
-    //void postFaderEvent(const int channelStripID, const char *eventValue, EventSource source);
+    // void postFaderEvent(const int channelStripID, const char *eventValue, EventSource source);
     void postFaderEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
+    void postVpotEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
 
 
     void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
-                                    FaderCallbackFunction faderCallback,
-                                    VpotCallbackFunction vpotCallback,
+                                    ConsoleFaderCallback faderCallback,
+                                    ConsoleVpotCallbackFunction vpotCallback,
                                     std::function<void(Bank, const std::string &)> unsubscribeCallback);
 };
 
@@ -200,6 +220,10 @@ inline EventBus &EventBus::getInstance()
     static EventBus instance;
     return instance;
 }
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // POSTER INTERFACE AND IMPLEMENTATIONS

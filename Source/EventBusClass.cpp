@@ -30,6 +30,7 @@ EventBus::EventBus()
     for (auto &callbackMap : chStripComponentCallbacks)
     {
 
+        FIXTHIS
         // Fill the ChannelStripComponent Callback lookup table with ID's
         for (int i = 0; i <= 0x17; ++i)
         {
@@ -125,6 +126,15 @@ void EventBus::channelStripEventSubscribe(Bank bank, const std::string &channelS
 
 }
 
+//////////////// MAKING NEW SUBSCRIPTION METHODS - SEPERATING STUFF /////////////////
+void EventBus::bankFaderEventSubscribe(Bank bank, ChStripID chStripID, ConsoleFaderCallback faderCallback)
+{
+    faderCallbackArray[bank][chStripID] = faderCallback;
+}
+
+
+
+// TODO: Maybe this one needs to go out? Changing to seperate post methods....
 // ####################################################################################################################
 // When an event has fired, which calls a callback in a channel object (like moving a fader), the channel will the use
 // this method to post an event that will update the channelStripComponents in the UI, by calling their callback from
@@ -138,6 +148,22 @@ void EventBus::associateChStripUiEventPost(std::unordered_set<std::string> chann
         // First index is the eventtype in the array, next index is the key of the map of callbacks.
         // The callback takes the event value as parameter - it just mimicks the mixer, so no need for knowing bank here.
         chStripComponentCallbacks[eventType][stripID](eventValue);
+    }
+}
+
+void EventBus::associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2])
+{
+    // Iterate through the bits in the mask, use them for indexing the callbacks.
+    while(chStripBitMask)
+    {
+        // Get the index of the lowest set bit
+        int stripID = __builtin_ctz(chStripBitMask);
+        
+        // Use the stripID to index an array of callbacks.
+        associateUiFaderCallbackArray[currentBank][stripID](faderValue);
+
+        // Clear lowest set bit
+        chStripBitMask &= chStripBitMask - 1;
     }
 }
 
@@ -209,6 +235,12 @@ void EventBus::postFaderEvent(const ChStripID channelStripID, const char (&event
     //faderCallbackMap[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
     faderCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
 }
+
+void EventBus::postVpotEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source)
+{
+    vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
+}
+
 
 
 void EventBus::postButtonEvent(const)

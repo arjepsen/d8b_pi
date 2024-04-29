@@ -269,7 +269,10 @@ void MixerManager::handleBufferMessage()
                 // No bounds checking - we assume that the messages ending
                 // with 'f' and 'v' are always having the strip ID as the first two chars.
                 // So: Convert the first two chars to an integer
-                ChStripID channelStripID = static_cast<ChStripID>((msgBuffer[0] << 8) | msgBuffer[1]);
+                char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
+                ChStripID channelStripID = static_cast<ChStripID>(hexToInt(hexValueString));
+                
+                FIX THE MISTAKE CONVERSION OF 2CHAR HEX IN OTHER PLACES OF THE CODE
 
                 // TODO: HOW ABOUT MASTER STRIP???
 
@@ -287,8 +290,12 @@ void MixerManager::handleBufferMessage()
             {
                 // Decipher which pot.
                 // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-                std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
-                std::string value = message.substr(2, 2);  // Get fader position from message
+                // std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
+                // std::string value = message.substr(2, 2);  // Get fader position from message
+                ChStripID channelStripID = static_cast<ChStripID>((msgBuffer[0] << 8) | msgBuffer[1]);
+
+                NEED TO CHANGE THE METHOD IN THE CHANNELS CLASS.
+                
 
                 // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
                 eventBus.postEvent(VPOT_EVENT, vPotID, value, CONSOLE_EVENT);
