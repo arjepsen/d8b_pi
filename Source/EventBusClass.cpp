@@ -151,6 +151,7 @@ void EventBus::associateChStripUiEventPost(std::unordered_set<std::string> chann
     }
 }
 
+WHAT ABOUT BANK?
 void EventBus::associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2])
 {
     // Iterate through the bits in the mask, use them for indexing the callbacks.
@@ -166,6 +167,8 @@ void EventBus::associateUiStripFaderEventPost(int chStripBitMask, const char (&f
         chStripBitMask &= chStripBitMask - 1;
     }
 }
+
+void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue, currentpotfunction??)
 
 // #######################################################################################################################
 // This method is fired when a master strip event has happened, and we need to update the other (console or ui) interface.

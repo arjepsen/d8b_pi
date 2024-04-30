@@ -36,6 +36,7 @@ constexpr int VOL_VALUE_LENGTH = 3;  // Max chars in the volume value string. (o
 constexpr int DSP_VOL_CMD_LENGTH = 8;     // Max dsp volume command length. (for setting array). ie. "0AcXC8Q" (can be only 7, when just one hex digit for volume)
 constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
 constexpr int DSP_PAN_CMD_LENGTH = 16;
+constexpr int BRAIN_LED_CMD_LENGTH = 4;
 
 // Set first channel ID. This will increment with every channel object constructed.
 uint8_t Channel::nextChannelNumber = 0;
@@ -398,6 +399,9 @@ void Channel::removeChStripAssociationCallback(const Bank bank, const std::strin
 // ####################################################################################################################
 inline void Channel::handleVpotPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
 {
+    // If old pan value was 127, then we are moving away from dead center
+    // And need to turn the dot off.
+    bool handleDot = (pan == 127);
 
     // // Use a stringstream to construct the DSP command  (xxdFEFFXyyOFDFFXP, x is channelID, y is pan value)
     // std::stringstream ss;
@@ -474,92 +478,76 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], const Bank bank, C
     dspCom.send(dspPanCommand);
 
 
-
-
-    // =========== NEXT THING IS TO UPDATE THE LED's AROUND THE VPOT ============
-    
+    // Next, update the LED's around the vpot.
+    // Do a lookup of the vPot LED corresponding to the new pan value.
     ChStripLED newRingLED = ledRingLookup.getRingID(pan);
 
+    // Handle dot also, if we move TO 127 (then turn on instead of off.)
+    handleDot = (pan == 127) ? true : handleDot;
+    bool updateRing = (newRingLED != currentRingLED);
 
-    CONTINUE FROM HERE
-
-    // // Determine which LED's should be lit
-    // ChStripLed newRingLED;
-    // if (pan < 28)
-    //     newRingLED = RING_1;
-    // else if (pan < 54)
-    //     newRingLED = RING_2;
-    // else if (pan < 78)
-    //     newRingLED = RING_3;
-    // else if (pan < 100)
-    //     newRingLED = RING_4;
-    // else if (pan < 120)
-    //     newRingLED = RING_5;
-    // else if (pan < 136)
-    //     newRingLED = RING_6;
-    // else if (pan < 156)
-    //     newRingLED = RING_7;
-    // else if (pan < 178)
-    //     newRingLED = RING_8;
-    // else if (pan < 202)
-    //     newRingLED = RING_9;
-    // else if (pan < 228)
-    //     newRingLED = RING_10;
-    // else
-    //     newRingLED = RING_11;
-
-    // Check dead center for dot LED.
-    bool updateDot = false;
-    if (pan == 127)
+    // Check it up against last saved - update if necessary.
+    if (updateRing || handleDot)
     {
-        panDotCenter = true;
-        updateDot = true;
-    }
-    else if (panDotCenter)
-    {
-        panDotCenter = false;
-        updateDot = true;
-    }
+        // New pan value requires an LED change.
+        // Iterate through all associated channels (including this one)
+        // and turn off the current LED and turn on the new one.
 
-    // Retreive the set of associated channelStrips on the current bank
-    std::unordered_set<std::string> associatedStrips = associatedChannelStrips[bank];
+        // First, set up a char array for the command
+        char brainLedCommand[4];
 
-    // If ring LED needs to change, turn on the new one, an turn off the old one.
-    if (currentRingLED != newRingLED || updateDot)
-    {
-        for (auto &stripID : associatedStrips)
+        // Copy the bitmask, and iterate over the bits
+        int channelMask = associatedChannelStripBitmask;
+        while (channelMask)
         {
-            // Look up the ID for the led to turn off, and the one to turn on.
-            // Construct the Brain command to send.
-            std::string ledOff = CH_STRIP_LED_MAP.at(stripID)[currentRingLED] + "j";
-            std::string ledOn = CH_STRIP_LED_MAP.at(stripID)[newRingLED] + "i";
+            // Get the index of the lowest set bit
+            ChStripID stripID = static_cast<ChStripID>(__builtin_ctz(channelMask));
 
-            brainCom.send(ledOff);
-            brainCom.send(ledOn);
-
-            // Check for need to update dot
-            if (updateDot)
+            if (updateRing)
             {
-                // Start the command string.
-                std::string dotCommand = CH_STRIP_LED_MAP.at(stripID)[RING_DOT];
+                // Copy and send command from set, to turn off previous LED
+                brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][currentRingLED][0];
+                brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][currentRingLED][1];
+                brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][currentRingLED][2];
+                brainLedCommand[3] = LED_OFF_CMD;
+                brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
 
-                // Append last part, depending on whether we need to turn on or off.
-                dotCommand.append(panDotCenter ? "i" : "j");
-                brainCom.send(dotCommand);
+                // Likewise, turn on new LED
+                brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][newRingLED][0];
+                brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][newRingLED][1];
+                brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][newRingLED][2];
+                brainLedCommand[3] = LED_ON_CMD;
+                brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
             }
+
+            // Update center dot if necessary.
+            if (handleDot)
+            {
+                brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][RING_DOT][0];
+                brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][RING_DOT][1];
+                brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][RING_DOT][2];
+                brainLedCommand[3] = (pan == 127) ? LED_ON_CMD : LED_OFF_CMD;
+                brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
+            }
+
+            // Clear lowest set bit
+            channelMask &= channelMask - 1;
         }
-        // Update the registry
-        currentRingLED = newRingLED;
     }
 
-    // If this was a console event, post event for UI update
-    if (source == UI_EVENT)
-    {
-        // Remove the calling channel strip ID from the associate set
-        associatedStrips.erase(channelStripID);
-    }
+    // Finally, let's update the ui. 
+    // If this was a UI event, first remove the calling stripID.
+    // Instead of using conditional check, use the fact that "UI_EVENT" = 1
+    // and CONSOLE_EVENT = 0;
+    
+    // First, get the bitmask
+    int uiMask = associatedChannelStripBitmask;
 
-    // Post event for the associated strips.
+    // Update the bit for the calling channel according to what source was.
+    uiMask |= (source << channelStripID);
+
+    // Post a ui event
+    FIX THE EVENT BUS METHOD
     eventBus.associateChStripUiEventPost(associatedStrips, VPOT_EVENT, panValueString);
 }
 

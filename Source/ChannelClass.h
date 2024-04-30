@@ -76,7 +76,7 @@ class Channel
     int pan; // (0 - FE) - weird things happen on "FF".... 
     bool panDotCenter;
 
-    ChStripLed currentRingLED;
+    ChStripLED currentRingLED;
 
     // std::string panValue = "7F";	// Center
 
