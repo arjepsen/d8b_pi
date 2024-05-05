@@ -250,44 +250,7 @@ void Channel::channelStripVpotEventCallback(const char (&vPotValue)[2],
                                              const ChStripID channelStripID,
                                              EventSource source)
 {
-    // The supplied value is likely not a specific placement, but rather a number of how fast/far the pot was turned.
-    // So the procedure here is:
-    // 1 - DEDUCE WHAT THE POT IS CONTROLING (done by pointer to current function)
-    // 2 - CALCULATE NEW VALUE FROM OLD VALUE ON SUPPLIED CHANGE-VALUE (done in specific function)
-    // 3 - SEND DSP (OR BRAIN?) COMMAND TO UPDATE WHAT THE VPOT IS CHOSEN TO CONTROL
-    // 4 - UPDATE PRIVATE MEMBER
-    // 5 - SEND AN ASSOCIATE EVENT POST FOR UPDATING THE UI, AND THE LED's ON THE CONSOLE
-    // --------------------------------------------------------------------------------
-
-    // So , I guess here it could make sense to use a pointer to a function, depending on what mode is selected:
-    // A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control. (no pan for groups and busses)
-    // B - Aux Send Level (Aux1-8 buttons) (no aux for groups, midis and busses)
-    // C - Aux 9-10 / 11-12 send level for the stereo pair
-    // D - Aux 9-10 / 11-12 PAN pan control for the stereo pair.
-    // E - Level to tape
-    // F - Digital trim. (only for the 48 audio channels)
-
-    // The pots send values in same form as the faders. BUT the value is Fy for CCW and 0y for CW rotation, where y is the value depending on how fast the pot was turned.
-    //  ---------------------------------------------------------------------------------------------
-
-    // So, channelstrip vpot functionality is global, so same across all banks. (except for channels that dont support - like aux for bus)
-
-    // Here's a list of what the different channels support:
-    // Ch. 1- 48: all.
-    // Ch. 49 -
-
-    // This points to the method, related to current selected vpots functionality.
-    // It is only responsible for sending the relevant DSP command.
     (this->*currentVpotFunction)(vPotValue, bank, channelStripID, source);
-
-    // DSP command was sent. Now we need to update the console and UI, including associated channelstrips.
-    // HOW DO WE HANDLE SEPERATION BETWEEN SUPPORTED FUNCTIONALITY?
-
-    // ALL CHANNELS WILL SUPPORT _SOME_ POT ACTION, SO THEY SHOULD SUBSCRIBE TO THE EVENT.
-    // THEN WE CAN MANAGE IN-CLASS, BY MANAGING WHICH FUNCTIONS AR POINTED TO?
-    // PRESUMABLY THIS IS IN THE METHOD THAT CHANGES THE METHOD POINTED TO.
-
-    // This also means, that associated channelstrips should get updated by the pointed function, not here.
 }
 
 void Channel::channelStripButtonEventCallback(const int chStripNumber,
@@ -547,18 +510,40 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], const Bank bank, C
     uiMask |= (source << channelStripID);
 
     // Post a ui event
-    FIX THE EVENT BUS METHOD
-    eventBus.associateChStripUiEventPost(associatedStrips, VPOT_EVENT, panValueString);
+    eventBus.associateUiStripVpotEventPost(uiMask, pan);
 }
 
-void Channel::handleVpotAuxSend(const std::string &vpotValue, const Bank bank, EventSource &source)
+inline void Channel::handleVpotAuxSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
 {
-    // TODO: WORK ON THESE
+    // TODO
 }
+
+inline void Channel::handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
+{
+    // TODO
+}
+
+inline void Channel::handleVpotLevelToTape(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
+{
+    // TODO
+}
+
+inline void Channel::handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
+{
+    // TODO
+}
+
+inline void Channel::handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
+{
+    // TODO
+}
+
 
 // ===========================================  BUTTON EVENT HANDLERS  =======================================
 
-void channelStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID, EventSource source)
+inline void Channel::muteBtnCallback(char msgCategory)
 {
-    // 1 - make a map of
+    // Only act on presses, not on depress.
+
+
 }

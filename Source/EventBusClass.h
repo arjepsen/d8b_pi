@@ -46,10 +46,6 @@ enum EventSource
 };
 
 
-    using ConsoleFaderCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
-    using ConsoleVpotCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
-
-
 class EventBus
 {
   private:
@@ -60,35 +56,36 @@ class EventBus
     EventBus(const EventBus &) = delete;
     EventBus &operator=(const EventBus &) = delete;
 
-    // Structure to hold callbacks, the first element is for the channelobject, the second is for removing a
-    // strip from the channel object's association map.
-    // The first element is an array which holds the callbacks for the channel:
-    // [faderCallback, VpotCallback, ButtonCallback]
-    // The second element is the unsubscribe callback for the channel.
-    // The unsubscription callback in the channelclass removes the recorded associated strips
-    struct BankEventHandlers
-    {
-        std::array<std::function<void(const std::string &, Bank, const std::string &, EventSource)>, EVENT_TYPE_COUNT> callbackArray;
-        std::function<void(Bank, const std::string &)> unsubscribeCallback;
-    };
+    // // Structure to hold callbacks, the first element is for the channelobject, the second is for removing a
+    // // strip from the channel object's association map.
+    // // The first element is an array which holds the callbacks for the channel:
+    // // [faderCallback, VpotCallback, ButtonCallback]
+    // // The second element is the unsubscribe callback for the channel.
+    // // The unsubscription callback in the channelclass removes the recorded associated strips
+    // struct BankEventHandlers
+    // {
+    //     std::array<std::function<void(const std::string &, Bank, const std::string &, EventSource)>, EVENT_TYPE_COUNT> callbackArray;
+    //     std::function<void(Bank, const std::string &)> unsubscribeCallback;
+    // };
 
-    // We instantiate four maps of BankEventHandlers - meaning we will have a map of the structs for each bank.
-    std::unordered_map<std::string, BankEventHandlers> lineBankCallbacks;
-    std::unordered_map<std::string, BankEventHandlers> tapeBankCallbacks;
-    std::unordered_map<std::string, BankEventHandlers> effectsBankCallbacks;
-    std::unordered_map<std::string, BankEventHandlers> mastersBankCallbacks;
+    // // We instantiate four maps of BankEventHandlers - meaning we will have a map of the structs for each bank.
+    // std::unordered_map<std::string, BankEventHandlers> lineBankCallbacks;
+    // std::unordered_map<std::string, BankEventHandlers> tapeBankCallbacks;
+    // std::unordered_map<std::string, BankEventHandlers> effectsBankCallbacks;
+    // std::unordered_map<std::string, BankEventHandlers> mastersBankCallbacks;
 
-    // Pointer to the currently selected bank callbacks
-    std::unordered_map<std::string, BankEventHandlers> *currentBankCallbacks;
+    // // Pointer to the currently selected bank callbacks
+    // std::unordered_map<std::string, BankEventHandlers> *currentBankCallbacks;
 
     // This is used for UI callbacks. It is an array of maps, indexed as [FADER_EVENT, VPOT_EVENT, BUTTON_EVENT].
     // Each array element contains a map of <ChannelStripID, callBackFunction(valueString)>
     // So these callbacks are only for updating the UI after a physical interaction has happened.
-    std::array<std::unordered_map<std::string, std::function<void(const std::string &)>>, EVENT_TYPE_COUNT> chStripComponentCallbacks;
+    // std::array<std::unordered_map<std::string, std::function<void(const std::string &)>>, EVENT_TYPE_COUNT> chStripComponentCallbacks;
 
     // This .... holds the callbacks for the MasterStripComponent
     std::array<std::function<void(const std::string &)>, EVENT_TYPE_COUNT> masterStripComponentCallback;
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////// april '24 --- trying to seperate faders, vpots and buttons, due to master section.... ////////////
     // first, we do need unsubscriptions for channelstrips.... and the unsubscribtions are for all three controls....
@@ -98,8 +95,12 @@ class EventBus
     // using ConsoleFaderCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
     // using ConsoleVpotCallbackFunction = std::function<void(const std::string &, Bank, const std::string &, EventSource)>;
 
-
     using AssociateUiFaderCallback = std::function<void(const char (&)[2])>;
+    using AssociateUiVpotCallback = std::function<void(const int)>;
+
+
+
+
     // We set up the maps using arrays of maps. We index the arrays uing the bank enumeration.
 
     // Declare the fader callback maps
@@ -107,16 +108,26 @@ class EventBus
 
     // Lets change to use arrays for char arrays instead of the maps of std::strings.
     // TODO: SHOULD THIS INCLUDE THE MASTER STRIP?
-    ConsoleFaderCallback faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
-    ConsoleVpotCallback vPotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+
+    using FaderCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
+    using VpotCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
+    using ButtonCallback = std::function<void(const int, const char)>;
+
+    FaderCallback faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    VpotCallback vPotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+
+    // Buttons are sligthly different - here we need to use a lookup map.
+    std::unordered_map<int, ButtonCallback> buttonCallbackMap[NUMBER_OF_BANKS];
+
 
     // Declare the vpot callback maps
-    std::unordered_map<std::string, ConsoleVpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
+    // std::unordered_map<std::string, ConsoleVpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
 
     // Declare the button callback maps
 
     // Declare array of associated ui fader callbacks.
     AssociateUiFaderCallback associateUiFaderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    AssociateUiVpotCallback associateUiVpotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
 
     // Declare the channelStrip Unsubscribe maps
     std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
@@ -156,7 +167,6 @@ class EventBus
     // Similar - this is only used for ui updates.
     void masterStripComponentSubscribe(const BankEventType eventType, std::function<void(const std::string &)> masterStripCompCallback);
 
-
     //////////////// NEW STUFF, NEW SUBSCRITIONING april '24. Seperate things /////////
     void bankFaderEventSubscribe(Bank bank, ChStripID chStripID, ConsoleFaderCallback faderCallback);
 
@@ -193,6 +203,7 @@ class EventBus
 
     // Maybe seperate these into fader, vpot, button, etc...
     void associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2]);
+    void associateUiStripVpotEventPost(int chStripBitMask, int vPotValue);
 
     void associateMasterEventPost(BankEventType eventType, std::string eventValue);
 
@@ -206,6 +217,7 @@ class EventBus
     // void postFaderEvent(const int channelStripID, const char *eventValue, EventSource source);
     void postFaderEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
     void postVpotEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
+    void postButtonEvent(int buttonID, char msgCategory);
 
 
     void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
@@ -220,10 +232,6 @@ inline EventBus &EventBus::getInstance()
     static EventBus instance;
     return instance;
 }
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////
 // POSTER INTERFACE AND IMPLEMENTATIONS

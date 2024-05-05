@@ -292,27 +292,49 @@ void MixerManager::handleBufferMessage()
                 // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 // std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
                 // std::string value = message.substr(2, 2);  // Get fader position from message
-                ChStripID channelStripID = static_cast<ChStripID>((msgBuffer[0] << 8) | msgBuffer[1]);
+                char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
+                ChStripID channelStripID = static_cast<ChStripID>(hexToInt(hexValueString));
 
                 NEED TO CHANGE THE METHOD IN THE CHANNELS CLASS.
                 
 
                 // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
-                eventBus.postEvent(VPOT_EVENT, vPotID, value, CONSOLE_EVENT);
+                eventBus.postVpotEvent(VPOT_EVENT, vPotID, value, CONSOLE_EVENT);
                 break;
             }
-            case 's':
-            case 'u':
+            case 's':   
+            case 'u':   
             {
-                // Button was pressed. "s" means pressed, "u" means depressed.
+                // TODO: How to handle shift and other dual presses....
+                // TODO: How to handle doubl-click (like select for fat channel...)
+
+                // Button was pressed. "s" means pressed, "u" means released
                 // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
                 // std::string value = message.substr(2, 2);       // Get fader position from message
                 // eventBus.postEvent(BUTTON_EVENT, channelStripID, value, CONSOLE_EVENT);
                 // So what to do.
                 // how do we handle differentiation between channel buttons, and others
 
+                // From manual:
+                // DoubleClicking Select opens/closes fat channel on screeen.
+                // Holding opens channel prefs in VFD display.
+                // Holding two selects opens link options page in VFD
+                // Holding Solo while selecting other solos ....
+                // works also while holding ALT.
+
+                ////////////////////////////////////////////////////////////////
+
+                // Convert button ID to an integer
+                char hexValueString[3] = {msgBuffer[0], msgBuffer[1], msgBuffer[2]};
+                int buttonID = hex3ToInt(hexValueString);
+
+
+                eventBus.postButtonEvent(buttonID, msgCategory);
+
                 break;
             }
+            default:
+                printf("OTHER MESSAGE - DSP?");
                 // TODO: handle other possible messages from the brain, but in particular also DSP
         }
     }

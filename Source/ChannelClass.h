@@ -45,7 +45,7 @@ class Channel
 
     // Map of all the channelstrips that are configured to control this channel.
     // std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
-    std::unordered_map<Bank, std::unordered_set<char[2]>> associatedChannelStrips;
+    //std::unordered_map<Bank, std::unordered_set<char[2]>> associatedChannelStrips;
     bool associatedChannelStrips[NUMBER_OF_BANKS][CH_STRIP_COUNT];
     
     // Lets try using a bitmask instead.
@@ -53,14 +53,22 @@ class Channel
 
 
     // Type definition of the pointer to the current function to handle vpot events.
-    typedef void (Channel::*VpotFunction)(const std::string &, const Bank, std::string, EventSource &);
+    typedef void (Channel::*VpotFunction)(const char (&)[2], const Bank, ChStripID, EventSource);
 
     // Pointer to the currently selection vpot event handler function
     VpotFunction currentVpotFunction;
 
     // These are the possible vpot event handlers
-    void handleVpotPan(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
-    void handleVpotAuxSend(const char (&vPotValue)[2], const Bank bank, EventSource &source);
+    void handleVpotPan(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    void handleVpotAuxSend(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    void handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    void handleVpotLevelToTape(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    void handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    void handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+
+
+
+
 
     //... more....
     // A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
@@ -123,8 +131,12 @@ class Channel
                                          const ButtonType btnType,
                                          const ButtonAction btnAction);
 
-    // Button callbacks. We still need to receive the id for the caller channel strip, so we can deduce which others to handle
-    void muteBtnCallback(const char btnAction);
+    // Button callbacks. 
+    // 1: Send dsp command
+    // 2: Send Brain command for all associated strip LED's
+    // 3: Update all associated UI strips.
+    
+    void muteBtnCallback(char msgCategory);
     void soloBtnCallback();
     void selectBtnCallback();
     void writeBtnCallback();
