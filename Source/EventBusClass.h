@@ -144,6 +144,8 @@ class EventBus
     // Create a Bank variable for holding the currently selected bank.
     Bank currentBank;
 
+    void initializeButtonCallbackMaps();
+
   public:
     static EventBus &getInstance(); // Returns a reference to the instance.
 
