@@ -10,7 +10,7 @@
 
 // TODO: Change from std::string to c-style strings where applicable.
 #include "ChannelClass.h"
-#include "ButtonLookupTable.h"
+//#include "ButtonLookupTable.h"
 #include "ChannelIDMap.h"
 #include "LEDClass.h"
 #include <iomanip>
@@ -67,7 +67,8 @@ Channel::Channel()
         initialAssociateBank = TAPE_BANK;
     }
 
-    ChStripID initialAssociateStrip = static_cast<ChStripID>(initialAssociateStripNumber);
+    // Set up using enumeration (remember they start at 0...)
+    ChStripID initialAssociateStrip = static_cast<ChStripID>(initialAssociateStripNumber - 1);
 
     // // Convert Channel Number to a corresponding channel strip ID.
     // std::stringstream stream;
@@ -95,9 +96,12 @@ Channel::Channel()
     //     [this](const Bank bank, const std::string &channelStripID)
     //     { this->removeChStripAssociationCallback(bank, channelStripID); });
 
+
+
+
     // New way - subscribe more seperately - using arrays and chars instead of maps and std::strings.
     // Make a lambda expression for subscribing the callback
-    ConsoleFaderCallback faderCallback = [this](const char(&faderValue)[2],
+    FaderCallback faderCallback = [this](const char(&faderValue)[2],
                                                 Bank bank,
                                                 ChStripID channelStripID,
                                                 EventSource source)
@@ -113,11 +117,27 @@ Channel::Channel()
     // Set initial Vpot handler method
     currentVpotFunction = &Channel::handleVpotPan;
 
+
+    // Get the base number for the buttons on the initial associate strip.
+    unsigned int buttonBase = eventBus.channelStripButtonBase[initialAssociateStrip];
+
+    // Subscribe the button callbacks.
+    ButtonCallback muteBtnCallback = [this](const ButtonAction btnAction)
+    {
+        this->muteBtnCallback(btnAction);
+    };
+    
+
+
+
+
+///////////////////////////////////////////////////////////////
+
     // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
     // TODO: We need to be able to save and recall settings across reboots.
     // On construction, we should read saved values and set them.
     // Default saved values must be present, and recreated if not present.
-    mute = false;
+    muted = false;
 
     pan = 0x7F; // Center
     panDotCenter = true;
@@ -180,7 +200,7 @@ void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
     volume[1] = faderValue[1];
 
     // Only send dsp command if channel is not muted.
-    if (!mute)
+    if (!muted)
     {
         // Not muted, create string and send it.
         // The form of the command is "XXcXYYQ", where XX is dsp channel id,
@@ -541,9 +561,65 @@ inline void Channel::handleVpotAuxStereoPan(const char (&panValue)[2], const Ban
 
 // ===========================================  BUTTON EVENT HANDLERS  =======================================
 
-inline void Channel::muteBtnCallback(char msgCategory)
+inline void Channel::muteBtnCallback(const ButtonAction btnAction)
 {
-    // Only act on presses, not on depress.
+    // Only act on presses, not on releases.
+    if (btnAction == BTN_PRESS)
+    {
+        // Set up a char for the 'i' or 'j', to turn on or off the mute LED
+        LedStateCommand stateCmd;
 
+        // Create the command string for volume. 
+        char dspVolumeCommand[DSP_VOL_CMD_LENGTH] = "--cX--Q";
+        
+        // Copy in the Channel ID
+        dspVolumeCommand[0] = CH_ID_STR[0];
+        dspVolumeCommand[1] = CH_ID_STR[1];
 
+        if (muted)
+        {
+            // Copy in the volume value.
+            dspVolumeCommand[4] = volume[0];
+            dspVolumeCommand[5] = volume[1];
+
+            // Update the member flag
+            muted = false;
+
+            // Set last part of LED command.
+            stateCmd = LED_OFF_CMD;
+        }
+        else
+        {
+            // Muting, so set volume command to "00"
+            dspVolumeCommand[4] = '0';
+            dspVolumeCommand[5] = '0';
+
+            // Update the member flag
+            muted = true;
+
+            // Set last part of LED command.
+            stateCmd = LED_ON_CMD;
+        }
+
+        // Send DSP command.
+        dspCom.send(dspVolumeCommand);
+
+        // Construct the LED command. Iterate through associated channels
+        // and send it.
+        char brainLedCommand[4];
+        int channelMask = associatedChannelStripBitmask;
+        while (channelMask)
+        {
+            // Get the index of the lowest set bit
+            ChStripID stripID = static_cast<ChStripID>(__builtin_ctz(channelMask));
+
+            brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][MUTE_LED][0];
+            brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][MUTE_LED][1];
+            brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][MUTE_LED][2];
+            brainLedCommand[3] = stateCmd;
+
+            // Clear lowest set bit
+            channelMask &= channelMask - 1;
+        }
+    }
 }

@@ -88,7 +88,7 @@ class Channel
 
     // std::string panValue = "7F";	// Center
 
-    bool mute; // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
+    bool muted; // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
                // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
 
     // bool solo;               // maybe there should be a general list of soloed channels somewhere?
@@ -126,17 +126,14 @@ class Channel
 
     void channelStripFaderEventCallback(const char (&faderValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
     void channelStripVpotEventCallback(const char (&vPotValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
-    void channelStripButtonEventCallback(const int chStripNumber,
-                                         const Bank bank,
-                                         const ButtonType btnType,
-                                         const ButtonAction btnAction);
+    //void channelStripButtonEventCallback(const char buttonAction);
 
     // Button callbacks. 
     // 1: Send dsp command
     // 2: Send Brain command for all associated strip LED's
     // 3: Update all associated UI strips.
     
-    void muteBtnCallback(char msgCategory);
+    void muteBtnCallback(const ButtonAction btnAction);
     void soloBtnCallback();
     void selectBtnCallback();
     void writeBtnCallback();

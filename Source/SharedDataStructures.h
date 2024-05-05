@@ -40,6 +40,41 @@ enum ChStripID
     CH_STRIP_COUNT
 };
 
+enum ChStripButtonBase
+{
+    STRIP1_BTN_BASE = 0x051,
+    STRIP2_BTN_BASE = 0x059,
+    STRIP3_BTN_BASE = 0x041,
+    STRIP4_BTN_BASE = 0x049,
+    STRIP5_BTN_BASE = 0x031,
+    STRIP6_BTN_BASE = 0x039,
+    STRIP7_BTN_BASE = 0x021,
+    STRIP8_BTN_BASE = 0x029,
+    STRIP9_BTN_BASE = 0x011,
+    STRIP10_BTN_BASE = 0x019,
+    STRIP11_BTN_BASE = 0x001,
+    STRIP12_BTN_BASE = 0x009,
+    STRIP13_BTN_BASE = 0x179,
+    STRIP14_BTN_BASE = 0x161,
+    STRIP15_BTN_BASE = 0x169,
+    STRIP16_BTN_BASE = 0x151,
+    STRIP17_BTN_BASE = 0x159,
+    STRIP18_BTN_BASE = 0x141,
+    STRIP19_BTN_BASE = 0x149,
+    STRIP20_BTN_BASE = 0x131,
+    STRIP21_BTN_BASE = 0x139,
+    STRIP22_BTN_BASE = 0x121,
+    STRIP23_BTN_BASE = 0x129,
+    STRIP24_BTN_BASE = 0x111
+};
+
+
+enum ButtonAction : char
+{
+    BTN_PRESS = 's',
+    BTN_RELEASE = 'u'
+};
+
 // Lookup table for converting hexadecimal digits to their integer values
 static const unsigned char hex_values[256] = {
     ['0'] = 0, ['1'] = 1, ['2'] = 2, ['3'] = 3, 
@@ -134,15 +169,7 @@ class IntToHexLookup
 //     {0x039, 0x03A, 0x03B, 0x03C, 0x03D, 0x03E}, // 6
 // };
 
-// Create an array of "base" ID of button codes.
-// Use this, and then add specific values to get specific code.
-int channelStripButtonBaseIndex[]{
-    // Base button index of channelstrips
-    0x051, 0x059, 0x041, 0x049, 0x031, 0x039, // 1 - 6
-    0x021, 0x029, 0x011, 0x019, 0x001, 0x009, // 7 - 12
-    0x179, 0x161, 0x169, 0x151, 0x159, 0x141, // 13 - 18
-    0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
-};
+
 
 enum ButtonType
 {

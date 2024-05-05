@@ -24,7 +24,13 @@
  * Constructor for the event bus.
  * TODO: give it a thorough description
  */
-EventBus::EventBus()
+EventBus::EventBus() : channelStripButtonBase{
+                           // Base button index of channelstrips
+                           0x051, 0x059, 0x041, 0x049, 0x031, 0x039, // 1 - 6
+                           0x021, 0x029, 0x011, 0x019, 0x001, 0x009, // 7 - 12
+                           0x179, 0x161, 0x169, 0x151, 0x159, 0x141, // 13 - 18
+                           0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
+                       }
 {
     // // Iterate over the array of eventtypes
     // for (auto &callbackMap : chStripComponentCallbacks)
@@ -48,7 +54,7 @@ EventBus::EventBus()
 
     initializeButtonCallbackMaps();
 
-    HOW TO WRITE IN CALLBACKS? HOW TO INDEX? DO WE NEED A SEPERATE THINGIE WITH THE IDS?
+    HOW TO WRITE IN CALLBACKS ? HOW TO INDEX ? DO WE NEED A SEPERATE THINGIE WITH THE IDS ?
 }
 
 // Destructor
@@ -132,17 +138,25 @@ void EventBus::channelStripEventSubscribe(Bank bank, const std::string &channelS
 //////////////////////////////////////////////////////////////////////
 // NEW SUBSCRIBER, HANDLES CALLING THE SPECIFIC SUBSCRIERS
 //////////////////////////////////////////////////////////////////
-void EventBus::channelStripEventSubscribe(Bank, ChStripID, )
+void EventBus::channelStripEventSubscribe(Bank, ChStripID, );
 
-    //////////////// MAKING NEW SUBSCRIPTION METHODS - SEPERATING STUFF /////////////////
-    void EventBus::bankFaderEventSubscribe(Bank bank, ChStripID chStripID, ConsoleFaderCallback faderCallback)
+//////////////// MAKING NEW SUBSCRIPTION METHODS - SEPERATING STUFF /////////////////
+void EventBus::bankFaderEventSubscribe(Bank bank, ChStripID chStripID, FaderCallback faderCallback)
 {
-    // Before writing in new callback, an unsubscribe callback should be called,
+    // TODO: Before writing in new callback, an unsubscribe callback should be called,
     // to let the old subscriber update it's record of associated strips.
     // But this is only faders? Maybe we need to make a generalized subscribe
     // method, that then are responsible for everything....
 
     faderCallbackArray[bank][chStripID] = faderCallback;
+}
+
+
+
+void EventBus::bankButtonEventSubscribe(Bank bank, unsigned int buttonID, ButtonCallback buttonCallback)
+{
+    // TODO: Handle Unsubscription??
+    buttonCallbackMap[bank][buttonID] = buttonCallback;
 }
 
 // BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
@@ -287,9 +301,9 @@ inline void EventBus::postVpotEvent(const ChStripID channelStripID, const char (
     vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
 }
 
-inline void EventBus::postButtonEvent(int buttonID, char msgCategory)
+inline void EventBus::postButtonEvent(const int buttonID, const ButtonAction buttonAction)
 {
-    buttonCallbackArray[currentBank][buttonID](msgCategory);
+    buttonCallbackMap[currentBank][buttonID](buttonAction);
 }
 
 // ##################################################################################
@@ -325,10 +339,9 @@ Bank EventBus::getCurrentBank()
     return currentBank;
 }
 
-
 void EventBus::initializeButtonCallbackMaps()
 {
-        // Initialize the buttonCallback maps with button ID's
+    // Initialize the buttonCallback maps with button ID's
     // clang-format off
     buttonCallbackMap[LINE_BANK] = {
         // ================== CHANNELSTRIP 1-12 BUTTONS =============================
@@ -430,5 +443,14 @@ void EventBus::initializeButtonCallbackMaps()
     buttonCallbackMap[TAPE_BANK] = buttonCallbackMap[LINE_BANK];
     buttonCallbackMap[EFFECTS_BANK] = buttonCallbackMap[LINE_BANK];
     buttonCallbackMap[MASTERS_BANK] = buttonCallbackMap[LINE_BANK];
-
 }
+
+// Create an array of "base" ID of button codes.
+// Use this, and then add specific values to get specific code.
+int EventBus::channelStripButtonBase[]{
+    // Base button index of channelstrips
+    0x051, 0x059, 0x041, 0x049, 0x031, 0x039, // 1 - 6
+    0x021, 0x029, 0x011, 0x019, 0x001, 0x009, // 7 - 12
+    0x179, 0x161, 0x169, 0x151, 0x159, 0x141, // 13 - 18
+    0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
+};
