@@ -174,6 +174,12 @@ void EventBus::masterFaderEventSubscribe(FaderCallback masterFaderCallback)
     faderCallbackArray[MASTERS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
 }
 
+
+void EventBus::masterUiFaderSubscribe(MasterUiFaderCallback masterUiFaderCallback)
+{
+    masterUiFaderCallback = masterUiFaderCallback;
+}
+
 // BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
 // YES - BUT THEN WHAT ABOUT NON-CHANNELSTRIP?
 // OK, ONE SUBSCRIBE METHOD FOR CHANNELS. ANOTHER FOR THE MASTER SECTION.
@@ -240,48 +246,48 @@ void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
     }
 }
 
-void EventBus::associateUiMasterFaderEventPost(const char (&faderValue)[2])
+void EventBus::updateUiMasterFaderEventPost(const char (&faderValue)[2])
 {
     masterUiFaderCallback(faderValue);
 }
 
-// #######################################################################################################################
-// This method is fired when a master strip event has happened, and we need to update the other (console or ui) interface.
-// #######################################################################################################################
-void EventBus::associateMasterEventPost(BankEventType eventType, std::string eventValue)
-{
-    masterStripComponentCallback[eventType](eventValue);
-}
+// // #######################################################################################################################
+// // This method is fired when a master strip event has happened, and we need to update the other (console or ui) interface.
+// // #######################################################################################################################
+// void EventBus::associateMasterEventPost(BankEventType eventType, std::string eventValue)
+// {
+//     masterStripComponentCallback[eventType](eventValue);
+// }
 
-// ################################################################################################
-// This method is used to add the callbacks to the channel strip component callback lookup table.
-// #################################################################################################
-void EventBus::chStripComponentSubscribe(const std::string stripID,
-                                         const BankEventType eventType,
-                                         std::function<void(const std::string &)> chStripCompCallback)
-{
-    // Ensure that a valid strip ID has been provided, and that the callback has not already been set.
-    if (chStripComponentCallbacks[eventType].count(stripID) && !chStripComponentCallbacks[eventType][stripID])
-    {
-        // Set callback
-        chStripComponentCallbacks[eventType][stripID] = chStripCompCallback;
-    }
-    else
-    {
-        printf("ERROR ON SETTING CHANNELSTRIPCOMPONENT CALLBACK");
-        exit(1);
-    }
-}
+// // ################################################################################################
+// // This method is used to add the callbacks to the channel strip component callback lookup table.
+// // #################################################################################################
+// void EventBus::chStripComponentSubscribe(const std::string stripID,
+//                                          const BankEventType eventType,
+//                                          std::function<void(const std::string &)> chStripCompCallback)
+// {
+//     // Ensure that a valid strip ID has been provided, and that the callback has not already been set.
+//     if (chStripComponentCallbacks[eventType].count(stripID) && !chStripComponentCallbacks[eventType][stripID])
+//     {
+//         // Set callback
+//         chStripComponentCallbacks[eventType][stripID] = chStripCompCallback;
+//     }
+//     else
+//     {
+//         printf("ERROR ON SETTING CHANNELSTRIPCOMPONENT CALLBACK");
+//         exit(1);
+//     }
+// }
 
-// #####################################################################
-// This method is used to add the masterChannelStripComponent callbacks.
-// #####################################################################
-void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
-                                             std::function<void(const std::string &)> masterStripCompCallback)
-{
-    // Set the callback
-    masterStripComponentCallback[eventType] = masterStripCompCallback;
-}
+// // #####################################################################
+// // This method is used to add the masterChannelStripComponent callbacks.
+// // #####################################################################
+// void EventBus::masterStripComponentSubscribe(const BankEventType eventType,
+//                                              std::function<void(const std::string &)> masterStripCompCallback)
+// {
+//     // Set the callback
+//     masterStripComponentCallback[eventType] = masterStripCompCallback;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -323,7 +329,7 @@ inline void EventBus::postVpotEvent(const ChStripID channelStripID, const char (
 
 inline void EventBus::postButtonEvent(const int buttonID, const ButtonAction buttonAction)
 {
-    buttonCallbackMap[currentBank][buttonID](buttonAction);
+    buttonCallbackMap[currentBank][buttonID](buttonAction, currentBank);
 }
 
 // ##################################################################################

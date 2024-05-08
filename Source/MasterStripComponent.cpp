@@ -35,16 +35,16 @@ MasterStripComponent::MasterStripComponent ()
     //[Constructor_pre] You can add your own custom stuff here..
     // ################## MY CONSTRUCTOR STUFF ###################
 
-    // Add the callbacks to the eventBus
-    eventBus.masterStripComponentSubscribe(FADER_EVENT,
-                                           [this](const std::string &valueString)
-                                           { this->faderMoveEventCallback(valueString); });
-    eventBus.masterStripComponentSubscribe(VPOT_EVENT,
-                                           [this](const std::string &valueString)
-                                           { this->vpotTurnEventCallback(valueString); });
-    eventBus.masterStripComponentSubscribe(BUTTON_EVENT,
-                                           [this](const std::string &valueString)
-                                           { this->buttonEventCallback(valueString); });
+    // // Add the callbacks to the eventBus
+    // eventBus.masterStripComponentSubscribe(FADER_EVENT,
+    //                                        [this](const std::string &valueString)
+    //                                        { this->faderMoveEventCallback(valueString); });
+    // eventBus.masterStripComponentSubscribe(VPOT_EVENT,
+    //                                        [this](const std::string &valueString)
+    //                                        { this->vpotTurnEventCallback(valueString); });
+    // eventBus.masterStripComponentSubscribe(BUTTON_EVENT,
+    //                                        [this](const std::string &valueString)
+    //                                        { this->buttonEventCallback(valueString); });
 
     // ##################### END OF MY CONSTRUCTOR STUFF ##################
 
@@ -868,7 +868,7 @@ void MasterStripComponent::setMasterFaderPosition(double value)
  * 
  * @param faderHexValue 
  ********************************************************************************/
-void MasterStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2])
+void MasterStripComponent::faderUpdateEventCallback(const char (&faderHexValue)[2])
 {
 
     int decimalValue = hexToInt(faderHexValue);

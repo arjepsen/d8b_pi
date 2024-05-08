@@ -53,7 +53,7 @@ public:
 	// void faderMoveEventCallback(std::string faderValue);
     // void vpotTurnEventCallback(std::string vpotValue);
     // void buttonEventCallback(std::string buttonValue);
-	void faderMoveEventCallback(const char (& faderValue)[2]);
+	void faderUpdateEventCallback(const char (& faderValue)[2]);
     void vpotTurnEventCallback(std::string vpotValue);
     void buttonEventCallback(std::string buttonValue);
 

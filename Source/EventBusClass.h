@@ -50,6 +50,7 @@ using VpotCallback = std::function<void(const char (&)[2], Bank, ChStripID, Even
 using ButtonCallback = std::function<void(ButtonAction, Bank)>;
 using UnSubscribeCallback = std::function<void(Bank, ChStripID)>;
 
+using MasterUiFaderCallback = std::function<void(const char (&)[2])>;
 
 class EventBus
 {
@@ -88,7 +89,7 @@ class EventBus
     // std::array<std::unordered_map<std::string, std::function<void(const std::string &)>>, EVENT_TYPE_COUNT> chStripComponentCallbacks;
 
     // This .... holds the callbacks for the MasterStripComponent
-    std::array<std::function<void(const std::string &)>, EVENT_TYPE_COUNT> masterStripComponentCallback;
+    //std::array<std::function<void(const std::string &)>, EVENT_TYPE_COUNT> masterStripComponentCallback;
 
 
     //std::function<void(const char (&)[2])> masterUiFaderCallback;
@@ -134,10 +135,13 @@ class EventBus
     AssociateUiFaderCallback associateUiFaderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
     AssociateUiVpotCallback associateUiVpotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
 
+    MasterUiFaderCallback masterUiFaderCallback;
+    //std::function<void(const char (&)[2])> updateUiMasterFaderEventPost()
+
     // Declare the UnSubscribe callback array
 
     // Declare the channelStrip Unsubscribe maps
-    std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
+    //std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
 
     // The Master section - according to the original d8b manual - is everything to the right of channel 24.
     // Let's create a data structure for the callbacks for these buttons and vpots.
@@ -187,13 +191,6 @@ class EventBus
         UnSubscribeCallback unSubScribeCallback;
     };
 
-    struct MasterStripCallbacks
-    {
-        std::function<void(const char (&)[2])> masterFaderCallback;
-        
-
-
-    }
 
     // ########################################## SUBSCRIPTION DECLARATIONS #########################################
     // Register/update event subscription for a particular strip, on a particular bank.
@@ -214,7 +211,10 @@ class EventBus
     //                                std::function<void(const std::string &)> chStripCompCallback);
 
     // Similar - this is only used for ui updates.
-    void masterStripComponentSubscribe(const BankEventType eventType, std::function<void(const std::string &)> masterStripCompCallback);
+    //void masterStripComponentSubscribe(const BankEventType eventType, std::function<void(const std::string &)> masterStripCompCallback);
+
+    
+
 
     //////////////// NEW STUFF, NEW SUBSCRITIONING april '24. Seperate things /////////
     // void bankFaderEventSubscribe(Bank bank, ChStripID chStripID, FaderCallback faderCallback);
@@ -256,9 +256,11 @@ class EventBus
     void associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2]);
     void associateUiStripVpotEventPost(int chStripBitMask, int vPotValue);
 
-    void associateUiMasterFaderEventPost(const char (&faderValue)[2]);
+    void updateUiMasterFaderEventPost(const char (&faderValue)[2]);
 
-    void associateMasterEventPost(BankEventType eventType, std::string eventValue);
+    void masterUiFaderSubscribe(MasterUiFaderCallback masterUiFaderCallback);
+
+    //void associateMasterEventPost(BankEventType eventType, std::string eventValue);
 
     // void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
 
