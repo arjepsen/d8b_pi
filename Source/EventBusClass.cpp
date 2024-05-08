@@ -126,7 +126,7 @@ EventBus::~EventBus() {}
 // NEW SUBSCRIBER, HANDLES CALLING THE SPECIFIC SUBSCRIBERS
 //////////////////////////////////////////////////////////////////
 
-/**
+/*******************************************************************************
  * @brief This method is used by the channel objects, to "subscribe" to events,
  *        i.e. to write in their callback methods.
  *        First it calls the previously entered "unsubscribe" callback, which
@@ -135,7 +135,7 @@ EventBus::~EventBus() {}
  * @param bank 
  * @param chStripID 
  * @param callbacks This is a structure of all the callbacks for a channelstrip.
- */
+ *******************************************************************************/
 void EventBus::channelStripEventSubscribe(Bank bank, ChStripID chStripID, ChannelStripCallbacks& callbacks) 
 {
     // First, call the unsubscribe callback, to let the channel update
@@ -150,15 +150,29 @@ void EventBus::channelStripEventSubscribe(Bank bank, ChStripID chStripID, Channe
     int buttonBase = channelStripButtonBase[chStripID];
 
     // Write in the button callbacks, using the button enumeration for map key.
-    buttonCallbackMap[bank][buttonBase + MUTE_BTN] = callbacks.muteCallback;
-    buttonCallbackMap[bank][buttonBase + SOLO_BTN] = callbacks.soloCallback;
-    buttonCallbackMap[bank][buttonBase + SELECT_BTN] = callbacks.selectCallback;
-    buttonCallbackMap[bank][buttonBase + WRITE_BTN] = callbacks.writeCallback;
-    buttonCallbackMap[bank][buttonBase + ASSIGN_BTN] = callbacks.assignCallback;
-    buttonCallbackMap[bank][buttonBase + REC_RDY_BTN] = callbacks.recordReadyCallback;
+    buttonCallbackMap[bank][buttonBase + MUTE_BTN] = callbacks.muteBtnCallback;
+    buttonCallbackMap[bank][buttonBase + SOLO_BTN] = callbacks.soloBtnCallback;
+    buttonCallbackMap[bank][buttonBase + SELECT_BTN] = callbacks.selectBtnCallback;
+    buttonCallbackMap[bank][buttonBase + WRITE_BTN] = callbacks.writeBtnCallback;
+    buttonCallbackMap[bank][buttonBase + ASSIGN_BTN] = callbacks.assignBtnCallback;
+    buttonCallbackMap[bank][buttonBase + REC_RDY_BTN] = callbacks.recRdyBtnCallback;
 }
 
-
+/*****************************************************************************
+ * @brief This method is for the master channel object to subscribe to master
+ *        fader events. No unsubscribe, since this should not change.
+ *        (We don't want to move the master fader to another strip, do we?)
+ * 
+ * @param masterFaderCallback 
+ *****************************************************************************/
+void EventBus::masterFaderEventSubscribe(FaderCallback masterFaderCallback)
+{
+    // The master fader is called on all banks.
+    faderCallbackArray[LINE_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+    faderCallbackArray[TAPE_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+    faderCallbackArray[EFFECTS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+    faderCallbackArray[MASTERS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+}
 
 // BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
 // YES - BUT THEN WHAT ABOUT NON-CHANNELSTRIP?
@@ -224,6 +238,11 @@ void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
         associateUiVpotCallbackArray[currentBank][stripID](vPotValue);
         chStripBitMask &= chStripBitMask - 1;
     }
+}
+
+void EventBus::associateUiMasterFaderEventPost(const char (&faderValue)[2])
+{
+    masterUiFaderCallback(faderValue);
 }
 
 // #######################################################################################################################
@@ -310,29 +329,29 @@ inline void EventBus::postButtonEvent(const int buttonID, const ButtonAction but
 // ##################################################################################
 // This method is used to change poster method, depending on which bank is selected.
 // ##################################################################################
-void EventBus::setBankPoster(Bank bank)
+void EventBus::setCurrentBank(Bank bank)
 {
     // Set the currentBank member
     currentBank = bank;
 
-    // Update the callback map pointer.
-    switch (currentBank)
-    {
-        case LINE_BANK:
-            currentBankCallbacks = &lineBankCallbacks;
-            break;
-        case TAPE_BANK:
-            currentBankCallbacks = &tapeBankCallbacks;
-            break;
-        case EFFECTS_BANK:
-            currentBankCallbacks = &effectsBankCallbacks;
-            break;
-        case MASTERS_BANK:
-            currentBankCallbacks = &mastersBankCallbacks;
-            break;
-        default:;
-            // Handle invalid bank input.
-    }
+    // // Update the callback map pointer.
+    // switch (currentBank)
+    // {
+    //     case LINE_BANK:
+    //         currentBankCallbacks = &lineBankCallbacks;
+    //         break;
+    //     case TAPE_BANK:
+    //         currentBankCallbacks = &tapeBankCallbacks;
+    //         break;
+    //     case EFFECTS_BANK:
+    //         currentBankCallbacks = &effectsBankCallbacks;
+    //         break;
+    //     case MASTERS_BANK:
+    //         currentBankCallbacks = &mastersBankCallbacks;
+    //         break;
+    //     default:;
+    //         // Handle invalid bank input.
+    // }
 }
 
 Bank EventBus::getCurrentBank()

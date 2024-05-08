@@ -50,9 +50,13 @@ public:
 
     void setMasterFaderPosition(double value);
 
-	void faderMoveEventCallback(std::string faderValue);
+	// void faderMoveEventCallback(std::string faderValue);
+    // void vpotTurnEventCallback(std::string vpotValue);
+    // void buttonEventCallback(std::string buttonValue);
+	void faderMoveEventCallback(const char (& faderValue)[2]);
     void vpotTurnEventCallback(std::string vpotValue);
     void buttonEventCallback(std::string buttonValue);
+
 
     //void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
     //TODO: Set it up through event bus instead.

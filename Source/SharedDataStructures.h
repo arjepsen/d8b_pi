@@ -40,6 +40,8 @@ enum ChStripID
     CH_STRIP_COUNT
 };
 
+const int MASTER_CH_STRIP = 24;
+
 enum ChStripButtonBase
 {
     STRIP1_BTN_BASE = 0x051,

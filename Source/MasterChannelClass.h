@@ -17,7 +17,7 @@
 
 class MasterChannel
 {
-private:
+  private:
     // Private constructor, since this is a singleton
     MasterChannel();
     //~MasterChannel();
@@ -32,12 +32,16 @@ private:
     MasterChannel(const MasterChannel &) = delete;
     MasterChannel &operator=(const MasterChannel &) = delete;
 
-    std::string masterVolume;
+    char masterVolume[3] = "00";
 
-public:
+  public:
     static MasterChannel &getInstance(); // Returns a reference to the instance.
 
-    void masterStripFaderEventCallback(const std::string faderValue, Bank bank, const std::string &channelStripID, EventSource source);
+    void masterFaderEventCallback(const char (&faderValue)[2],
+                                       Bank bank,
+                                       ChStripID channelStripID,
+                                       EventSource source);
+
     void masterStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID, EventSource source);
     void masterStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID, EventSource source);
 

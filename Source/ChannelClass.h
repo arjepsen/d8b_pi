@@ -79,7 +79,7 @@ class Channel
     // F - Digital trim.
 
     // std::string volume;
-    char volume[3] = {'0', '0', '\0'}; // Initialize to "00".
+    char volume[3] = "00"; // Initialize to "00".
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     int pan; // (0 - FE) - weird things happen on "FF".... 
     bool panDotCenter;

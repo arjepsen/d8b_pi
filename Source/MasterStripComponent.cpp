@@ -21,6 +21,7 @@
 //[/Headers]
 
 #include "MasterStripComponent.h"
+#include "SharedDataStructures.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
@@ -857,15 +858,23 @@ void MasterStripComponent::setMasterFaderPosition(double value)
 // 	masterFaderMoveCallback = callbackFunction;
 // }
 
-// ################################################################################################
-// This is a callback method to be used by the eventBus. It will be called, when the master object
-// has sent it's commands to the DSP, and Brain, and all that is left is to update the UI.
-// It looks up the value in the precomputed map, and sets the fader to the given value.
-// ################################################################################################
-void MasterStripComponent::faderMoveEventCallback(std::string faderHexValue)
+
+/*********************************************************************************
+ * @brief This is a callback used by the eventbus, after af physical master
+ *        fader move has been handled by the MasterChannel, and all that is left
+ *        is to update the ui.
+ *        It uses some lookups to convert the provided 2-char hex value to the
+ *        log10 decibel value for the UI fader.
+ * 
+ * @param faderHexValue 
+ ********************************************************************************/
+void MasterStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2])
 {
-    int decimalValue = std::stoi(faderHexValue, nullptr, 16);
-    float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
+
+    int decimalValue = hexToInt(faderHexValue);
+    //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
+    float logValue = *faderValueLookup.getLog10Value(decimalValue);
+    //float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
     juce::MessageManager::callAsync([this, logValue]()
                                     { masterFader.get()->setValue(logValue, juce::dontSendNotification); });
 }
