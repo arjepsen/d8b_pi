@@ -49,7 +49,7 @@ class Channel
     bool associatedChannelStrips[NUMBER_OF_BANKS][CH_STRIP_COUNT];
     
     // Lets try using a bitmask instead.
-    unsigned int associatedChannelStripBitmask;
+    unsigned int associatedChannelStripBitmask[NUMBER_OF_BANKS];
 
 
     // Type definition of the pointer to the current function to handle vpot events.
@@ -124,8 +124,8 @@ class Channel
     // void removeLineBankStripSubscription(std::string channelStripID);
     // void removeSubscription(BankEventType eventType, std::string channelStripID);
 
-    void channelStripFaderEventCallback(const char (&faderValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
-    void channelStripVpotEventCallback(const char (&vPotValue)[2], Bank bank, const ChStripID channelStripID, EventSource source);
+    void channelStripFaderEventCallback(const char (&faderValue)[2], Bank bank, ChStripID channelStripID, EventSource source);
+    void channelStripVpotEventCallback(const char (&vPotValue)[2], Bank bank, ChStripID channelStripID, EventSource source);
     //void channelStripButtonEventCallback(const char buttonAction);
 
     // Button callbacks. 
@@ -133,16 +133,17 @@ class Channel
     // 2: Send Brain command for all associated strip LED's
     // 3: Update all associated UI strips.
     
-    void muteBtnCallback(const ButtonAction btnAction);
-    void soloBtnCallback();
-    void selectBtnCallback();
-    void writeBtnCallback();
-    void assignBtnCallback();
-    void recordReadyBtnCallback();
+    void muteBtnCallback(ButtonAction btnAction, Bank currentBank);
+    void soloBtnCallback(ButtonAction btnAction, Bank currentBank);
+    void selectBtnCallback(ButtonAction btnAction, Bank currentBank);
+    void writeBtnCallback(ButtonAction btnAction, Bank currentBank);
+    void assignBtnCallback(ButtonAction btnAction, Bank currentBank);
+    void recRdyBtnCallback(ButtonAction btnAction, Bank currentBank);
 
-    void removeChStripAssociationCallback(const Bank bank, const std::string channelStripID);
+    void removeChStripAssociationCallback(Bank bank, ChStripID chStripID);
 
     void setVpotFunction(std::function<void(int)> func); // {vPotFunction = func}
+    void subscribeToChStrip(Bank bank, ChStripID chStripID);
 };
 
 // // Should these be classes also??

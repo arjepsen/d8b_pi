@@ -52,8 +52,7 @@ Channel::Channel()
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       intToHexLookup(IntToHexLookup::getInstance()),
-      ledRingLookup(LEDringLookup::getInstance()),
-      associatedChannelStripBitmask(0) // Explicit initialization for safety.
+      ledRingLookup(LEDringLookup::getInstance())
 {
     // Set up variables for initial channel strip event subscription.
     // TODO: Upon boot, this should be loaded from saved file.
@@ -79,9 +78,16 @@ Channel::Channel()
     // std::unordered_set<std::string> initialStripSet{initialAssociateChannelStripID};
     // associatedChannelStrips[initialAssociateBank] = initialStripSet;
 
-    // New way, now we use a bitmask for the strip ID.
     // TODO: This should also eventually be loaded from file on boot.
-    associatedChannelStripBitmask |= (1U << initialAssociateStripNumber);
+    
+    // Clear all association
+    associatedChannelStripBitmask[LINE_BANK] = 0;
+    associatedChannelStripBitmask[TAPE_BANK] = 0;
+    associatedChannelStripBitmask[EFFECTS_BANK] = 0;
+    associatedChannelStripBitmask[MASTERS_BANK] = 0;
+
+    // Set the bit for the initially associated channelstrip.
+    associatedChannelStripBitmask[initialAssociateBank] |= (1U << initialAssociateStripNumber);
 
     // // Subscribe to events on the given bank and strip.
     // eventBus.bankEventSubscribe(
@@ -96,40 +102,16 @@ Channel::Channel()
     //     [this](const Bank bank, const std::string &channelStripID)
     //     { this->removeChStripAssociationCallback(bank, channelStripID); });
 
+    // Subscribe to events on the initial channelstrip.
+    subscribeToChStrip(initialAssociateBank, initialAssociateStrip);
 
-
-
-    // New way - subscribe more seperately - using arrays and chars instead of maps and std::strings.
-    // Make a lambda expression for subscribing the callback
-    FaderCallback faderCallback = [this](const char(&faderValue)[2],
-                                                Bank bank,
-                                                ChStripID channelStripID,
-                                                EventSource source)
-    {
-        this->channelStripFaderEventCallback(faderValue, bank, channelStripID, source);
-    };
-
-    // Subscribe
-    eventBus.bankFaderEventSubscribe(initialAssociateBank,
-                                     initialAssociateStrip,
-                                     faderCallback);
-
-    // Set initial Vpot handler method
+    // Set initial Vpot handler method.
     currentVpotFunction = &Channel::handleVpotPan;
-
 
     // Get the base number for the buttons on the initial associate strip.
     unsigned int buttonBase = eventBus.channelStripButtonBase[initialAssociateStrip];
 
-    // Subscribe the button callbacks.
-    ButtonCallback muteBtnCallback = [this](const ButtonAction btnAction)
-    {
-        this->muteBtnCallback(btnAction);
-    };
-    
-
-
-
+    // TODO How to handle other associates....?
 
 ///////////////////////////////////////////////////////////////
 
@@ -156,41 +138,50 @@ Channel::Channel()
 
 // Implement other member functions...
 
-// #######################################################################################
-// This method updates the channel object's volume member, and sends a command to the DSP
-// #######################################################################################
-// void Channel::setVolume(std::string volumeValue)
-void Channel::setVolume(char *volumeValue)
-{
-    // Update volume member
-    // volume = volumeValue;
-    strncpy(volume, volumeValue, 2); // Copy two chars.
-    volume[2] = '\0';                // Ensure third index is null terminator.
+// // #######################################################################################
+// // This method updates the channel object's volume member, and sends a command to the DSP
+// // #######################################################################################
+// // void Channel::setVolume(std::string volumeValue)
+// void Channel::setVolume(char *volumeValue)
+// {
+//     // Update volume member
+//     // volume = volumeValue;
+//     strncpy(volume, volumeValue, 2); // Copy two chars.
+//     volume[2] = '\0';                // Ensure third index is null terminator.
 
-    // Construct DSP command, and send it (if not muted)    (i.e. 22cX4FQ)
-    // std::string volumeCommand = CH_ID_STR + "cX" + volumeValue + "Q";
+//     // Construct DSP command, and send it (if not muted)    (i.e. 22cX4FQ)
+//     // std::string volumeCommand = CH_ID_STR + "cX" + volumeValue + "Q";
 
-    if (!mute)
-    {
-        // write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
-        char volumeCommand[DSP_VOL_CMD_LENGTH];
-        // strcpy(volumeCommand, CH_ID_STR);
-        // strcat(volumeCommand, "cX");
-        // strcat(volumeCommand, volume);
-        // strcat(volumeCommand, "Q");
-        snprintf(volumeCommand, DSP_VOL_CMD_LENGTH, "%s%s%sQ", CH_ID_STR, "cX", volume);
-        dspCom.send(volumeCommand);
-    }
-}
+//     if (!mute)
+//     {
+//         // write(*dspDescriptorPtr, volumeCommand.c_str(), volumeCommand.length());
+//         char volumeCommand[DSP_VOL_CMD_LENGTH];
+//         // strcpy(volumeCommand, CH_ID_STR);
+//         // strcat(volumeCommand, "cX");
+//         // strcat(volumeCommand, volume);
+//         // strcat(volumeCommand, "Q");
+//         snprintf(volumeCommand, DSP_VOL_CMD_LENGTH, "%s%s%sQ", CH_ID_STR, "cX", volume);
+//         dspCom.send(volumeCommand);
+//     }
+// }
 
-// ###########################################################################################################################
-// This is a callback function that is fired by the EventBus, when a fader is moved.
-// First it sends a DSP command to update the volume. Then it will iterate over all associalted channelstrips
-// on the console, and update them. Finaly it will post another event, which will update the channelStripComponents in the UI
-// ###########################################################################################################################
+
+
+/*******************************************************************************
+ * @brief This is the fader callback method that is fired off when a fader on an
+ *        associated channelstrip is moved.
+ *        First we send a DSP command to update the volume, then a Brain command
+ *        to move all associated faders, and last we post a UI event for moving
+ *        the associated faders in the UI.
+ * 
+ * @param faderValue 
+ * @param bank 
+ * @param channelStripID 
+ * @param source 
+ *******************************************************************************/
 void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
                                              Bank bank,
-                                             const ChStripID channelStripID,
+                                             ChStripID channelStripID,
                                              EventSource source)
 {
     // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
@@ -215,19 +206,19 @@ void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
         dspCom.send(dspVolumeCommand);
 
         // Copy associated channelstrip bitmask.
-        int consoleMask = associatedChannelStripBitmask;
-        int uiMask = associatedChannelStripBitmask;
+        int consoleMask = associatedChannelStripBitmask[bank];
+        int uiMask = associatedChannelStripBitmask[bank];
 
         // Disable "calling" strip, depending on whether ui or console.
         if (source == CONSOLE_EVENT)
         {
             // Clear the bit of the calling channelstrip
-            consoleMask = associatedChannelStripBitmask & ~(1U << channelStripID);
+            consoleMask = consoleMask & ~(1U << channelStripID);
         }
         else
         {
             // UI event, clear the ui caller bit.
-            uiMask = associatedChannelStripBitmask & ~(1U << channelStripID);
+            uiMask = uiMask & ~(1U << channelStripID);
         }
 
         // Create and send commands for the associated faders.
@@ -265,6 +256,15 @@ void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
     }
 }
 
+/*******************************************************************************
+ * @brief This is the callback for vpot events.
+ *        The work is handed off to the currently selected vpot function method.
+ * 
+ * @param vPotValue 
+ * @param bank 
+ * @param channelStripID 
+ * @param source 
+ ******************************************************************************/
 void Channel::channelStripVpotEventCallback(const char (&vPotValue)[2],
                                              Bank bank,
                                              const ChStripID channelStripID,
@@ -273,193 +273,80 @@ void Channel::channelStripVpotEventCallback(const char (&vPotValue)[2],
     (this->*currentVpotFunction)(vPotValue, bank, channelStripID, source);
 }
 
-void Channel::channelStripButtonEventCallback(const int chStripNumber,
-                                              const Bank bank,
-                                              const ButtonType btnType,
-                                              const ButtonAction btnAction)
+/*********************************************************************************
+ * @brief This method is used when we make a new association, i.e. when we want
+ *        to set up some specific channelstrip to control this channel.
+ *        (any channelstrip on any bank can be configured to control any channel).
+ *        When a new association is made, we first need to let the old associated
+ *        channel know that it is no longer associated with that strip, so it can
+ *        update it's register of associated channels - done by this callback.
+ * 
+ * @param bank
+ * @param chStripID 
+ *********************************************************************************/
+void Channel::removeChStripAssociationCallback(Bank bank, ChStripID chStripID)
 {
-    // TODO: SOME WORK TO BE DONE HERE...
-    printf("BUTTON CLICKED");
-
-    // We receive the strip number, to handle associated strips.
-    // The button type (mute, solo, etc.)
-    // the action (pressed/released)
-    // And the source of the event - console or ui.
-
-    // Maybe create a map of dsp commands before-hand?
-    // So how does bank selection affect the channelstrip buttons?
-
-    // Handle the button event, depending on which button:
-    switch (btnType)
-    {
-        case MUTE_BTN:
-            // Do nothing on button release
-            if (btnAction == 'u') return; // TODO: can this be handled better? without conditional?
-
-            // Ok, we first send the mute/unmute command to the DSP board for this channel.
-            // Then we must send the command to turn on/off the LED on the mute button
-            // on all associated channelstrips.
-            // finally we also need to reflect this in the UI.
-
-            // Variable for the LED brain command
-            LedStateCommand stateCmd = LED_OFF_CMD;
-
-            // 1: Construct and send the DSP command for muting or unmuting the channel. i.e. "22cXC5Q"
-            // std::string dspCmd = CH_ID_STR + "cX";
-            char dspCmd[DSP_VOL_CMD_LENGTH]; // Set up the string array
-
-            if (mute) // Check whether we're muting or unmuting
-            {
-                // Muted. Get the saved volume value, and send the dsp command. (LED command set to off above)
-                mute = false;
-                snprintf(dspCmd, DSP_VOL_CMD_LENGTH, "%s%s%sQ", CH_ID_STR, "cX", volume);
-            }
-            else
-            {
-                // Muting, send a value of 0 to the DSP, and set the command for turning ON the mute LED.
-                mute = true;
-                snprintf(dspCmd, DSP_VOL_CMD_LENGTH, "%s%s0Q", CH_ID_STR, "cX");
-                stateCmd = LED_ON_CMD; // Prepare for the LED brain command.
-            }
-
-            // Send the DSP volume command.
-            dspCom.send(dspCmd); // TODO: IS THIS SOMETHING THAT ALL CASES DO??
-
-            // Now, send the on/off command to all associated strip button led's
-            // TODO: Maybe also something all cases do??
-            // Use the LED lookup map, and index the array using the enumeration
-            // TODO: the loop would insert the bank key if it does not already exists - should we put in some safety check? but that would mess with performance?
-            for (const std::string &stripID : associatedChannelStrips[bank])
-            {
-                std::string ledCommand = CH_STRIP_LED_MAP[stripID][MUTE_LED];
-                ledCommand += stateCmd;
-            }
-
-            CHANGING TO USE CHAR ARRAYS INSTEAD.MOVE ID ENUMERATION FROM LEDIDMAPS, SINCE IT IS USED MORE PLACES
-
-                                                                                        // MAYBE INSTEAD WE COULD MAKE A MAP OF COMMANDS, SO THE CALL SIMPLY FETCHES THE CORRECT COMMAND TO SEND????
-
-                                                                                        // 1: Send a dsp command for setting volume to 0 on this channel.
-                                                                                        //    xxcXC0Q where xx is the channelID string (CH_ID_STR).
-                                                                                        //    BUT, dont update the channels' volume record. Keep this value for unmuting.
-                                                                                        //    REMEMBER - master channel volume command is different (4Cc9X0QAX0Q)
-                                                                                        //    // but... no mute on master....?
-                                                                                        //   TODO: Cheac what other "channels" do (master, effect, midi etc.)
-                                                                                        // 2: Do update the mute variable in the channel object.
-                                                                                        // 3: retrieve associated channels (only current bank - when do we update the others?)
-                                                                                        std::unordered_set<std::string>
-                                                                                            associatedConsoleStrips = associatedChannelStrips[bank];
-
-            // 4: Turn on/off the led on all the associated channels, including the "activated" on
-
-            // Iterate through the set of associated channelStrips,
-            // and activate/deactivate their mute button LED
-            for (auto &stripID : associatedChannelStrips[bank])
-            {
-                std::string faderCommand = stripID + faderValue + "f";
-                brainCom.send(faderCommand);
-            }
-    }
+    associatedChannelStripBitmask[bank] &= ~(1U << chStripID);
 }
 
-// ####################################################################################################
-// This method is a callback for removing the supplied channel strip from the set of associated strips.
-// This is called from the event bus, when an association is updated.
-// ####################################################################################################
-void Channel::removeChStripAssociationCallback(const Bank bank, const std::string channelStripID)
-{
-    associatedChannelStrips[bank].erase(channelStripID);
-}
+
 
 // ===========================================  VPOT EVENT HANDLERS  =======================================
 
-// ####################################################################################################################
-// The Brain board sends a message with the value "Fy" where "y" is the value to change, when the pan pot is moved CCW.
-// On a CW movement, the value is in the form "0y".
-// The value "y" is higher, the faster the pot is turned.
-// This method adds the current pan value with the received value. Since it's a byte, it wraps around, so Fy values
-// becomes subtractive.
-// ####################################################################################################################
-inline void Channel::handleVpotPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
+/*********************************************************************************
+ * @brief Vpot pan event handler. 
+ *        When a channelstrip vpot is turned it sends a message in the same format
+ *        as the faders: XXYYv. XX is the channelstrip ID, and YY is the value.
+ *        The value will be Fy for CCW movement, and 0y for CW movement, where
+ *        y is a value depending on how fast the pot is turned.
+ *        When converting this to an int8_t, it becomes negative for Fy values,
+ *        which means we can simply add this value to the previously stored pan.
+ * 
+ * @param panValue 
+ * @param bank 
+ * @param channelStripID 
+ * @param source 
+ **********************************************************************************/
+inline void Channel::handleVpotPan(const char (&panValue)[2], Bank bank, ChStripID channelStripID, EventSource source)
 {
     // If old pan value was 127, then we are moving away from dead center
     // And need to turn the dot off.
     bool handleDot = (pan == 127);
 
-    // // Use a stringstream to construct the DSP command  (xxdFEFFXyyOFDFFXP, x is channelID, y is pan value)
-    // std::stringstream ss;
-    // std::string panValueString;
+    // Create initial DSP command string.
+    char dspPanCommand[] = "--dFEFFX--OFDFFXP";
 
-    // First, we need to construct a DSP command string of the form 
-    // xxdFEFFXyyOFDFFXP, where "xx" is the channelstrip ID, and yy is the value.
-
-    // CCW step sends "FF" = 255
-    // CW step sends "01" = 1
-
-
-    // Create initial DSP command string. "xx" & "yy" needs to be overwritten
-    // with the new calculated values.
-    char dspPanCommand[] = "xxdFEFFXyyOFDFFXP";
-
-    // Copy the dsp channel ID code.
+    // Write in the dsp channel ID code.
     dspPanCommand[0] = CH_ID_STR[0];
     dspPanCommand[1] = CH_ID_STR[1];
 
     // Handle the event one way if it was fired by the console.
     if (source == CONSOLE_EVENT)
     {
-        // The console sends a value showing how fast the pot was turned.
-        // Because of the difference between CCW and CW, we can cast the value to 
-        // int8_t. This will make the value negative if turned CCW, and positive
-        // if CW. And then we simply add that to the previous pan value.
-
-        // Convert hex string to signed int8_t.
+        // Convert hex string to signed int8_t. (CCW becomes negative)
         int panChangeValue = static_cast<int8_t>(hexToInt(panValue));
 
         // Adding to the current value will result in the new value to write.
         // Clamp the value, so it stays within 0 to 254. Write to class member.
         pan = std::max(0, std::min(254, static_cast<int>(pan + panChangeValue)));
-
-        // // Convert to 2-digit hex string.
-        // //ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(newPanValue);
-        // const char *panHexValue = intToHexLookup.getHexValue(pan);
-        
-        // // Write the hex "yy" value to the dsp command string
-        // dspPanCommand[8] = panHexValue[0];
-        // dspPanCommand[9] = panHexValue[1];
-
-        // // Write to std::string variable.
-        // panValueString = ss.str();
-
-        // // Clear the stringstream
-        // ss = std::stringstream();
     }
     else
     {
         // This is a UI event, so we're receiving the value that the pot has 
         // been moved TO as a hex string.
-        // First, update the pan member of this channel
+        // Update the pan member of this channel
         pan = hexToInt(panValue);
-
-        // Convert to uint8_t for saving to pan member.
-        //newPanValue = static_cast<uint8_t>(std::stoi(vpotValue, nullptr, 16));
     }
-
-    // // Add ID and first part
-    // ss << CH_ID_STR << "dFEFFX" << panValueString << "OFDFFXP";
 
     // Convert pan to a 2-digit hex string
     const char *panHexValue = intToHexLookup.getHexValue(pan);
 
-    // Write the hex "yy" value to the dsp command string
+    // Write the hex value to the dsp command string
     dspPanCommand[8] = panHexValue[0];
     dspPanCommand[9] = panHexValue[1];
 
-
     // Send the DSP command
-    //dspCom.send(ss.str());
     dspCom.send(dspPanCommand);
-
 
     // Next, update the LED's around the vpot.
     // Do a lookup of the vPot LED corresponding to the new pan value.
@@ -480,7 +367,7 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], const Bank bank, C
         char brainLedCommand[4];
 
         // Copy the bitmask, and iterate over the bits
-        int channelMask = associatedChannelStripBitmask;
+        int channelMask = associatedChannelStripBitmask[bank];
         while (channelMask)
         {
             // Get the index of the lowest set bit
@@ -524,7 +411,7 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], const Bank bank, C
     // and CONSOLE_EVENT = 0;
     
     // First, get the bitmask
-    int uiMask = associatedChannelStripBitmask;
+    int uiMask = associatedChannelStripBitmask[bank];
 
     // Update the bit for the calling channel according to what source was.
     uiMask |= (source << channelStripID);
@@ -559,9 +446,17 @@ inline void Channel::handleVpotAuxStereoPan(const char (&panValue)[2], const Ban
 }
 
 
-// ===========================================  BUTTON EVENT HANDLERS  =======================================
+// ===========================================  BUTTON EVENT CALLBACKS  =======================================
 
-inline void Channel::muteBtnCallback(const ButtonAction btnAction)
+/**************************************************************************
+ * @brief This is the callback for the mute button.
+ *        First we send a DSP volume command.
+ *        Next, we handle the LED's on all associated channelstrip buttons.
+ * 
+ * @param btnAction 
+ * @param currentBank 
+ **************************************************************************/
+inline void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
     // Only act on presses, not on releases.
     if (btnAction == BTN_PRESS)
@@ -607,7 +502,7 @@ inline void Channel::muteBtnCallback(const ButtonAction btnAction)
         // Construct the LED command. Iterate through associated channels
         // and send it.
         char brainLedCommand[4];
-        int channelMask = associatedChannelStripBitmask;
+        int channelMask = associatedChannelStripBitmask[currentBank];
         while (channelMask)
         {
             // Get the index of the lowest set bit
@@ -622,4 +517,82 @@ inline void Channel::muteBtnCallback(const ButtonAction btnAction)
             channelMask &= channelMask - 1;
         }
     }
+}
+
+/**********************************************************************
+ * @brief This method is used for subscribing to a channelstrip.
+ *        We collect all the callbacks in a struct, and then call the 
+ *        subscribe method from the eventbus.
+ * 
+ * @param bank 
+ * @param chStripID 
+ **********************************************************************/
+void Channel::subscribeToChStrip(Bank bank, ChStripID chStripID)
+{
+    // Make a lambda expression for subscribing the callback
+    FaderCallback faderCallback = [this](const char(&faderValue)[2],
+                                                Bank bank,
+                                                ChStripID channelStripID,
+                                                EventSource source)
+    {
+        this->channelStripFaderEventCallback(faderValue, bank, channelStripID, source);
+    };
+
+    // Same for the vpot callback
+    VpotCallback vPotCallback = [this](const char(&vPotValue)[2],
+                                                Bank bank,
+                                                ChStripID channelStripID,
+                                                EventSource source)
+    {
+        this->channelStripVpotEventCallback(vPotValue, bank, channelStripID, source);
+    };
+
+    // And for the buttons
+    ButtonCallback muteBtnCallback = [this](ButtonAction btnAction, Bank currentBank)
+    {
+        this->muteBtnCallback(btnAction, currentBank);
+    };
+    ButtonCallback soloBtnCallback = [this](ButtonAction btnAction, Bank currentBank)
+    {
+        this->soloBtnCallback(btnAction, currentBank);
+    };
+    ButtonCallback selectBtnCallback = [this](ButtonAction btnAction, Bank currentBank)
+    {
+        this->selectBtnCallback(btnAction, currentBank);
+    };
+    ButtonCallback writeBtnCallback = [this](ButtonAction btnAction, Bank currentBank)
+    {
+        this->writeBtnCallback(btnAction, currentBank);
+    };
+    ButtonCallback assignBtnCallback = [this](ButtonAction btnAction, Bank currentBank)
+    {
+        this->assignBtnCallback(btnAction, currentBank);
+    };
+    ButtonCallback recRdyBtnCallback = [this](ButtonAction btnAction, Bank currentBank)
+    {
+        this->recRdyBtnCallback(btnAction, currentBank);
+    };
+
+    // And finally the unsubscribe callback
+    UnSubscribeCallback unsubscribeCallback = [this](Bank bank, ChStripID chStripID)
+    {
+        this->removeChStripAssociationCallback(bank, chStripID);
+    };
+
+    // Collect the callbacks in the struct, to hand it to the eventbus
+    EventBus::ChannelStripCallbacks callbacks;
+
+    callbacks.faderCallback = faderCallback;
+    callbacks.vPotCallback = vPotCallback;
+    callbacks.muteBtnCallback = muteBtnCallback;
+    callbacks.soloBtnCallback = soloBtnCallback;
+    callbacks.selectBtnCallback = selectBtnCallback;
+    callbacks.writeBtnCallback = writeBtnCallback;
+    callbacks.assignBtnCallback = assignBtnCallback;
+    callbacks.recRdyBtnCallback = recRdyBtnCallback;
+    callbacks.unSubScribeCallback = unsubscribeCallback;
+
+    // Register with the eventbus.
+    eventBus.channelStripEventSubscribe(bank,chStripID, callbacks);
+
 }

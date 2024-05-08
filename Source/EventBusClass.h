@@ -45,9 +45,11 @@ enum EventSource
     UI_EVENT
 };
 
-using FaderCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
-using VpotCallback = std::function<void(const char (&)[2], Bank, const ChStripID, EventSource)>;
-using ButtonCallback = std::function<void(const ButtonAction)>;
+using FaderCallback = std::function<void(const char (&)[2], Bank, ChStripID, EventSource)>;
+using VpotCallback = std::function<void(const char (&)[2], Bank, ChStripID, EventSource)>;
+using ButtonCallback = std::function<void(ButtonAction, Bank)>;
+using UnSubscribeCallback = std::function<void(Bank, ChStripID)>;
+
 
 class EventBus
 {
@@ -101,6 +103,7 @@ class EventBus
     using AssociateUiFaderCallback = std::function<void(const char (&)[2])>;
     using AssociateUiVpotCallback = std::function<void(const int)>;
 
+
     // We set up the maps using arrays of maps. We index the arrays uing the bank enumeration.
 
     // Declare the fader callback maps
@@ -109,11 +112,17 @@ class EventBus
     // Lets change to use arrays for char arrays instead of the maps of std::strings.
     // TODO: SHOULD THIS INCLUDE THE MASTER STRIP?
 
-    FaderCallback faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
-    VpotCallback vPotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    // Declare arrays of fader and vpot callbacks. (+1 for master strip)
+    FaderCallback faderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT + 1] = {};
+    VpotCallback vPotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT + 1] = {};
 
     // Buttons are sligthly different - here we need to use a lookup map.
+    // This includes all buttons, both channelstrips and master section.
     std::unordered_map<int, ButtonCallback> buttonCallbackMap[NUMBER_OF_BANKS];
+
+    // Declare the UnSubscribe callback array
+    UnSubscribeCallback unSubScribeCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT] = {};
+
 
     // Declare the vpot callback maps
     // std::unordered_map<std::string, ConsoleVpotCallbackFunction> vPotCallbackMap[NUMBER_OF_BANKS];
@@ -123,6 +132,9 @@ class EventBus
     // Declare array of associated ui fader callbacks.
     AssociateUiFaderCallback associateUiFaderCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
     AssociateUiVpotCallback associateUiVpotCallbackArray[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+
+    // Declare the UnSubscribe callback array
+
 
     // Declare the channelStrip Unsubscribe maps
     std::unordered_map<std::string, std::function<void(Bank, const std::string &)>> unsubscribeCallbackMap[NUMBER_OF_BANKS];
@@ -149,32 +161,59 @@ class EventBus
 
     const int channelStripButtonBase[CH_STRIP_COUNT];
 
+    // Struct for collecing the callbacks for one channelstrip
+  // struct ChannelStripCallbacks
+  // {
+  //     std::function<void(const char (&)[2], Bank, ChStripID, EventSource)> faderCallback;
+  //     std::function<void(const char (&)[2], Bank, ChStripID, EventSource)> vPotCallback;
+  //     std::function<void(ButtonAction)> muteCallback;
+  //     std::function<void(ButtonAction)> soloCallback;
+  //     std::function<void(ButtonAction)> selectCallback;
+  //     std::function<void(ButtonAction)> writeCallback;
+  //     std::function<void(ButtonAction)> assignCallback;
+  //     std::function<void(ButtonAction)> recordReadyCallback;
+  //     std::function<void(Bank, ChStripID)> unSubScribeCallback;
+  // };
+  struct ChannelStripCallbacks
+  {
+      FaderCallback faderCallback;
+      VpotCallback vPotCallback;
+      ButtonCallback muteBtnCallback;
+      ButtonCallback soloBtnCallback;
+      ButtonCallback selectBtnCallback;
+      ButtonCallback writeBtnCallback;
+      ButtonCallback assignBtnCallback;
+      ButtonCallback recRdyBtnCallback;
+      UnSubscribeCallback unSubScribeCallback;
+  };
+
+
     // ########################################## SUBSCRIPTION DECLARATIONS #########################################
     // Register/update event subscription for a particular strip, on a particular bank.
     // This subscribed by the channel class.
-    void
-    bankEventSubscribe(Bank bank,
-                       // BankEventType eventType,
-                       const std::string &channelStripID,
-                       std::function<void(const std::string &, Bank, const std::string &, EventSource)> faderCallback,
-                       std::function<void(const std::string &, Bank, const std::string &, EventSource)> vpotCallback,
-                       std::function<void(const std::string &, Bank, const std::string &, EventSource)> buttonCallback,
-                       std::function<void(Bank, const std::string &)> removeSubscriptionCallback);
+    // void
+    // bankEventSubscribe(Bank bank,
+    //                    // BankEventType eventType,
+    //                    const std::string &channelStripID,
+    //                    std::function<void(const std::string &, Bank, const std::string &, EventSource)> faderCallback,
+    //                    std::function<void(const std::string &, Bank, const std::string &, EventSource)> vpotCallback,
+    //                    std::function<void(const std::string &, Bank, const std::string &, EventSource)> buttonCallback,
+    //                    std::function<void(Bank, const std::string &)> removeSubscriptionCallback);
 
-    // This is used by the ChannelStripComponent to subscribe to channel strip events.
-    // So these callbacks are only for updating the ui.
-    void chStripComponentSubscribe(const std::string stripID,
-                                   const BankEventType eventType,
-                                   std::function<void(const std::string &)> chStripCompCallback);
+    // // This is used by the ChannelStripComponent to subscribe to channel strip events.
+    // // So these callbacks are only for updating the ui.
+    // void chStripComponentSubscribe(const std::string stripID,
+    //                                const BankEventType eventType,
+    //                                std::function<void(const std::string &)> chStripCompCallback);
 
     // Similar - this is only used for ui updates.
     void masterStripComponentSubscribe(const BankEventType eventType, std::function<void(const std::string &)> masterStripCompCallback);
 
     //////////////// NEW STUFF, NEW SUBSCRITIONING april '24. Seperate things /////////
-    void bankFaderEventSubscribe(Bank bank, ChStripID chStripID, FaderCallback faderCallback);
+    // void bankFaderEventSubscribe(Bank bank, ChStripID chStripID, FaderCallback faderCallback);
 
 
-    void bankButtonEventSubscribe(Bank bank, unsigned int buttonID, ButtonCallback buttonCallback);
+    // void bankButtonEventSubscribe(Bank bank, unsigned int buttonID, ButtonCallback buttonCallback);
 
     // ############################################# EVENT POST DECLARATIONS #############################################
 
@@ -205,7 +244,7 @@ class EventBus
 
     // this should receive a set of associate channels, an event type, and the value. DO WE NEED BANK?
     // this might be purely "cosmetical" - just making the associated channel strips reflect the original.
-    void associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+    //void associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
 
     // Maybe seperate these into fader, vpot, button, etc...
     void associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2]);
@@ -213,10 +252,10 @@ class EventBus
 
     void associateMasterEventPost(BankEventType eventType, std::string eventValue);
 
-    void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
+    // void lineBankChannelEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue);
 
-    // This method is used to switch bank - by changing the pointer
-    void setBankPoster(Bank bank);
+    // // This method is used to switch bank - by changing the pointer
+    // void setBankPoster(Bank bank);
 
     Bank getCurrentBank(); // Returns the enumeration for the currently selected bank.
                            // void postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source);
@@ -225,10 +264,13 @@ class EventBus
     void postVpotEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
     void postButtonEvent(const int buttonID, const ButtonAction buttonAction);
 
-    void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
-                                    ConsoleFaderCallback faderCallback,
-                                    ConsoleVpotCallbackFunction vpotCallback,
-                                    std::function<void(Bank, const std::string &)> unsubscribeCallback);
+    void channelStripEventSubscribe(Bank bank, ChStripID chStripID, ChannelStripCallbacks& callbacks);
+
+
+    // void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
+    //                                 ConsoleFaderCallback faderCallback,
+    //                                 ConsoleVpotCallbackFunction vpotCallback,
+    //                                 std::function<void(Bank, const std::string &)> unsubscribeCallback);
 };
 
 // Singleton modifications

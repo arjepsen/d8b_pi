@@ -47,138 +47,139 @@ EventBus::EventBus() : channelStripButtonBase{
     //     }
     // }
 
-    // Set the initial bank to Line Bank
-    // currentBank = LINE_BANK;
+    //Set the initial bank to Line Bank
+    currentBank = LINE_BANK;
     // currentBankCallbacks = &lineBankCallbacks;
     // setBankPoster(LINE_BANK);
 
     initializeButtonCallbackMaps();
 
-    HOW TO WRITE IN CALLBACKS ? HOW TO INDEX ? DO WE NEED A SEPERATE THINGIE WITH THE IDS ?
+    // Write empty unsubscription callbacks into the unsubscriptions array
+    // to avoid errors first time it is called (since it's called before
+    // the new callbacks are written ...)
+    UnSubscribeCallback emptyCallback = [](Bank, ChStripID) {};
+    for (auto& bank : unSubScribeCallbackArray)
+    {
+        for (auto& unSubScribeCallback : bank)
+        {
+            unSubScribeCallback = emptyCallback;
+        }
+    }
 }
 
 // Destructor
 EventBus::~EventBus() {}
 
-/*****************************************************************************************************************************
- * @brief This method is used to subscribe to events on a given channelstrip on a given bank.
- *      The method must receive a specification of which bank and channelstrip, and
- *      the callback methods for fader- vpot- and button activity on that strip.
- *      It must also receive a callback for removing the subscription. This is necessary, since a channel can be configured
- *      to any strip on any bank.
- *
- * @param bank                          Specify which bank.
- * @param channelStripID                Specify which channelstrip on the given bank
- * @param faderCallback                 Hand over the callback to call, when a fader is moved on the specified strip.
- * @param vpotCallback                  Callback for vpot movements on the strip.
- * @param buttonCallback                Callback for button presses on the strip.
- * @param removeSubscriptionCallback    Callback for removing the current subscription.
- *****************************************************************************************************************************/
-void EventBus::bankEventSubscribe(Bank bank,
-                                  const std::string &channelStripID,
-                                  std::function<void(const std::string &, Bank, const std::string &, EventSource)> faderCallback,
-                                  std::function<void(const std::string &, Bank, const std::string &, EventSource)> vpotCallback,
-                                  std::function<void(const std::string &, Bank, const std::string &, EventSource)> buttonCallback,
-                                  std::function<void(Bank, const std::string &)> removeSubscriptionCallback)
-{
-    // Check validity of strip ID
-    if (channelStripID.length() != 2)
-    {
-        DEBUG_MSG("WRONG LENGTH OF CHANNEL STRIP ID\n");
-        exit(1);
-    }
+// /*****************************************************************************************************************************
+//  * @brief This method is used to subscribe to events on a given channelstrip on a given bank.
+//  *      The method must receive a specification of which bank and channelstrip, and
+//  *      the callback methods for fader- vpot- and button activity on that strip.
+//  *      It must also receive a callback for removing the subscription. This is necessary, since a channel can be configured
+//  *      to any strip on any bank.
+//  *
+//  * @param bank                          Specify which bank.
+//  * @param channelStripID                Specify which channelstrip on the given bank
+//  * @param faderCallback                 Hand over the callback to call, when a fader is moved on the specified strip.
+//  * @param vpotCallback                  Callback for vpot movements on the strip.
+//  * @param buttonCallback                Callback for button presses on the strip.
+//  * @param removeSubscriptionCallback    Callback for removing the current subscription.
+//  *****************************************************************************************************************************/
+// void EventBus::bankEventSubscribe(Bank bank,
+//                                   const std::string &channelStripID,
+//                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> faderCallback,
+//                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> vpotCallback,
+//                                   std::function<void(const std::string &, Bank, const std::string &, EventSource)> buttonCallback,
+//                                   std::function<void(Bank, const std::string &)> removeSubscriptionCallback)
+// {
+//     // Check validity of strip ID
+//     if (channelStripID.length() != 2)
+//     {
+//         DEBUG_MSG("WRONG LENGTH OF CHANNEL STRIP ID\n");
+//         exit(1);
+//     }
 
-    // Set a reference to the specific bank map of callbacks.
-    auto &callbackMap =
-        (bank == LINE_BANK)      ? lineBankCallbacks
-        : (bank == TAPE_BANK)    ? tapeBankCallbacks
-        : (bank == EFFECTS_BANK) ? effectsBankCallbacks
-        : (bank == MASTERS_BANK) ? mastersBankCallbacks
-                                 : (throw std::runtime_error("ERROR IN DETERMINING BANK FOR EVENT CALLBACK\n"));
+//     // Set a reference to the specific bank map of callbacks.
+//     auto &callbackMap =
+//         (bank == LINE_BANK)      ? lineBankCallbacks
+//         : (bank == TAPE_BANK)    ? tapeBankCallbacks
+//         : (bank == EFFECTS_BANK) ? effectsBankCallbacks
+//         : (bank == MASTERS_BANK) ? mastersBankCallbacks
+//                                  : (throw std::runtime_error("ERROR IN DETERMINING BANK FOR EVENT CALLBACK\n"));
 
-    // Check if a subscription already exists, if so, run its unsubscribe callback.
+//     // Check if a subscription already exists, if so, run its unsubscribe callback.
 
-    if (callbackMap.find(channelStripID) != callbackMap.end())
-    {
-        callbackMap[channelStripID].unsubscribeCallback(bank, channelStripID);
-    }
+//     if (callbackMap.find(channelStripID) != callbackMap.end())
+//     {
+//         callbackMap[channelStripID].unsubscribeCallback(bank, channelStripID);
+//     }
 
-    // Write in the new callbacks.
-    callbackMap[channelStripID].callbackArray[FADER_EVENT] = faderCallback;
-    callbackMap[channelStripID].callbackArray[VPOT_EVENT] = vpotCallback;
-    callbackMap[channelStripID].callbackArray[BUTTON_EVENT] = buttonCallback;
-    callbackMap[channelStripID].unsubscribeCallback = removeSubscriptionCallback;
-}
+//     // Write in the new callbacks.
+//     callbackMap[channelStripID].callbackArray[FADER_EVENT] = faderCallback;
+//     callbackMap[channelStripID].callbackArray[VPOT_EVENT] = vpotCallback;
+//     callbackMap[channelStripID].callbackArray[BUTTON_EVENT] = buttonCallback;
+//     callbackMap[channelStripID].unsubscribeCallback = removeSubscriptionCallback;
+// }
 
-void EventBus::channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
-                                          FaderCallbackFunction faderCallback,
-                                          VpotCallbackFunction vpotCallback,
-                                          std::function<void(Bank, const std::string &)> unsubscribeCallback)
-{
-    //     // Check validity of strip ID
-    // if (channelStripID.length() != 2)
-    // {
-    //     DEBUG_MSG("WRONG LENGTH OF CHANNEL STRIP ID\n");
-    //     exit(1);
-    // }
 
-    // // Unsubscribe if callback already exists. Use reference to avoid repeated lookups.
-    // auto currentUnsubscribeMap = &unsubscribeCallbackMap[bank];
-    // if (currentUnsubscribeMap->find(channelStripID) != currentUnsubscribeMap->end())
-    // {
-    //     (*currentUnsubscribeMap)[channelStripID](bank, channelStripID);
-    // }
-
-    // // Write in the new callbacks
-    // faderCallbackMap[bank][channelStripID] = faderCallback;
-    // vPotCallbackMap[bank][channelStripID] = vpotCallback;
-    // // TODO: Also handle buttons... what is their structure?
-}
 
 //////////////////////////////////////////////////////////////////////
-// NEW SUBSCRIBER, HANDLES CALLING THE SPECIFIC SUBSCRIERS
+// NEW SUBSCRIBER, HANDLES CALLING THE SPECIFIC SUBSCRIBERS
 //////////////////////////////////////////////////////////////////
-void EventBus::channelStripEventSubscribe(Bank, ChStripID, );
 
-//////////////// MAKING NEW SUBSCRIPTION METHODS - SEPERATING STUFF /////////////////
-void EventBus::bankFaderEventSubscribe(Bank bank, ChStripID chStripID, FaderCallback faderCallback)
+/**
+ * @brief This method is used by the channel objects, to "subscribe" to events,
+ *        i.e. to write in their callback methods.
+ *        First it calls the previously entered "unsubscribe" callback, which
+ *        lets the channel update it's channelstrip associations.
+ * 
+ * @param bank 
+ * @param chStripID 
+ * @param callbacks This is a structure of all the callbacks for a channelstrip.
+ */
+void EventBus::channelStripEventSubscribe(Bank bank, ChStripID chStripID, ChannelStripCallbacks& callbacks) 
 {
-    // TODO: Before writing in new callback, an unsubscribe callback should be called,
-    // to let the old subscriber update it's record of associated strips.
-    // But this is only faders? Maybe we need to make a generalized subscribe
-    // method, that then are responsible for everything....
+    // First, call the unsubscribe callback, to let the channel update
+    // it's channelstrip association bitmap.
+    unSubScribeCallbackArray[bank][chStripID](bank, chStripID);
 
-    faderCallbackArray[bank][chStripID] = faderCallback;
+    // Next, write in the new callbacks.
+    faderCallbackArray[bank][chStripID] = callbacks.faderCallback;
+    vPotCallbackArray[bank][chStripID] = callbacks.vPotCallback;
+
+    // Get the button base id, for looking up the button ID's
+    int buttonBase = channelStripButtonBase[chStripID];
+
+    // Write in the button callbacks, using the button enumeration for map key.
+    buttonCallbackMap[bank][buttonBase + MUTE_BTN] = callbacks.muteCallback;
+    buttonCallbackMap[bank][buttonBase + SOLO_BTN] = callbacks.soloCallback;
+    buttonCallbackMap[bank][buttonBase + SELECT_BTN] = callbacks.selectCallback;
+    buttonCallbackMap[bank][buttonBase + WRITE_BTN] = callbacks.writeCallback;
+    buttonCallbackMap[bank][buttonBase + ASSIGN_BTN] = callbacks.assignCallback;
+    buttonCallbackMap[bank][buttonBase + REC_RDY_BTN] = callbacks.recordReadyCallback;
 }
 
 
-
-void EventBus::bankButtonEventSubscribe(Bank bank, unsigned int buttonID, ButtonCallback buttonCallback)
-{
-    // TODO: Handle Unsubscription??
-    buttonCallbackMap[bank][buttonID] = buttonCallback;
-}
 
 // BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
 // YES - BUT THEN WHAT ABOUT NON-CHANNELSTRIP?
 // OK, ONE SUBSCRIBE METHOD FOR CHANNELS. ANOTHER FOR THE MASTER SECTION.
 
-// TODO: Maybe this one needs to go out? Changing to seperate post methods....
-// ####################################################################################################################
-// When an event has fired, which calls a callback in a channel object (like moving a fader), the channel will the use
-// this method to post an event that will update the channelStripComponents in the UI, by calling their callback from
-// the lookup tables array "chStripComponentCallbacks".
-// ####################################################################################################################
-void EventBus::associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
-{
-    // Iterate over the set, reference channelstripID to map of channelStripComponent callbacks, run the callback.
-    for (auto &stripID : channelStrips)
-    {
-        // First index is the eventtype in the array, next index is the key of the map of callbacks.
-        // The callback takes the event value as parameter - it just mimicks the mixer, so no need for knowing bank here.
-        chStripComponentCallbacks[eventType][stripID](eventValue);
-    }
-}
+// // TODO: Maybe this one needs to go out? Changing to seperate post methods....
+// // ####################################################################################################################
+// // When an event has fired, which calls a callback in a channel object (like moving a fader), the channel will the use
+// // this method to post an event that will update the channelStripComponents in the UI, by calling their callback from
+// // the lookup tables array "chStripComponentCallbacks".
+// // ####################################################################################################################
+// void EventBus::associateChStripUiEventPost(std::unordered_set<std::string> channelStrips, BankEventType eventType, std::string eventValue)
+// {
+//     // Iterate over the set, reference channelstripID to map of channelStripComponent callbacks, run the callback.
+//     for (auto &stripID : channelStrips)
+//     {
+//         // First index is the eventtype in the array, next index is the key of the map of callbacks.
+//         // The callback takes the event value as parameter - it just mimicks the mixer, so no need for knowing bank here.
+//         chStripComponentCallbacks[eventType][stripID](eventValue);
+//     }
+// }
 
 /******************************************************************************
  * @brief This is an event post method, used to call the callbacks for updating
@@ -445,12 +446,12 @@ void EventBus::initializeButtonCallbackMaps()
     buttonCallbackMap[MASTERS_BANK] = buttonCallbackMap[LINE_BANK];
 }
 
-// Create an array of "base" ID of button codes.
-// Use this, and then add specific values to get specific code.
-int EventBus::channelStripButtonBase[]{
-    // Base button index of channelstrips
-    0x051, 0x059, 0x041, 0x049, 0x031, 0x039, // 1 - 6
-    0x021, 0x029, 0x011, 0x019, 0x001, 0x009, // 7 - 12
-    0x179, 0x161, 0x169, 0x151, 0x159, 0x141, // 13 - 18
-    0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
-};
+// // Create an array of "base" ID of button codes.
+// // Use this, and then add specific values to get specific code.
+// int EventBus::channelStripButtonBase[]{
+//     // Base button index of channelstrips
+//     0x051, 0x059, 0x041, 0x049, 0x031, 0x039, // 1 - 6
+//     0x021, 0x029, 0x011, 0x019, 0x001, 0x009, // 7 - 12
+//     0x179, 0x161, 0x169, 0x151, 0x159, 0x141, // 13 - 18
+//     0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
+// };
