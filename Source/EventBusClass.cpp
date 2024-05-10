@@ -158,6 +158,15 @@ void EventBus::channelStripEventSubscribe(Bank bank, ChStripID chStripID, Channe
     buttonCallbackMap[bank][buttonBase + REC_RDY_BTN] = callbacks.recRdyBtnCallback;
 }
 
+void EventBus::channelStripComponentsubscribe(Bank bank, ChStripID stripID, UiStripCallbacks callbacks)
+{
+    associateUiFaderCallbackArray[bank][stripID] = callbacks.uiFaderCallback;
+    associateUiVpotCallbackArray[bank][stripID] = callbacks.uiVpotCallback;
+}
+
+
+
+
 /*****************************************************************************
  * @brief This method is for the master channel object to subscribe to master
  *        fader events. No unsubscribe, since this should not change.

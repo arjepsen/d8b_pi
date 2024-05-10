@@ -75,15 +75,40 @@ ChannelStripComponent::ChannelStripComponent ()
 
 
     // Add the callbacks to the eventBus
-    eventBus.chStripComponentSubscribe(channelStripComponentID, FADER_EVENT,
-                                       [this](const std::string &valueString)
-                                       { this->faderMoveEventCallback(valueString); });
-    eventBus.chStripComponentSubscribe(channelStripComponentID, VPOT_EVENT,
-                                       [this](const std::string &valueString)
-                                       { this->vpotTurnEventCallback(valueString); });
-    eventBus.chStripComponentSubscribe(channelStripComponentID, BUTTON_EVENT,
-                                       [this](const std::string &valueString)
-                                       { this->buttonEventCallback(valueString); });
+    // eventBus.chStripComponentSubscribe(channelStripComponentID, FADER_EVENT,
+                                    //    [this](const std::string &valueString)
+                                    //    { this->faderMoveEventCallback(valueString); });
+    // eventBus.chStripComponentSubscribe(channelStripComponentID, VPOT_EVENT,
+    //                                    [this](const std::string &valueString)
+    //                                    { this->vpotTurnEventCallback(valueString); });
+    // eventBus.chStripComponentSubscribe(channelStripComponentID, BUTTON_EVENT,
+    //                                    [this](const std::string &valueString)
+    //                                    { this->buttonEventCallback(valueString); });
+
+
+    
+    // Set up lambda's for the callbacks, then collect them in a struct, for
+    // handing over to the event bus.
+    // These are the callbacks for updating the ui after DSP commands are sent.
+    AssociateUiFaderCallback uiFaderUpdateCallback = [this](const char (&faderHexValue)[2])
+    { 
+        this->faderMoveEventCallback(faderHexValue);
+    };
+
+    AssociateUiVpotCallback uiVpotUpdateCallback = [this](int vPotValue)
+    {
+        this->vpotTurnEventCallback(vPotValue);
+    };
+
+
+    // Declare a struct of callbacks and write the fader and vpot callback to it.
+    EventBus::UiStripCallbacks uiStripCallbacks;
+    uiStripCallbacks.uiFaderCallback = uiFaderUpdateCallback;
+    uiStripCallbacks.uiVpotCallback = uiVpotUpdateCallback;
+
+    // Now call the Event Bus ui subscribe method.
+    eventBus.channelStripComponentsubscribe(LINE_BANK, channelStripComponentID, uiStripCallbacks);
+    // TODO: How to initialize/constructor the other bank strip callbacks?
 
     // Increment the static counter.
     nextChannelStripComponentID++;
@@ -1049,9 +1074,7 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
         //sprintf(dspVpotValue, "%02X", shiftedValue);
 
         // Post the event for the Channel object to handle.
-        CHANGE TO POSTVPOTEVENT
-        eventBus.postFaderEvent(channelStripComponentID, dspVpotValue, UI_EVENT);
-
+        eventBus.postVpotEvent(channelStripComponentID, dspVpotValue, UI_EVENT);
 
         //[/UserSliderCode_vPot]
     }
@@ -1371,16 +1394,23 @@ void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2
                                     { fader.get()->setValue(logValue, juce::dontSendNotification); });
 }
 
-// ####################################################
-// Same as above, this just updates the VPot in the UI.
-// ####################################################
-void ChannelStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
+/*****************************************************************************
+ * @brief Same as the fadermove event callback, this method is only a callback
+ *        for updating the ui pot, to follow the console.
+ * 
+ * @param vPotValue 
+ *****************************************************************************/
+void ChannelStripComponent::vpotTurnEventCallback(int vPotValue)
 {
+    // TODO:
+    // BUT, there are different vpot functions, which displays differnt things...
+    // Maybe we need different callbacks for each function.
+
     // Convert string hex value to a float
-    float decimalValue = std::stoi(vpotHexValue, nullptr, 16);
+    //float decimalValue = std::stoi(vpotHexValue, nullptr, 16);
 
     // Adjust to fit the -127 to 127 range
-    decimalValue -= 127.0;
+    float decimalValue = vPotValue - 127.0;
 
     juce::MessageManager::callAsync([this, decimalValue]()
                                     { vPot.get()->setValue(decimalValue, juce::dontSendNotification); });

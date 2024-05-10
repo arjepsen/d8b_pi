@@ -423,6 +423,7 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], Bank bank, ChStrip
 inline void Channel::handleVpotAuxSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
 {
     // TODO
+    
 }
 
 inline void Channel::handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)

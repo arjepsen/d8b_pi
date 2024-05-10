@@ -69,7 +69,7 @@ public:
     // These ONLY update the UI - purely cosmetical - so no need know which bank. (logic already handled elsewhere).
 	//void faderMoveEventCallback(std::string faderValue);
     void faderMoveEventCallback(const char (&faderHexValue)[2]);
-    void vpotTurnEventCallback(std::string vpotValue);
+    void vpotTurnEventCallback(int vpotValue);
     void buttonEventCallback(std::string buttonValue);  // This one is a bit different... but again mainly cosmetic.
 
     //[/UserMethods]

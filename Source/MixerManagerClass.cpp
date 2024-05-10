@@ -272,7 +272,6 @@ void MixerManager::handleBufferMessage()
                 char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
                 ChStripID channelStripID = static_cast<ChStripID>(hexToInt(hexValueString));
                 
-                FIX THE MISTAKE CONVERSION OF 2CHAR HEX IN OTHER PLACES OF THE CODE
 
                 // TODO: HOW ABOUT MASTER STRIP???
 
@@ -294,12 +293,10 @@ void MixerManager::handleBufferMessage()
                 // std::string value = message.substr(2, 2);  // Get fader position from message
                 char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
                 ChStripID channelStripID = static_cast<ChStripID>(hexToInt(hexValueString));
-
-                NEED TO CHANGE THE METHOD IN THE CHANNELS CLASS.
                 
 
                 // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
-                eventBus.postVpotEvent(VPOT_EVENT, vPotID, value, CONSOLE_EVENT);
+                eventBus.postVpotEvent(channelStripID, hexValueString, CONSOLE_EVENT);
                 break;
             }
             case 's':   
@@ -329,7 +326,7 @@ void MixerManager::handleBufferMessage()
                 int buttonID = hex3ToInt(hexValueString);
 
 
-                eventBus.postButtonEvent(buttonID, msgCategory);
+                eventBus.postButtonEvent(buttonID, static_cast<ButtonAction>(msgCategory));
 
                 break;
             }
