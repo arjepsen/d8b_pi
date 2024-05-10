@@ -40,6 +40,7 @@ MixerManager::MixerManager()
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       circBuffer(CircularBuffer::getInstance()),
+      hexToIntLookup(HexToIntLookup::getInstance()),
       isInitializing(false)
 // messageHandler(&lineBankMessageHandler)
 {
@@ -270,7 +271,7 @@ void MixerManager::handleBufferMessage()
                 // with 'f' and 'v' are always having the strip ID as the first two chars.
                 // So: Convert the first two chars to an integer
                 char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
-                ChStripID channelStripID = static_cast<ChStripID>(hexToInt(hexValueString));
+                ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexValueString));
                 
 
                 // TODO: HOW ABOUT MASTER STRIP???
@@ -292,7 +293,7 @@ void MixerManager::handleBufferMessage()
                 // std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
                 // std::string value = message.substr(2, 2);  // Get fader position from message
                 char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
-                ChStripID channelStripID = static_cast<ChStripID>(hexToInt(hexValueString));
+                ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexValueString));
                 
 
                 // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
@@ -323,7 +324,7 @@ void MixerManager::handleBufferMessage()
 
                 // Convert button ID to an integer
                 char hexValueString[3] = {msgBuffer[0], msgBuffer[1], msgBuffer[2]};
-                int buttonID = hex3ToInt(hexValueString);
+                int buttonID = hexToIntLookup.hex3ToInt(hexValueString);
 
 
                 eventBus.postButtonEvent(buttonID, static_cast<ButtonAction>(msgCategory));

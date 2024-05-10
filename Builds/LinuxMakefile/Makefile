@@ -43,7 +43,7 @@ ifeq ($(CONFIG),Debug)
   JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0"
   JUCE_TARGET_APP := d8b_pi
 
-  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0 $(CFLAGS)
+  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0 -std=c++20 $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
   JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell $(PKG_CONFIG) --libs freetype2 libcurl) -fvisibility=hidden -static-libgcc -static-libstdc++ -lrt -ldl -lpthread -lusb -ludev $(LDFLAGS)
 
@@ -64,7 +64,7 @@ ifeq ($(CONFIG),Release)
   JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0"
   JUCE_TARGET_APP := d8b_pi
 
-  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -O3 $(CFLAGS)
+  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -O3 -std=c++20 $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
   JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell $(PKG_CONFIG) --libs freetype2 libcurl) -fvisibility=hidden -static-libgcc -static-libstdc++ -lrt -ldl -lpthread -lusb -ludev $(LDFLAGS)
 
@@ -72,9 +72,9 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
+  $(JUCE_OBJDIR)/BrainComClass_e5f52a6e.o \
   $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o \
   $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o \
-  $(JUCE_OBJDIR)/BrainComClass_e5f52a6e.o \
   $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o \
   $(JUCE_OBJDIR)/ChannelIDMap_ed0868a7.o \
   $(JUCE_OBJDIR)/ChannelStripComponent_60285c09.o \
@@ -113,6 +113,11 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(JUCE_OBJDIR)/execinfo.cmd $
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
 
+$(JUCE_OBJDIR)/BrainComClass_e5f52a6e.o: ../../Source/BrainComClass.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling BrainComClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o: ../../Source/BrainLookupTable.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling BrainLookupTable.cpp"
@@ -121,11 +126,6 @@ $(JUCE_OBJDIR)/BrainLookupTable_be54ad27.o: ../../Source/BrainLookupTable.cpp
 $(JUCE_OBJDIR)/BrainMessageHandlers_e15d1143.o: ../../Source/BrainMessageHandlers.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling BrainMessageHandlers.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/BrainComClass_e5f52a6e.o: ../../Source/BrainComClass.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling BrainComClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/ChannelClass_ef7af43e.o: ../../Source/ChannelClass.cpp

@@ -25,6 +25,7 @@
 #include <unordered_set>
 // #include <functional> // For pointers to vpot function depending on vpot mode.
 #include "SharedDataStructures.h"
+#include "LEDClass.h"
 
 class Channel
 {
@@ -34,7 +35,9 @@ class Channel
     BrainCom &brainCom;
     DspCom &dspCom;
     IntToHexLookup &intToHexLookup;
+    HexToIntLookup &hexToIntLookup;
     LEDringLookup &ledRingLookup;
+
 
     // int *dspDescriptorPtr; // Reference to the DSP file descriptor.
     // int *brainDescriptorPtr; // Reference to the Brain file descriptor.

@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 7.0.5
+  Created with Projucer version: 7.0.11
 
   ------------------------------------------------------------------------------
 
@@ -46,13 +46,13 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     brainPortComboBox->setEditableText (false);
     brainPortComboBox->setJustificationType (juce::Justification::centredLeft);
     brainPortComboBox->setTextWhenNothingSelected (juce::String());
-    brainPortComboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    brainPortComboBox->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
     brainPortComboBox->addListener (this);
 
     brainPortComboBox->setBounds (8, 32, 150, 24);
 
     brainPortLabel.reset (new juce::Label ("brainPortLabel",
-                                           TRANS("Brain Port\n")));
+                                           TRANS ("Brain Port\n")));
     addAndMakeVisible (brainPortLabel.get());
     brainPortLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     brainPortLabel->setJustificationType (juce::Justification::centredLeft);
@@ -67,13 +67,13 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     dspPortComboBox->setEditableText (false);
     dspPortComboBox->setJustificationType (juce::Justification::centredLeft);
     dspPortComboBox->setTextWhenNothingSelected (juce::String());
-    dspPortComboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    dspPortComboBox->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
     dspPortComboBox->addListener (this);
 
     dspPortComboBox->setBounds (176, 32, 150, 24);
 
     dspPortLabel.reset (new juce::Label ("dspPortLabel",
-                                         TRANS("DSP Port\n")));
+                                         TRANS ("DSP Port\n")));
     addAndMakeVisible (dspPortLabel.get());
     dspPortLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     dspPortLabel->setJustificationType (juce::Justification::centredLeft);
@@ -96,7 +96,7 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     deviceListLabel->setBounds (8, 96, 320, 104);
 
     comPortListLabel.reset (new juce::Label ("comPortListLabel",
-                                             TRANS("COM port device list\n")));
+                                             TRANS ("COM port device list\n")));
     addAndMakeVisible (comPortListLabel.get());
     comPortListLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     comPortListLabel->setJustificationType (juce::Justification::centredLeft);
@@ -107,7 +107,7 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     comPortListLabel->setBounds (8, 72, 176, 24);
 
     brainBaudRateLabel.reset (new juce::Label ("brainBaudRateLabel",
-                                               TRANS("Brain Baudrate\n")));
+                                               TRANS ("Brain Baudrate\n")));
     addAndMakeVisible (brainBaudRateLabel.get());
     brainBaudRateLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     brainBaudRateLabel->setJustificationType (juce::Justification::centredLeft);
@@ -122,16 +122,16 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     brainBaudRateComboBox->setEditableText (false);
     brainBaudRateComboBox->setJustificationType (juce::Justification::centredLeft);
     brainBaudRateComboBox->setTextWhenNothingSelected (juce::String());
-    brainBaudRateComboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    brainBaudRateComboBox->addItem (TRANS("115200"), 1);
-    brainBaudRateComboBox->addItem (TRANS("230400"), 2);
+    brainBaudRateComboBox->setTextWhenNoChoicesAvailable (TRANS ("(no choices)"));
+    brainBaudRateComboBox->addItem (TRANS ("115200"), 1);
+    brainBaudRateComboBox->addItem (TRANS ("230400"), 2);
     brainBaudRateComboBox->addListener (this);
 
     brainBaudRateComboBox->setBounds (8, 248, 150, 24);
 
     initMixerBtn.reset (new juce::TextButton ("initMixerBtn"));
     addAndMakeVisible (initMixerBtn.get());
-    initMixerBtn->setButtonText (TRANS("Initialize Mixer"));
+    initMixerBtn->setButtonText (TRANS ("Initialize Mixer"));
     initMixerBtn->addListener (this);
 
     initMixerBtn->setBounds (200, 248, 150, 24);

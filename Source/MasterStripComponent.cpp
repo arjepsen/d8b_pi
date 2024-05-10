@@ -21,7 +21,6 @@
 //[/Headers]
 
 #include "MasterStripComponent.h"
-#include "SharedDataStructures.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
@@ -45,6 +44,15 @@ MasterStripComponent::MasterStripComponent ()
     // eventBus.masterStripComponentSubscribe(BUTTON_EVENT,
     //                                        [this](const std::string &valueString)
     //                                        { this->buttonEventCallback(valueString); });
+
+    MasterUiFaderCallback masterFaderUpdateCallback = [this](int faderValue)
+    {
+        this->faderUpdateEventCallback(faderValue);
+    };
+
+    eventBus.masterUiFaderSubscribe(masterFaderUpdateCallback);
+
+
 
     // ##################### END OF MY CONSTRUCTOR STUFF ##################
 
@@ -675,11 +683,16 @@ void MasterStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved)
         //[UserSliderCode_masterFader] -- add your slider handling code here..
 
         // Fader was moved in the UI.
-        float newMasterFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
-        std::string dspMasterFaderValue = faderValueLookup.dspHexLookupMap[newMasterFaderValue];
+        // float newMasterFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
+        // std::string dspMasterFaderValue = faderValueLookup.dspHexLookupMap[newMasterFaderValue];
+
+        const char * faderHexString = faderValueLookup.getDspHexValue(sliderThatWasMoved->getValue());
+        char eventValue[2] = {faderHexString[0], faderHexString[1]};
+
 
         // Use event post (hardcoded strip ID - master is 18)
-        eventBus.postEvent(FADER_EVENT, "18", dspMasterFaderValue, UI_EVENT);
+        eventBus.postFaderEvent(static_cast<ChStripID>(MASTER_CH_STRIP), eventValue, UI_EVENT);
+        //eventBus.postEvent(FADER_EVENT, "18", dspMasterFaderValue, UI_EVENT);
 
         //[/UserSliderCode_masterFader]
     }
@@ -865,15 +878,15 @@ void MasterStripComponent::setMasterFaderPosition(double value)
  *        is to update the ui.
  *        It uses some lookups to convert the provided 2-char hex value to the
  *        log10 decibel value for the UI fader.
- * 
- * @param faderHexValue 
+ *
+ * @param faderValue
  ********************************************************************************/
-void MasterStripComponent::faderUpdateEventCallback(const char (&faderHexValue)[2])
+void MasterStripComponent::faderUpdateEventCallback(int faderValue)
 {
 
-    int decimalValue = hexToInt(faderHexValue);
+    //int decimalValue = hexToIntLookup.hexToInt(faderHexValue);
     //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
-    float logValue = *faderValueLookup.getLog10Value(decimalValue);
+    float logValue = *faderValueLookup.getLog10Value(faderValue);
     //float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
     juce::MessageManager::callAsync([this, logValue]()
                                     { masterFader.get()->setValue(logValue, juce::dontSendNotification); });

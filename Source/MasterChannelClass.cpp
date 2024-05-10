@@ -15,7 +15,8 @@
 MasterChannel::MasterChannel()
     : eventBus(EventBus::getInstance()), // Get the singleton instances
       brainCom(BrainCom::getInstance()),
-      dspCom(DspCom::getInstance())
+      dspCom(DspCom::getInstance()),
+      hexToIntLookup(HexToIntLookup::getInstance())
 {
 
     // // Subscribe to events (callbacks will ignore ID and Bank)
@@ -106,8 +107,8 @@ void MasterChannel::masterFaderEventCallback(const char (&faderValue)[2],
 	// If Console fader was moved, update UI, else update console.
     if (source == CONSOLE_EVENT)
     {
-        eventBus.associateMasterEventPost(FADER_EVENT, faderValue);
-        instead: uiMasterFaderEventPost
+        int masterFaderValue = hexToIntLookup.hexToInt(faderValue);
+        eventBus.updateUiMasterFaderEventPost(masterFaderValue);
     }
     else
     {
@@ -134,83 +135,6 @@ void MasterChannel::masterStripButtonEventCallback(const std::string buttonValue
 
 void MasterChannel::removeMasterStripAssociationCallback(const Bank bank, const std::string channelStripID)
 {
-
+    // No reason for this... the Master will not be removed....
 }
 
-//////////////////////////////////////////////////////////////////
-void Channel::channelStripFaderEventCallback(const char (&faderValue)[2],
-                                             Bank bank,
-                                             ChStripID channelStripID,
-                                             EventSource source)
-{
-    // TODO: THIS MAY NEED TO CHANGE A BIT, IF WE CONTINUE TO USE THE CHANNEL CLASS FOR EFFECTS, MIDI, BUS, GROUPS, ETC.
-
-    // Update the channel volume member
-    volume[0] = faderValue[0];
-    volume[1] = faderValue[1];
-
-    // Only send dsp command if channel is not muted.
-    if (!muted)
-    {
-        // Not muted, create string and send it.
-        // The form of the command is "XXcXYYQ", where XX is dsp channel id,
-        // and YY is the volume value (hex string)
-        char dspVolumeCommand[DSP_VOL_CMD_LENGTH] = "--cX--Q";
-        //snprintf(dspVolumeCommand, DSP_VOL_CMD_LENGTH, "%s%s%sQ", CH_ID_STR, "cX", volume);
-        dspVolumeCommand[0] = CH_ID_STR[0];
-        dspVolumeCommand[1] = CH_ID_STR[1];
-        dspVolumeCommand[4] = volume[0];
-        dspVolumeCommand[5] = volume[1];
-
-        dspCom.send(dspVolumeCommand);
-
-        // Copy associated channelstrip bitmask.
-        int consoleMask = associatedChannelStripBitmask[bank];
-        int uiMask = associatedChannelStripBitmask[bank];
-
-        // Disable "calling" strip, depending on whether ui or console.
-        if (source == CONSOLE_EVENT)
-        {
-            // Clear the bit of the calling channelstrip
-            consoleMask = consoleMask & ~(1U << channelStripID);
-        }
-        else
-        {
-            // UI event, clear the ui caller bit.
-            uiMask = uiMask & ~(1U << channelStripID);
-        }
-
-        // Create and send commands for the associated faders.
-        // The char array is not initialized, since we write to it right after,
-        // and the remaining two chars are written in the while loop, before using it.
-        char brainFaderCommand[BRAIN_FADER_CMD_LENGTH];
-        brainFaderCommand[2] = volume[0];
-        brainFaderCommand[3] = volume[1];
-        brainFaderCommand[4] = 'f';
-        // brainFaderCommand[5] = '\0';  // Write command does not send null terminator anyway.
-
-        // Now the char array contains "__XXf\0", where XX is the volume value.
-        // Iterate over the bitmask of associated strips,
-        // write the strip id in the first two indices, send commands.
-        while (consoleMask)
-        {
-            // Get the index of the lowest set bit
-            int stripID = __builtin_ctz(consoleMask);
-
-            // Use array lookup to convert the id to two-char hex.
-            brainFaderCommand[0] = CH_STRIP_ID_ARRAY[stripID][0];
-            brainFaderCommand[1] = CH_STRIP_ID_ARRAY[stripID][1];
-
-            // Send. We know the length, so use that method.
-            brainCom.send(brainFaderCommand, BRAIN_FADER_CMD_LENGTH);
-
-            // Clear lowest set bit
-            consoleMask &= consoleMask - 1;
-        }
-
-        // Now post a ui event with the mask for the ui.
-        // The eventBus method will iterate over the mask, and call the callbacks.
-        const char volumeValue[2] = {volume[0], volume[1]};
-        eventBus.associateUiStripFaderEventPost(uiMask, volumeValue);
-    }
-}

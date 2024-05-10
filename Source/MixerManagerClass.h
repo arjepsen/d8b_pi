@@ -53,6 +53,7 @@ private:
     BrainCom &brainCom;
     DspCom &dspCom;
     CircularBuffer &circBuffer;
+    HexToIntLookup &hexToIntLookup;
 
     // Declare the IO slot objects.
     IOSlot *ioSlotA;

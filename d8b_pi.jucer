@@ -5,6 +5,9 @@
               maxBinaryFileSize="20971520">
   <MAINGROUP id="hHfYNg" name="d8b_pi">
     <GROUP id="{2A1B8560-4155-ED71-CEB1-417F6F169C9F}" name="Source">
+      <FILE id="RywKi6" name="BrainComClass.cpp" compile="1" resource="0"
+            file="Source/BrainComClass.cpp"/>
+      <FILE id="s0eKIb" name="BrainComClass.h" compile="0" resource="0" file="Source/BrainComClass.h"/>
       <FILE id="YfKxsQ" name="BrainLookupTable.cpp" compile="1" resource="0"
             file="Source/BrainLookupTable.cpp"/>
       <FILE id="kXOAo8" name="BrainLookupTable.h" compile="0" resource="0"
@@ -13,9 +16,6 @@
             file="Source/BrainMessageHandlers.cpp"/>
       <FILE id="Wr26Ds" name="BrainMessageHandlers.h" compile="0" resource="0"
             file="Source/BrainMessageHandlers.h"/>
-      <FILE id="RywKi6" name="BrainComClass.cpp" compile="1" resource="0"
-            file="Source/BrainComClass.cpp"/>
-      <FILE id="s0eKIb" name="BrainComClass.h" compile="0" resource="0" file="Source/BrainComClass.h"/>
       <FILE id="Cc2BbQ" name="ChannelClass.cpp" compile="1" resource="0"
             file="Source/ChannelClass.cpp"/>
       <FILE id="Sie6ux" name="ChannelClass.h" compile="0" resource="0" file="Source/ChannelClass.h"/>
@@ -30,6 +30,8 @@
             file="Source/CircularBuffer.cpp"/>
       <FILE id="ixn2Yn" name="CircularBuffer.h" compile="0" resource="0"
             file="Source/CircularBuffer.h"/>
+      <FILE id="ZUGizH" name="ButtonLookupTable.h" compile="0" resource="0"
+            file="Source/ButtonLookupTable.h"/>
       <FILE id="n0ZxHX" name="CommandStrings.h" compile="0" resource="0"
             file="Source/CommandStrings.h"/>
       <FILE id="g7BNcH" name="ComBaseClass.cpp" compile="1" resource="0"
@@ -81,16 +83,14 @@
             file="Source/SettingsWindow.cpp"/>
       <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
             file="Source/SettingsWindow.h"/>
+      <FILE id="ZTg5lK" name="SharedDataStructures.h" compile="0" resource="0"
+            file="Source/SharedDataStructures.h"/>
     </GROUP>
-    <FILE id="ZUGizH" name="ButtonLookupTable.h" compile="0" resource="0"
-          file="Source/ButtonLookupTable.h"/>
-    <FILE id="ZTg5lK" name="SharedDataStructures.h" compile="0" resource="0"
-          file="Source/SharedDataStructures.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="usb &#10;udev"
-                extraLinkerFlags="-static-libgcc -static-libstdc++&#10;">
+                extraLinkerFlags="-static-libgcc -static-libstdc++&#10;" extraCompilerFlags="-std=c++20">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="d8b_pi" binaryPath="Builds/output/"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="d8b_pi" binaryPath="Builds/output/"/>

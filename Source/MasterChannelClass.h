@@ -14,6 +14,7 @@
 #include "DspComClass.h"
 #include "EventBusClass.h"
 #include <string>
+#include "SharedDataStructures.h"
 
 class MasterChannel
 {
@@ -25,6 +26,7 @@ class MasterChannel
     EventBus &eventBus;
     BrainCom &brainCom;
     DspCom &dspCom;
+    HexToIntLookup &hexToIntLookup;
 
     const std::string MASTER_STRIP_ID = "18";
 

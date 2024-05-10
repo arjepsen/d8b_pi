@@ -86,12 +86,12 @@ ChannelStripComponent::ChannelStripComponent ()
     //                                    { this->buttonEventCallback(valueString); });
 
 
-    
+
     // Set up lambda's for the callbacks, then collect them in a struct, for
     // handing over to the event bus.
     // These are the callbacks for updating the ui after DSP commands are sent.
     AssociateUiFaderCallback uiFaderUpdateCallback = [this](const char (&faderHexValue)[2])
-    { 
+    {
         this->faderMoveEventCallback(faderHexValue);
     };
 
@@ -1034,7 +1034,7 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
     {
         //[UserSliderCode_fader] -- add your slider handling code here..
 
-        // Fader was moved in the UI. 
+        // Fader was moved in the UI.
         // TODO: Clean up.
 
         // float newFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
@@ -1369,9 +1369,9 @@ void ChannelStripComponent::setFaderPosition(double value)
  * @brief This is a callback method to be used by the event bus.
  *      It will be called when the channel object has sent its commands to the
  *      DSP and Brain, and all that is left is to update the UI.
- *      It will make a lookup in the precomputed values, and set the fader to 
+ *      It will make a lookup in the precomputed values, and set the fader to
  *      the given value.
- * 
+ *
  * @param faderHexValue This is the 2-char hex string sent by the console.
  ****************************************************************************/
 //void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
@@ -1381,8 +1381,8 @@ void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2
 
     //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
     int faderIntValue = ((faderHexValue[0] << 8) | faderHexValue[1]);
-    
-    
+
+
     // double faderValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
     // setFaderPosition(precomputedLog10Values[decimalValue]);
 
@@ -1397,8 +1397,8 @@ void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2
 /*****************************************************************************
  * @brief Same as the fadermove event callback, this method is only a callback
  *        for updating the ui pot, to follow the console.
- * 
- * @param vPotValue 
+ *
+ * @param vPotValue
  *****************************************************************************/
 void ChannelStripComponent::vpotTurnEventCallback(int vPotValue)
 {
@@ -1438,7 +1438,7 @@ void ChannelStripComponent::buttonEventCallback(std::string buttonValue)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="ChannelStripComponent" componentName="ChannelStripComponent"
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;    faderValueLookup(FaderValueLookup::getInstance())"
+                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="75" initialHeight="1024">
   <BACKGROUND backgroundColour="ff242d31">

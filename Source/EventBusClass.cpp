@@ -255,7 +255,7 @@ void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
     }
 }
 
-void EventBus::updateUiMasterFaderEventPost(const char (&faderValue)[2])
+void EventBus::updateUiMasterFaderEventPost(int faderValue)
 {
     masterUiFaderCallback(faderValue);
 }

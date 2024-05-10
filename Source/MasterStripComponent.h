@@ -23,6 +23,7 @@
 #include <JuceHeader.h>
 #include "EventBusClass.h"
 #include "FaderValueLookupClass.h"
+//#include "SharedDataStructures.h"
 //[/Headers]
 
 
@@ -53,7 +54,7 @@ public:
 	// void faderMoveEventCallback(std::string faderValue);
     // void vpotTurnEventCallback(std::string vpotValue);
     // void buttonEventCallback(std::string buttonValue);
-	void faderUpdateEventCallback(const char (& faderValue)[2]);
+	void faderUpdateEventCallback(int faderValue);
     void vpotTurnEventCallback(std::string vpotValue);
     void buttonEventCallback(std::string buttonValue);
 
@@ -75,6 +76,7 @@ private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     EventBus &eventBus;        // Reference to EventBus singleton.
     FaderValueLookup &faderValueLookup;
+    //HexToIntLookup &hexToIntLookup;
 
 	std::function<void(float)> masterFaderMoveCallback;
 

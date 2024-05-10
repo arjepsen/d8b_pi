@@ -50,7 +50,8 @@ using VpotCallback = std::function<void(const char (&)[2], Bank, ChStripID, Even
 using ButtonCallback = std::function<void(ButtonAction, Bank)>;
 using UnSubscribeCallback = std::function<void(Bank, ChStripID)>;
 
-using MasterUiFaderCallback = std::function<void(const char (&)[2])>;
+//using MasterUiFaderCallback = std::function<void(const char (&)[2])>;
+using MasterUiFaderCallback = std::function<void(int)>;
 
 using AssociateUiFaderCallback = std::function<void(const char (&)[2])>;
 using AssociateUiVpotCallback = std::function<void(const int)>;
@@ -259,9 +260,11 @@ class EventBus
     void associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2]);
     void associateUiStripVpotEventPost(int chStripBitMask, int vPotValue);
 
-    void updateUiMasterFaderEventPost(const char (&faderValue)[2]);
+    //void updateUiMasterFaderEventPost(const char (&faderValue)[2]);
+    void updateUiMasterFaderEventPost(int faderValue);
 
     void masterUiFaderSubscribe(MasterUiFaderCallback masterUiFaderCallback);
+    
 
   void channelStripComponentsubscribe(Bank bank, ChStripID stripID, UiStripCallbacks uiUpdateCallbacks);
 

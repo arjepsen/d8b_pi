@@ -12,7 +12,7 @@
 #include "ChannelClass.h"
 //#include "ButtonLookupTable.h"
 #include "ChannelIDMap.h"
-#include "LEDClass.h"
+//#include "LEDClass.h"
 #include <iomanip>
 #include <sstream>
 #include <string.h>
@@ -52,6 +52,7 @@ Channel::Channel()
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       intToHexLookup(IntToHexLookup::getInstance()),
+      hexToIntLookup(HexToIntLookup::getInstance()),
       ledRingLookup(LEDringLookup::getInstance())
 {
     // Set up variables for initial channel strip event subscription.
@@ -324,7 +325,7 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], Bank bank, ChStrip
     if (source == CONSOLE_EVENT)
     {
         // Convert hex string to signed int8_t. (CCW becomes negative)
-        int panChangeValue = static_cast<int8_t>(hexToInt(panValue));
+        int panChangeValue = static_cast<int8_t>(hexToIntLookup.hexToInt(panValue));
 
         // Adding to the current value will result in the new value to write.
         // Clamp the value, so it stays within 0 to 254. Write to class member.
@@ -335,7 +336,7 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], Bank bank, ChStrip
         // This is a UI event, so we're receiving the value that the pot has 
         // been moved TO as a hex string.
         // Update the pan member of this channel
-        pan = hexToInt(panValue);
+        pan = hexToIntLookup.hexToInt(panValue);
     }
 
     // Convert pan to a 2-digit hex string
@@ -423,7 +424,7 @@ inline void Channel::handleVpotPan(const char (&panValue)[2], Bank bank, ChStrip
 inline void Channel::handleVpotAuxSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
 {
     // TODO
-    
+
 }
 
 inline void Channel::handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)

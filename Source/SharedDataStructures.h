@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <cstring>
+#include <stdio.h>
+
 // Enumeration of the channelstrips
 enum ChStripID
 {
@@ -77,40 +80,99 @@ enum ButtonAction : char
     BTN_RELEASE = 'u'
 };
 
-// Lookup table for converting hexadecimal digits to their integer values
-static const unsigned char hex_values[256] = {
-    ['0'] = 0, ['1'] = 1, ['2'] = 2, ['3'] = 3, 
-    ['4'] = 4, ['5'] = 5, ['6'] = 6, ['7'] = 7, 
-    ['8'] = 8, ['9'] = 9, ['A'] = 10, ['B'] = 11, 
-    ['C'] = 12, ['D'] = 13, ['E'] = 14, ['F'] = 15,
-    // All other values can remain 0, as input is always valid uppercase hex.
+
+
+// Lookup table for converting hexadecimal digits to their integer values.
+// All other values can remain 0, as input is always valid uppercase hex.
+// static const unsigned char hex_values[256] = {
+//     ['0'] = 0, ['1'] = 1, ['2'] = 2, ['3'] = 3, 
+//     ['4'] = 4, ['5'] = 5, ['6'] = 6, ['7'] = 7, 
+//     ['8'] = 8, ['9'] = 9, ['A'] = 10, ['B'] = 11, 
+//     ['C'] = 12, ['D'] = 13, ['E'] = 14, ['F'] = 15
+// };
+
+// /***************************************************************
+//  * @brief This function is used to convert a 2-char hex string
+//  *        like "F7" to an integer, using the lookup table.
+//  * 
+//  * @param hexString 
+//  * @return int 
+//  ***************************************************************/
+// inline int hexToInt(const char (&hexString)[2])
+// {
+//     return (hex_values[(unsigned char)hexString[0]] << 4) |
+//             hex_values[(unsigned char)hexString[1]];
+// }
+
+// /**************************************************************
+//  * @brief This function is used to convert a 3-char hex string
+//  *        like "2F3" to an integer.
+//  * 
+//  * @param hexString 
+//  * @return int 
+//  **************************************************************/
+// inline int hex3ToInt(const char (&hexString)[3]) {
+//     return (hex_values[(unsigned char)hexString[0]] << 8) |
+//            (hex_values[(unsigned char)hexString[1]] << 4) |
+//             hex_values[(unsigned char)hexString[2]];
+// }
+
+class HexToIntLookup 
+{
+private:
+    unsigned char hex_values[256];
+
+    // Private constructor to prevent instantiation
+    HexToIntLookup() 
+    {
+        // Initialize hex_values with all zeros
+        memset(hex_values, 0, sizeof(hex_values));
+
+        // Set specific hex character values
+        hex_values['0'] = 0;
+        hex_values['1'] = 1;
+        hex_values['2'] = 2;
+        hex_values['3'] = 3;
+        hex_values['4'] = 4;
+        hex_values['5'] = 5;
+        hex_values['6'] = 6;
+        hex_values['7'] = 7;
+        hex_values['8'] = 8;
+        hex_values['9'] = 9;
+        hex_values['A'] = 10;
+        hex_values['B'] = 11;
+        hex_values['C'] = 12;
+        hex_values['D'] = 13;
+        hex_values['E'] = 14;
+        hex_values['F'] = 15;
+        // Initialize additional characters if needed
+    }
+
+    // Private Copy constructor and assignment operator to prevent copying
+    HexToIntLookup(const HexToIntLookup&);
+    HexToIntLookup& operator=(const HexToIntLookup&);
+
+public:
+    static HexToIntLookup& getInstance() 
+    {
+        static HexToIntLookup instance; // Guaranteed to be destroyed, instantiated on first use.
+        return instance;
+    }
+
+    int hexToInt(const char (&hexString)[2]) 
+    {
+        return (hex_values[(unsigned char)hexString[0]] << 4) |
+               hex_values[(unsigned char)hexString[1]];
+    }
+
+    int hex3ToInt(const char (&hexString)[3]) 
+    {
+        return (hex_values[(unsigned char)hexString[0]] << 8) |
+               (hex_values[(unsigned char)hexString[1]] << 4) |
+                hex_values[(unsigned char)hexString[2]];
+    }
 };
 
-/***************************************************************
- * @brief This function is used to convert a 2-char hex string
- *        like "F7" to an integer, using the lookup table.
- * 
- * @param hexString 
- * @return int 
- ***************************************************************/
-inline int hexToInt(const char (&hexString)[2])
-{
-    return (hex_values[(unsigned char)hexString[0]] << 4) |
-            hex_values[(unsigned char)hexString[1]];
-}
-
-/**************************************************************
- * @brief This function is used to convert a 3-char hex string
- *        like "2F3" to an integer.
- * 
- * @param hexString 
- * @return int 
- **************************************************************/
-inline int hex3ToInt(const char (&hexString)[3]) {
-    return (hex_values[(unsigned char)hexString[0]] << 8) |
-           (hex_values[(unsigned char)hexString[1]] << 4) |
-            hex_values[(unsigned char)hexString[2]];
-}
 
 
 
@@ -185,4 +247,3 @@ enum ButtonType
     NUMBER_OF_CHSTRIP_BUTTONS
 };
 
-MAKE THE CALLBACK ARRAY IN EVENT BUS, WHICH THIS WILL BE USED TO INDEX
