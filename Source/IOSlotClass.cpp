@@ -14,16 +14,8 @@
 #include <sstream>
 #include <unistd.h>
 #include <iostream>
+#include "Debug.h"
 
-
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define IO_INIT_DEBUG_MESSAGES
-
-#ifdef IO_INIT_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("IO_INIT_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 // Constructor (initialization list)
 IOSlot::IOSlot(int brainDescriptor, IOSlotID slotIDtoQuery) //: ioCard(nullptr)

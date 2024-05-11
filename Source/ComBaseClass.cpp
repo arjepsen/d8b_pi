@@ -12,11 +12,22 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include "Debug.h"
+
+
+
 
 // Constructor with initialization list for the circular buffer
-ComBase::ComBase() : circBuffer(CircularBuffer::getInstance()) {}
+ComBase::ComBase() : circBuffer(CircularBuffer::getInstance()) 
+{
+    DEBUG_MSG("BASE COM CONSTRUCTOR\n");
+}
 
 ComBase::~ComBase() {}
+
+
+
+
 
 /************************************************************************
  * @brief Method for setting up the com port

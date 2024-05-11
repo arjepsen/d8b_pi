@@ -50,7 +50,7 @@ using VpotCallback = std::function<void(const char (&)[2], Bank, ChStripID, Even
 using ButtonCallback = std::function<void(ButtonAction, Bank)>;
 using UnSubscribeCallback = std::function<void(Bank, ChStripID)>;
 
-//using MasterUiFaderCallback = std::function<void(const char (&)[2])>;
+// using MasterUiFaderCallback = std::function<void(const char (&)[2])>;
 using MasterUiFaderCallback = std::function<void(int)>;
 
 using AssociateUiFaderCallback = std::function<void(const char (&)[2])>;
@@ -196,7 +196,6 @@ class EventBus
         AssociateUiFaderCallback uiFaderCallback;
         AssociateUiVpotCallback uiVpotCallback;
         // TODO: buttons??
-
     };
 
     // ########################################## SUBSCRIPTION DECLARATIONS #########################################
@@ -260,14 +259,12 @@ class EventBus
     void associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2]);
     void associateUiStripVpotEventPost(int chStripBitMask, int vPotValue);
 
-    //void updateUiMasterFaderEventPost(const char (&faderValue)[2]);
+    // void updateUiMasterFaderEventPost(const char (&faderValue)[2]);
     void updateUiMasterFaderEventPost(int faderValue);
 
     void masterUiFaderSubscribe(MasterUiFaderCallback masterUiFaderCallback);
-    
 
-  void channelStripComponentsubscribe(Bank bank, ChStripID stripID, UiStripCallbacks uiUpdateCallbacks);
-
+    void channelStripComponentsubscribe(Bank bank, ChStripID stripID, UiStripCallbacks uiUpdateCallbacks);
 
     // void associateMasterEventPost(BankEventType eventType, std::string eventValue);
 
@@ -279,9 +276,26 @@ class EventBus
     Bank getCurrentBank(); // Returns the enumeration for the currently selected bank.
                            // void postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source);
     // void postFaderEvent(const int channelStripID, const char *eventValue, EventSource source);
-    void postFaderEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
-    void postVpotEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source);
-    void postButtonEvent(const int buttonID, const ButtonAction buttonAction);
+    // void postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source);
+    // void postVpotEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source);
+    // void postButtonEvent(int buttonID, ButtonAction buttonAction);
+    inline void postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
+    {
+        faderCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
+    }
+
+    // TODO: Handle different pot functions - some - maybe most - are within
+    // the channel class.
+    inline void postVpotEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
+    {
+        vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
+    }
+
+    inline void postButtonEvent(int buttonID, ButtonAction buttonAction)
+    {
+        buttonCallbackMap[currentBank][buttonID](buttonAction, currentBank);
+    }
+
 
     void channelStripEventSubscribe(Bank bank, ChStripID chStripID, ChannelStripCallbacks &callbacks);
 

@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include "Debug.h"
 
 /*******************************************************************************
  * @brief This class is used to optimize the conversion between the linear
@@ -37,6 +38,8 @@ class FaderValueLookup
 
     FaderValueLookup()
     {
+        DEBUG_MSG("FADERVALUE LOOKUP CONSTRUCTOR\n");
+
         // Precompute the array of logarithms the first time this class is instantiated.
         // This is done to avoid slow log10 computations during runtime, so we can look up the result in an array.
         if (preComputedLog10Values[0] != -90.0) // Check if array has already been computed. (then first element would be -90)

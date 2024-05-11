@@ -7,15 +7,8 @@
 #include <unistd.h>
 #include <termios.h>
 #include <map>
+#include "Debug.h"
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define FX_INIT_DEBUG_MESSAGES
-
-#ifdef FX_INIT_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("FX_INIT_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 
 // The queries and responses are almost identical, with only 1 or 2 bytes being different.

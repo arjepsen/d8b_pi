@@ -17,15 +17,8 @@
 #include <sstream>
 #include <string.h>
 #include <unistd.h>
+#include "Debug.h"
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define CHANNEL_DEBUG_MESSAGES
-
-#ifdef CHANNEL_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("CHNL_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 constexpr size_t LED_CMD_LENGTH = 5; // Number of chars in the LED DSP commands, including null terminator.
 constexpr int STRIP_ID_LENGTH = 3;   // Number of chars in the channel strip ID, incl. null.
@@ -520,6 +513,32 @@ inline void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
         }
     }
 }
+
+
+void Channel::soloBtnCallback(ButtonAction btnAction, Bank currentBank)
+{
+    // TODO
+}
+
+void Channel::selectBtnCallback(ButtonAction btnAction, Bank currentBank)
+{
+    // TODO
+}
+
+void Channel::writeBtnCallback(ButtonAction btnAction, Bank currentBank)
+{
+    // TODO
+}
+
+void Channel::assignBtnCallback(ButtonAction btnAction, Bank currentBank)
+{
+    // TODO
+}
+void Channel::recRdyBtnCallback(ButtonAction btnAction, Bank currentBank)
+{
+    // TODO
+}
+
 
 /**********************************************************************
  * @brief This method is used for subscribing to a channelstrip.

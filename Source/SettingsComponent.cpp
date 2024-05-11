@@ -21,17 +21,11 @@
 //[/Headers]
 
 #include "SettingsComponent.h"
-
+#include "Debug.h"
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define SETTINGS_COMPONENT_DEBUG_MESSAGES
 
-#ifdef SETTINGS_COMPONENT_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("SETTING_CMPNT_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 //[/MiscUserDefs]
 
 //==============================================================================
@@ -39,6 +33,7 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
     : mixerManager(mixerManagerInstance)
 {
     //[Constructor_pre] You can add your own custom stuff here..
+    DEBUG_MSG("SETTINGS COMPONENT CONSTRUCTOR\n");
     //[/Constructor_pre]
 
     brainPortComboBox.reset (new juce::ComboBox ("brainPortComboBox"));
@@ -150,6 +145,8 @@ SettingsComponent::SettingsComponent (MixerManager& mixerManagerInstance)
 
     // Set Baud Rate to 115200 from the start
     //brainBaudRateComboBox->setSelectedId(1);
+
+    DEBUG_MSG("END OF SETTINGS COMPONENT CONSTRUCTOR\n");
 
     //[/Constructor]
 }

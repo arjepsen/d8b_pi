@@ -11,15 +11,8 @@
 #include "MixerInitScripts.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include "Debug.h"
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define INIT_DEBUG_MESSAGES
-
-#ifdef INIT_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("INIT_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 InitErrorType initializeMixer()
 {

@@ -12,19 +12,12 @@
 //#include <fcntl.h>
 #include <stdexcept>
 #include <unistd.h>
+#include "Debug.h"
 
 BrainCom::BrainCom(){}
 BrainCom::~BrainCom(){}
 
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define BRAINCOM_DEBUG_MESSAGES
-
-#ifdef BRAINCOM_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("BRAINCOM_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 // // #######################################
 // // Method for flushing the receiver buffer

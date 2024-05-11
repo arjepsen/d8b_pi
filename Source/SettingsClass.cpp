@@ -16,10 +16,12 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include "Debug.h"
 
 Settings::Settings() : brainPort(""), dspPort(""), brainBoostState(false)
 {
-    std::cout << "Settings Constructor" << std::endl;
+
+    DEBUG_MSG("SETTINGS CONSTRUCTOR\n");
     findUSBDevices();
     // std::vector<std::string> devices;
     // glob_t glob_result;
@@ -47,6 +49,7 @@ Settings::Settings() : brainPort(""), dspPort(""), brainBoostState(false)
     //         pclose(lsusb_output);
     //     }
     // }
+    
 }
 
 Settings::~Settings() {}

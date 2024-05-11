@@ -10,15 +10,8 @@
 
 #include "EventBusClass.h"
 #include <stdexcept>
+#include "Debug.h"
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define EVENTBUS_DEBUG_MESSAGES
-
-#ifdef EVENTBUS_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("EVENTBUS_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 /**
  * Constructor for the event bus.
@@ -32,6 +25,7 @@ EventBus::EventBus() : channelStripButtonBase{
                            0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
                        }
 {
+    DEBUG_MSG("EVENTBUS CONSTRUCTOR\n");
     // // Iterate over the array of eventtypes
     // for (auto &callbackMap : chStripComponentCallbacks)
     // {
@@ -65,6 +59,7 @@ EventBus::EventBus() : channelStripButtonBase{
             unSubScribeCallback = emptyCallback;
         }
     }
+    DEBUG_MSG("END OF EVENTBUS CONSTRUCTOR\n");
 }
 
 // Destructor
@@ -320,26 +315,6 @@ void EventBus::updateUiMasterFaderEventPost(int faderValue)
 // The reason for this, is that we're trying to handle the seperation between controls on the channelstrips, vs.
 // controls on the master section. Faders are only on channel strips, but vpots and buttons also exist outside them....
 // void EventBus::postFaderEvent(const std::string &channelStripID, const std::string &eventValue, EventSource source)
-inline void EventBus::postFaderEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source)
-{
-
-    // Fader events are ONLY channel strip events.
-    // value, bank, id, source
-    // faderCallbackMap[currentBank].at(channelStripID)(eventValue, currentBank, channelStripID, source);
-    faderCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
-}
-
-// TODO: Handle different pot functions - some - maybe most - are within
-// the channel class.
-inline void EventBus::postVpotEvent(const ChStripID channelStripID, const char (&eventValue)[2], EventSource source)
-{
-    vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
-}
-
-inline void EventBus::postButtonEvent(const int buttonID, const ButtonAction buttonAction)
-{
-    buttonCallbackMap[currentBank][buttonID](buttonAction, currentBank);
-}
 
 // ##################################################################################
 // This method is used to change poster method, depending on which bank is selected.

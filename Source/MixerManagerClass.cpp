@@ -20,15 +20,8 @@
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
+#include "Debug.h"
 
-// UNCOMMENT TO ENABLE DEBUG MESSAGES.
-#define MANAGER_DEBUG_MESSAGES
-
-#ifdef MANAGER_DEBUG_MESSAGES
-#define DEBUG_MSG(format, ...) printf("MNGR_DBG: " format, ##__VA_ARGS__)
-#else
-#define DEBUG_MSG(format, ...) ((void)0) // do {} while (0)
-#endif
 
 #define WELCOME_STRING "90u44v38v42v94u36v2Ev30v20v28v61v6Cv70v68v61v29vCDu4Dv41v43v4Bv49v45vD4u44v49v47v49v54v41v4Cv"
 
@@ -42,9 +35,7 @@ MixerManager::MixerManager()
       circBuffer(CircularBuffer::getInstance()),
       hexToIntLookup(HexToIntLookup::getInstance()),
       isInitializing(false)
-// messageHandler(&lineBankMessageHandler)
 {
-    std::cout << "MixerManger Constructor" << std::endl;
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
     // std::array automatically initializes elements to default value -
     // so Channel constructor gets called automatically.
@@ -277,7 +268,7 @@ void MixerManager::handleBufferMessage()
                 // TODO: HOW ABOUT MASTER STRIP???
 
                 // Copy the fader value of the message (index 2 & #)
-                const char faderValue[2] = {msgBuffer[2], msgBuffer[3]};
+                char faderValue[2] = {msgBuffer[2], msgBuffer[3]};
                 // faderValue[0] = msgBuffer[2];
                 // faderValue[1] = msgBuffer[3];
 

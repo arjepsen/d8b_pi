@@ -10,6 +10,8 @@
 
 #include "MasterChannelClass.h"
 //#include <unistd.h>
+#include "Debug.h"
+
 
 // Constructor
 MasterChannel::MasterChannel()
@@ -19,6 +21,7 @@ MasterChannel::MasterChannel()
       hexToIntLookup(HexToIntLookup::getInstance())
 {
 
+    DEBUG_MSG("MASTER CHANNEL CLASS CONSTRUCTOR\n");
     // // Subscribe to events (callbacks will ignore ID and Bank)
     // eventBus.bankEventSubscribe(
     //     LINE_BANK,
@@ -44,7 +47,7 @@ MasterChannel::MasterChannel()
     // Use it to subscribe.
     eventBus.masterFaderEventSubscribe(masterFaderCallback);
 
-
+    DEBUG_MSG("END OF MASTER CHANNEL CONSTRUCTOR\n");
 }
 
 // void MasterChannel::setMasterVolume(std::string volumeString, int dspDescriptor)

@@ -12,6 +12,8 @@
 
 #include <cstring>
 #include <stdio.h>
+#include "Debug.h"
+
 
 // Enumeration of the channelstrips
 enum ChStripID
@@ -125,6 +127,8 @@ private:
     // Private constructor to prevent instantiation
     HexToIntLookup() 
     {
+        DEBUG_MSG("HEXTOINT CONSTRUCTOR\n");
+
         // Initialize hex_values with all zeros
         memset(hex_values, 0, sizeof(hex_values));
 
@@ -188,7 +192,9 @@ class IntToHexLookup
     char hexLookupArray[256][3]; // Hex strings + null terminator
 
     IntToHexLookup()
-    { // Private constructor
+    {
+        DEBUG_MSG("INTTOHEX CONSTRUCTOR\n");
+
         for (int i = 0; i < 256; ++i)
         {
             sprintf(hexLookupArray[i], "%02X", i);

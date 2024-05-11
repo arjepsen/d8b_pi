@@ -1,8 +1,12 @@
 #include "CircularBuffer.h"
 #include <cstring>
+#include "Debug.h"
 
 CircularBuffer::CircularBuffer()
-    : head_(0), tail_(0) {}
+    : head_(0), tail_(0) 
+    {
+        DEBUG_MSG("CIRCBUF CONSTRUCTOR\n");
+    }
 
 CircularBuffer::~CircularBuffer() {}
 
