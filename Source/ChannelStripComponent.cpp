@@ -37,7 +37,8 @@ int ChannelStripComponent::nextChannelStripComponentID = 0;
 ChannelStripComponent::ChannelStripComponent ()
     : eventBus(EventBus::getInstance()),
       faderValueLookup(FaderValueLookup::getInstance()),
-      intToHexLookup(IntToHexLookup::getInstance())
+      intToHexLookup(IntToHexLookup::getInstance()),
+      hexToIntLookup(HexToIntLookup::getInstance())
 {
     //[Constructor_pre] You can add your own custom stuff here..
     // ################################ MY CONSTRUCTOR STUFF##########################################
@@ -1380,7 +1381,8 @@ void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2
     // Convert the 2-char hex value to an int, using bitwise operations.
 
     //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
-    int faderIntValue = ((faderHexValue[0] << 8) | faderHexValue[1]);
+    //int faderIntValue = ((faderHexValue[0] << 8) | faderHexValue[1]);
+    int faderIntValue = hexToIntLookup.hexToInt(faderHexValue);
 
 
     // double faderValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
@@ -1438,7 +1440,7 @@ void ChannelStripComponent::buttonEventCallback(std::string buttonValue)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="ChannelStripComponent" componentName="ChannelStripComponent"
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())"
+                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())&#10;&#10;hexToIntLookup(HexToIntLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="75" initialHeight="1024">
   <BACKGROUND backgroundColour="ff242d31">

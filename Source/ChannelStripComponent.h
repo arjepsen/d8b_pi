@@ -90,6 +90,7 @@ private:
 	EventBus &eventBus;
     FaderValueLookup &faderValueLookup;
     IntToHexLookup &intToHexLookup;
+    HexToIntLookup &hexToIntLookup;
 
     //std::string channelStripComponentID;
     ChStripID channelStripComponentID;

@@ -61,7 +61,7 @@ Channel::Channel()
     }
 
     // Set up using enumeration (remember they start at 0...)
-    ChStripID initialAssociateStrip = static_cast<ChStripID>(initialAssociateStripNumber - 1);
+    ChStripID initialAssociateStrip = static_cast<ChStripID>(initialAssociateStripNumber);
 
     // // Convert Channel Number to a corresponding channel strip ID.
     // std::stringstream stream;

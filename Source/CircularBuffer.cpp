@@ -34,10 +34,13 @@ void CircularBuffer::push(const char *message, size_t msgLength)
     // strncpy(buffer_[head_].data(), message, BUFFER_WIDTH - 1);
     // buffer_[head_][BUFFER_WIDTH - 1] = '\0'; // Ensure null-termination
     strcpy(buffer_[head_], message);
-    head_ = next_head;
+    
 
     // Write the message length (index of last char) to the message length array.
     messageLengths_[head_] = msgLength;
+
+    // Update head pointer
+    head_ = next_head;
 
     // Increment buffer-message-count.
     // TODO: Do we want to use this for anything? Else remove.

@@ -21,7 +21,7 @@
 //[/Headers]
 
 #include "SettingsComponent.h"
-#include "Debug.h"
+
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 // UNCOMMENT TO ENABLE DEBUG MESSAGES.

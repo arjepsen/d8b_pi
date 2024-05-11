@@ -598,7 +598,7 @@ std::string getDspResponse(int dspDescriptor)
             else
             {
                 dspReplyStream.put(response);
-                DEBUG_MSG("dsp response: %c\n", response);
+                //DEBUG_MSG("dsp response: %c\n", response);
             }
         }
         else if (result == 0)

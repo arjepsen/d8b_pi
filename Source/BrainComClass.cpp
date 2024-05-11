@@ -84,7 +84,7 @@ void BrainCom::messageReceiver()
                 // In that case, don't increment index, or reset.
                 if (recvChar == 'l' || recvChar == 'k')
                 {
-                    DEBUG_MSG("hearbeat: %c\n", recvChar);
+                    //DEBUG_MSG("hearbeat: %c\n", recvChar);
                     msgIndex--; // Decrement, to erase from messages.
                     heartbeatReceived();
                 }

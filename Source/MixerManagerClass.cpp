@@ -33,10 +33,11 @@ MixerManager::MixerManager()
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       circBuffer(CircularBuffer::getInstance()),
-      hexToIntLookup(HexToIntLookup::getInstance()),
-      isInitializing(false)
+      hexToIntLookup(HexToIntLookup::getInstance())
+      //isInitializing(false)
 {
     DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
+    isInitializing = false;
     // std::array automatically initializes elements to default value -
     // so Channel constructor gets called automatically.
     // So the channel objects are ready for when we instantiate the map of channelstrips after mixer init script.
@@ -47,6 +48,7 @@ MixerManager::MixerManager()
     // Set up channelstrip map of pointers to channel objects. (initially Line bank, ch. 1-24)
     for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
     {
+        // TODO: Change to char array instead.
         // Create the 2-digit hex code for the channelstrip.
         std::stringstream stream;
         stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << i;
@@ -237,6 +239,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
 // This method is a "dispatcher" sort of thing, which is called
 // and run in a thread. It continually pops messages off the buffer, and
 // sends them to the current selected handler (depending on which bank is selected.)
+    // REMEMBER: ChStripID is an enumeration starting at "0" for channel "1"
 // #################################################################################
 void MixerManager::handleBufferMessage()
 {
@@ -246,49 +249,42 @@ void MixerManager::handleBufferMessage()
     while (true)
     {
         // Get the next message from the buffer
-        // std::string message = circBuffer.pop();
         size_t msgLength = circBuffer.pop(msgBuffer);
 
-        // Check last char for message Category:
-        char msgCategory = msgBuffer[msgLength]; // TODO: Might need to make a check to ensure message is not empty....?
+        // Check last char for message Category (-1 for correct indexing):
+        char msgCategory = msgBuffer[msgLength - 1]; 
+
+        // TODO: Might need to make a check to ensure message is not empty....?
 
         switch (msgCategory)
         {
             case 'f': // Fader was moved, command has format: XXYYf
             {
-                // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-
                 // No bounds checking - we assume that the messages ending
-                // with 'f' and 'v' are always having the strip ID as the first two chars.
+                // with 'f' and 'v' are always having the strip ID as the first 
+                // two chars.
+
                 // So: Convert the first two chars to an integer
                 char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
                 ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexValueString));
-                
 
-                // TODO: HOW ABOUT MASTER STRIP???
-
-                // Copy the fader value of the message (index 2 & #)
+                // Copy the fader value of the message (index 2 & 3)
                 char faderValue[2] = {msgBuffer[2], msgBuffer[3]};
-                // faderValue[0] = msgBuffer[2];
-                // faderValue[1] = msgBuffer[3];
 
-                // std::string value = message.substr(2, 2);       // Get fader position from message
-                // eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);
+                // Post fader event in the eventbus
                 eventBus.postFaderEvent(channelStripID, faderValue, CONSOLE_EVENT);
                 break;
             }
             case 'v': // V-Pot turned
             {
-                // Decipher which pot.
-                // std::string channelStripID = message.substr(0, 2); // Get channel strip ID from message
-                // std::string vPotID = message.substr(0, 2); // Get channel strip ID from message
-                // std::string value = message.substr(2, 2);  // Get fader position from message
-                char hexValueString[2] = {msgBuffer[0], msgBuffer[1]};
-                ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexValueString));
+                // Get the ID of the activated channel. Convert to ChStripID
+                char hexIdString[2] = {msgBuffer[0], msgBuffer[1]};
+                ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexIdString));
                 
+                char vPotValue[2] = {msgBuffer[2], msgBuffer[3]};
 
                 // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
-                eventBus.postVpotEvent(channelStripID, hexValueString, CONSOLE_EVENT);
+                eventBus.postVpotEvent(channelStripID, vPotValue, CONSOLE_EVENT);
                 break;
             }
             case 's':   
@@ -323,7 +319,7 @@ void MixerManager::handleBufferMessage()
                 break;
             }
             default:
-                printf("OTHER MESSAGE - DSP?");
+                printf("OTHER MESSAGE: %s\n", msgBuffer);
                 // TODO: handle other possible messages from the brain, but in particular also DSP
         }
     }
