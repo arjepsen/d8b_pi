@@ -52,3 +52,6 @@ Check it through, and see if any place can be optimized for the []
 
 
 The channel class, and the channelstripcomponent class subscribes seperately on the eventbus. We should probably implement some safety check, to ensure they align.
+
+Move method documentations to the header files?
+or maybe keep them, and make more general overall description in the headers?

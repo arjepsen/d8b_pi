@@ -21,20 +21,6 @@ MasterChannel::MasterChannel()
       hexToIntLookup(HexToIntLookup::getInstance())
 {
 
-    DEBUG_MSG("MASTER CHANNEL CLASS CONSTRUCTOR\n");
-    // // Subscribe to events (callbacks will ignore ID and Bank)
-    // eventBus.bankEventSubscribe(
-    //     LINE_BANK,
-    //     MASTER_STRIP_ID,
-    //     [this](const std::string &faderValue, const Bank bank, const std::string &channelStripID, EventSource source)
-    //     { this->masterStripFaderEventCallback(faderValue, bank, channelStripID, source); },
-    //     [this](const std::string &vpotValue, const Bank bank, const std::string &channelStripID, EventSource source)
-    //     { this->masterStripVpotEventCallback(vpotValue, bank, channelStripID, source); },
-    //     [this](const std::string &buttonValue, const Bank bank, const std::string &channelStripID, EventSource source)
-    //     { this->masterStripVpotEventCallback(buttonValue, bank, channelStripID, source); },
-    //     [this](const Bank bank, const std::string &channelStripID)
-    //     { this->removeMasterStripAssociationCallback(bank, channelStripID); });
-
     // Make a lambda expression for subscribing the callback
     FaderCallback masterFaderCallback = [this](const char(&faderValue)[2],
                                                 Bank bank,
@@ -46,8 +32,6 @@ MasterChannel::MasterChannel()
 
     // Use it to subscribe.
     eventBus.masterFaderEventSubscribe(masterFaderCallback);
-
-    DEBUG_MSG("END OF MASTER CHANNEL CONSTRUCTOR\n");
 }
 
 // void MasterChannel::setMasterVolume(std::string volumeString, int dspDescriptor)
@@ -111,7 +95,9 @@ void MasterChannel::masterFaderEventCallback(const char (&faderValue)[2],
     if (source == CONSOLE_EVENT)
     {
         int masterFaderValue = hexToIntLookup.hexToInt(faderValue);
+        printf("DO WE CRASH IN MASTER?");
         eventBus.updateUiMasterFaderEventPost(masterFaderValue);
+        printf("or not?");
     }
     else
     {

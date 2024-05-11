@@ -883,7 +883,7 @@ void MasterStripComponent::setMasterFaderPosition(double value)
  ********************************************************************************/
 void MasterStripComponent::faderUpdateEventCallback(int faderValue)
 {
-
+    printf("all  the way up in master strip component...");
     //int decimalValue = hexToIntLookup.hexToInt(faderHexValue);
     //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
     float logValue = *faderValueLookup.getLog10Value(faderValue);

@@ -169,6 +169,7 @@ void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
 
 void EventBus::updateUiMasterFaderEventPost(int faderValue)
 {
+    printf("Or do we crash in event post?");
     masterUiFaderCallback(faderValue);
 }
 
