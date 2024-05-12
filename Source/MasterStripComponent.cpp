@@ -34,16 +34,6 @@ MasterStripComponent::MasterStripComponent ()
     //[Constructor_pre] You can add your own custom stuff here..
     // ################## MY CONSTRUCTOR STUFF ###################
 
-    // // Add the callbacks to the eventBus
-    // eventBus.masterStripComponentSubscribe(FADER_EVENT,
-    //                                        [this](const std::string &valueString)
-    //                                        { this->faderMoveEventCallback(valueString); });
-    // eventBus.masterStripComponentSubscribe(VPOT_EVENT,
-    //                                        [this](const std::string &valueString)
-    //                                        { this->vpotTurnEventCallback(valueString); });
-    // eventBus.masterStripComponentSubscribe(BUTTON_EVENT,
-    //                                        [this](const std::string &valueString)
-    //                                        { this->buttonEventCallback(valueString); });
 
     MasterUiFaderCallback masterFaderUpdateCallback = [this](int faderValue)
     {
@@ -873,7 +863,7 @@ void MasterStripComponent::setMasterFaderPosition(double value)
 
 
 /*********************************************************************************
- * @brief This is a callback used by the eventbus, after af physical master
+ * @brief This is a callback used by the eventbus, after a physical master
  *        fader move has been handled by the MasterChannel, and all that is left
  *        is to update the ui.
  *        It uses some lookups to convert the provided 2-char hex value to the
@@ -883,7 +873,7 @@ void MasterStripComponent::setMasterFaderPosition(double value)
  ********************************************************************************/
 void MasterStripComponent::faderUpdateEventCallback(int faderValue)
 {
-    printf("all  the way up in master strip component...");
+
     //int decimalValue = hexToIntLookup.hexToInt(faderHexValue);
     //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
     float logValue = *faderValueLookup.getLog10Value(faderValue);

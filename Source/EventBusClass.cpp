@@ -112,9 +112,9 @@ void EventBus::masterFaderEventSubscribe(FaderCallback masterFaderCallback)
 }
 
 
-void EventBus::masterUiFaderSubscribe(MasterUiFaderCallback masterUiFaderCallback)
+void EventBus::masterUiFaderSubscribe(MasterUiFaderCallback faderCallback)
 {
-    masterUiFaderCallback = masterUiFaderCallback;
+    masterUiFaderCallback = faderCallback;
 }
 
 // BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
@@ -169,7 +169,6 @@ void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
 
 void EventBus::updateUiMasterFaderEventPost(int faderValue)
 {
-    printf("Or do we crash in event post?");
     masterUiFaderCallback(faderValue);
 }
 

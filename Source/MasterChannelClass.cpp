@@ -34,19 +34,7 @@ MasterChannel::MasterChannel()
     eventBus.masterFaderEventSubscribe(masterFaderCallback);
 }
 
-// void MasterChannel::setMasterVolume(std::string volumeString, int dspDescriptor)
-// {
-//     // Construct DSP command, and send it.
-//     std::string dspMasterVolumeCommand = "4Cc9X" + volumeString + "QAX" + volumeString + "Q";
-//     // write(dspDescriptor, dspMasterVolumeCommand.c_str(), dspMasterVolumeCommand.length());
-// 	dspCom.send(dspMasterVolumeCommand);
 
-
-// 	//SO - IF WE SEND 4Cc9XC1Q   would that only update volume in one side?
-
-//     // Update the member.
-//     masterVolume = volumeString;
-// }
 
 
 // ###########################################################################################################################
@@ -95,9 +83,7 @@ void MasterChannel::masterFaderEventCallback(const char (&faderValue)[2],
     if (source == CONSOLE_EVENT)
     {
         int masterFaderValue = hexToIntLookup.hexToInt(faderValue);
-        printf("DO WE CRASH IN MASTER?");
         eventBus.updateUiMasterFaderEventPost(masterFaderValue);
-        printf("or not?");
     }
     else
     {
