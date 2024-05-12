@@ -385,6 +385,13 @@ MasterStripComponent::MasterStripComponent ()
 
 
     //[Constructor] You can add your own custom stuff here..
+
+    // Set fader to 0
+    float logValue = *faderValueLookup.getLog10Value(0);
+    juce::MessageManager::callAsync([this, logValue]()
+                                    { masterFader.get()->setValue(logValue, juce::dontSendNotification); });
+
+
     //[/Constructor]
 }
 

@@ -68,25 +68,6 @@ ChannelStripComponent::ChannelStripComponent ()
     //     int dspValue = static_cast<int>((pow(10, (faderValue + 90) / 100.0) - 1) / 9.0 * 255);
 
 
-    //     // Convert dspValue to 2-digit uppercase hex string, and store in map
-    //     std::stringstream hexStream;
-    //     hexStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << dspValue;
-    //     dspHexLookupMap[faderValue] = hexStream.str();
-    // }
-
-
-    // Add the callbacks to the eventBus
-    // eventBus.chStripComponentSubscribe(channelStripComponentID, FADER_EVENT,
-                                    //    [this](const std::string &valueString)
-                                    //    { this->faderMoveEventCallback(valueString); });
-    // eventBus.chStripComponentSubscribe(channelStripComponentID, VPOT_EVENT,
-    //                                    [this](const std::string &valueString)
-    //                                    { this->vpotTurnEventCallback(valueString); });
-    // eventBus.chStripComponentSubscribe(channelStripComponentID, BUTTON_EVENT,
-    //                                    [this](const std::string &valueString)
-    //                                    { this->buttonEventCallback(valueString); });
-
-
 
     // Set up lambda's for the callbacks, then collect them in a struct, for
     // handing over to the event bus.
@@ -630,6 +611,11 @@ ChannelStripComponent::ChannelStripComponent ()
 
     // Set initial channel strip label (nextID incremented, so fits now.)
     chLabel->setText("Ch. " + (juce::String)nextChannelStripComponentID, juce::dontSendNotification);
+
+    // Set fader to 0
+    float logValue = *faderValueLookup.getLog10Value(0);
+    juce::MessageManager::callAsync([this, logValue]()
+                                    { fader.get()->setValue(logValue, juce::dontSendNotification); });
 
     //[/Constructor]
 }

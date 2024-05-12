@@ -64,7 +64,7 @@ ifeq ($(CONFIG),Release)
   JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0"
   JUCE_TARGET_APP := d8b_pi
 
-  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -g -O3 $(CFLAGS)
+  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -O3 $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++20 $(CXXFLAGS)
   JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell $(PKG_CONFIG) --libs freetype2 libcurl) -fvisibility=hidden -static-libgcc -static-libstdc++ -lrt -ldl -lpthread -lusb -ludev $(LDFLAGS)
 

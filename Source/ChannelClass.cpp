@@ -83,16 +83,20 @@ Channel::Channel()
     // Get the base number for the buttons on the initial associate strip.
     unsigned int buttonBase = eventBus.channelStripButtonBase[initialAssociateStrip];
 
+
     // TODO How to handle other associates....?
 
-    // INITIAL SETTINGS - WE CAN SET THEM HERE ARBITRARILY, OR USE A SPECIFIC CALL??
+    // ============================ SET INITIAL SETTINGS ============================
     // TODO: We need to be able to save and recall settings across reboots.
     // On construction, we should read saved values and set them.
     // Default saved values must be present, and recreated if not present.
     muted = false;
 
+
     pan = 0x7F; // Center
-    panDotCenter = true;
+    // Make a call to set volume (and fader) to 0, and pan center
+    // Cant use the fader callback here, since it will exclude the "calling" control (ui/console)
+    // Make a method that does it manually for all controls
 
     // solo = false;
 
@@ -407,6 +411,8 @@ void Channel::handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank,
  **************************************************************************/
 void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
+    printf("MUTE BUTTON");
+
     // Only act on presses, not on releases.
     if (btnAction == BTN_PRESS)
     {
@@ -570,4 +576,50 @@ void Channel::subscribeToChStrip(Bank bank, ChStripID chStripID)
     // Register with the eventbus.
     eventBus.channelStripEventSubscribe(bank,chStripID, callbacks);
 
+}
+
+void Channel::initializeChannel()
+{
+    // TODO: This is probably where we would load saved settings.
+
+    // Set volume to 0
+    char dspVolumeCommand[DSP_VOL_CMD_LENGTH] = "--cX00Q";
+    dspVolumeCommand[0] = CH_ID_STR[0];
+    dspVolumeCommand[1] = CH_ID_STR[1];
+    dspCom.send(dspVolumeCommand, 7);
+
+    // Set pan to center
+    pan = 0x7F; // Center
+    char dspPanCommand[] = "--dFEFFX7FOFDFFXP";
+
+    // Write in the dsp channel ID code.
+    dspPanCommand[0] = CH_ID_STR[0];
+    dspPanCommand[1] = CH_ID_STR[1];
+    dspCom.send(dspPanCommand,17);
+
+
+
+    // Turn on centre LED's
+    char brainLedCommand[4];
+    brainLedCommand[0] = CH_STRIP_LED_MAP[CH_NUMBER][RING_DOT][0];
+    brainLedCommand[1] = CH_STRIP_LED_MAP[CH_NUMBER][RING_DOT][1];
+    brainLedCommand[2] = CH_STRIP_LED_MAP[CH_NUMBER][RING_DOT][2];
+    brainLedCommand[3] = LED_ON_CMD;
+    brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
+
+    brainLedCommand[0] = CH_STRIP_LED_MAP[CH_NUMBER][RING_6][0];
+    brainLedCommand[1] = CH_STRIP_LED_MAP[CH_NUMBER][RING_6][1];
+    brainLedCommand[2] = CH_STRIP_LED_MAP[CH_NUMBER][RING_6][2];
+    brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
+
+    // Pull fader to 0
+    char brainFaderCommand[] = "--00f";
+    brainFaderCommand[0] = CH_STRIP_ID_ARRAY[CH_NUMBER][0];
+    brainFaderCommand[1] = CH_STRIP_ID_ARRAY[CH_NUMBER][1];
+    brainCom.send(brainFaderCommand, 5);
+
+
+
+
+    // UI is initially already at 0 and center.
 }

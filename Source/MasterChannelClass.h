@@ -36,6 +36,8 @@ class MasterChannel
 
     char masterVolume[3] = "00";
 
+    
+
   public:
     static MasterChannel &getInstance(); // Returns a reference to the instance.
 
@@ -50,6 +52,8 @@ class MasterChannel
     void removeMasterStripAssociationCallback(const Bank bank, const std::string channelStripID);
 
     void setMasterVolume(std::string volumeString, int dspDescriptor);
+
+    void initializeMasterChannel();
 };
 
 // Singleton modifications
@@ -58,3 +62,4 @@ inline MasterChannel &MasterChannel::getInstance()
     static MasterChannel instance;
     return instance;
 }
+

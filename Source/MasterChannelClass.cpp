@@ -32,6 +32,7 @@ MasterChannel::MasterChannel()
 
     // Use it to subscribe.
     eventBus.masterFaderEventSubscribe(masterFaderCallback);
+
 }
 
 
@@ -76,7 +77,6 @@ void MasterChannel::masterFaderEventCallback(const char (&faderValue)[2],
 
     //std::string dspMasterVolumeCommand = "4Cc9X" + faderValue + "QAX" + faderValue + "Q";
 
-    // TODO: check if 13 is enough... not transmittion null terminator.
 	dspCom.send(dspMasterVolumeCommand, 13);    
 
 	// If Console fader was moved, update UI, else update console.
@@ -90,7 +90,7 @@ void MasterChannel::masterFaderEventCallback(const char (&faderValue)[2],
         char brainMasterVolumeCommand[] = "18--f"; //"18" + faderValue + "f";
         brainMasterVolumeCommand[2] = masterVolume[0];
         brainMasterVolumeCommand[3] = masterVolume[1];
-        brainCom.send(brainMasterVolumeCommand);
+        brainCom.send(brainMasterVolumeCommand, 5);
     }
 }
 
@@ -113,3 +113,21 @@ void MasterChannel::removeMasterStripAssociationCallback(const Bank bank, const 
     // No reason for this... the Master will not be removed....
 }
 
+void MasterChannel::initializeMasterChannel()
+{
+    // TODO: This is probably where we would load saved settings.
+
+    printf("initializing master channel\n");
+
+    // Set volume to 0
+    char dspMasterVolumeCommand[] = "4Cc9X00QAX00Q";
+    dspCom.send(dspMasterVolumeCommand, 13);
+
+
+    // Pull fader to 0
+    char brainMasterVolumeCommand[] = "1800f";
+    brainCom.send(brainMasterVolumeCommand, 5);
+
+
+    // UI is initially already at 0 and center.
+}

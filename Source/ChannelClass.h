@@ -85,7 +85,7 @@ class Channel
     char volume[3] = "00"; // Initialize to "00".
     // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
     int pan; // (0 - FE) - weird things happen on "FF".... 
-    bool panDotCenter;
+    //bool panDotCenter;
 
     ChStripLED currentRingLED;
 
@@ -112,6 +112,7 @@ class Channel
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
     // void subscribeToLineBankEvents();
+    
 
   public:
     // Constructor
@@ -147,6 +148,8 @@ class Channel
 
     void setVpotFunction(std::function<void(int)> func); // {vPotFunction = func}
     void subscribeToChStrip(Bank bank, ChStripID chStripID);
+
+    void initializeChannel();
 };
 
 // // Should these be classes also??

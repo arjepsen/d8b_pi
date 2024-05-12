@@ -36,7 +36,6 @@ MixerManager::MixerManager()
       hexToIntLookup(HexToIntLookup::getInstance())
       //isInitializing(false)
 {
-    DEBUG_MSG("\n===================== MIXER MANAGER CONSTRUCTOR =======================\n");
     isInitializing = false;
     // std::array automatically initializes elements to default value -
     // so Channel constructor gets called automatically.
@@ -56,6 +55,7 @@ MixerManager::MixerManager()
 
         // Create an element in the map
         channelStripMap[hexCode] = &channels[i];
+
     }
 }
 
@@ -223,6 +223,17 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 brainCom.startReceiverThread();
                 dspCom.startReceiverThread();
                 messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
+
+                // TODO: THIS - THIS is where we must initialize things - now the com is up.
+                // Handle saved settings.
+                // For now, just call each channel's init method
+                for (int i = 0; i < 24; i++)
+                {
+                    channels[i].initializeChannel();
+                }
+
+                // Also initialize the master channel
+                masterChannel.initializeMasterChannel();
 
                 isInitializing = false;
 
