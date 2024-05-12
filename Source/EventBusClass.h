@@ -162,6 +162,7 @@ class EventBus
 
     inline void postButtonEvent(int buttonID, ButtonAction buttonAction)
     {
+        printf("calling button callback - now in eventbus.h\n");
         buttonCallbackMap[currentBank][buttonID](buttonAction, currentBank);
     }
 
@@ -170,10 +171,9 @@ class EventBus
 
     void masterFaderEventSubscribe(FaderCallback masterFadercallback);
 
-    // void channelStripEventSubscribe(Bank bank, const std::string &channelStripID,
-    //                                 ConsoleFaderCallback faderCallback,
-    //                                 ConsoleVpotCallbackFunction vpotCallback,
-    //                                 std::function<void(Bank, const std::string &)> unsubscribeCallback);
+    void buttonEventSubscribe(int buttonID, Bank bank, ButtonCallback buttonCallback);
+
+
 };
 
 // Singleton modifications

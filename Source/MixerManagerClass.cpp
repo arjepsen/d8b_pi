@@ -319,6 +319,7 @@ void MixerManager::handleBufferMessage()
                 // works also while holding ALT.
 
                 ////////////////////////////////////////////////////////////////
+                printf("button was pressed - mixermanager\n");
 
                 // Convert button ID to an integer
                 char hexValueString[3] = {msgBuffer[0], msgBuffer[1], msgBuffer[2]};

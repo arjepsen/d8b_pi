@@ -83,6 +83,11 @@ Channel::Channel()
     // Get the base number for the buttons on the initial associate strip.
     unsigned int buttonBase = eventBus.channelStripButtonBase[initialAssociateStrip];
 
+    // Subscribe to button events
+
+
+
+
 
     // TODO How to handle other associates....?
 
@@ -411,7 +416,7 @@ void Channel::handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank,
  **************************************************************************/
 void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
-    printf("MUTE BUTTON");
+    printf("MUTE BUTTON\n");
 
     // Only act on presses, not on releases.
     if (btnAction == BTN_PRESS)
@@ -452,7 +457,7 @@ void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
         }
 
         // Send DSP command.
-        dspCom.send(dspVolumeCommand);
+        dspCom.send(dspVolumeCommand, 7);
 
         // Construct the LED command. Iterate through associated channels
         // and send it.
@@ -467,6 +472,8 @@ void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
             brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][MUTE_LED][1];
             brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][MUTE_LED][2];
             brainLedCommand[3] = stateCmd;
+            brainCom.send(brainLedCommand, 4);
+
 
             // Clear lowest set bit
             channelMask &= channelMask - 1;
@@ -478,25 +485,30 @@ void Channel::muteBtnCallback(ButtonAction btnAction, Bank currentBank)
 void Channel::soloBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
     // TODO
+    printf("solo button\n");
 }
 
 void Channel::selectBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
     // TODO
+    printf("select button\n");
 }
 
 void Channel::writeBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
     // TODO
+    printf("write button\n");
 }
 
 void Channel::assignBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
     // TODO
+    printf("assign button\n");
 }
 void Channel::recRdyBtnCallback(ButtonAction btnAction, Bank currentBank)
 {
     // TODO
+    printf("recrdy button\n");
 }
 
 
@@ -623,3 +635,4 @@ void Channel::initializeChannel()
 
     // UI is initially already at 0 and center.
 }
+

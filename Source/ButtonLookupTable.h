@@ -32,28 +32,28 @@ enum ButtonAction : char
 };
 
 
-// Enum to use for indexing the event bus' array of button callbacks.
-// The numbers assigned are listed in hex, since this is the values
-// that the console sends as chars.
-enum ChStripButtonID
-{
-    MUTE_BTN1 = 0x051, MUTE_BTN2 = 0x059, MUTE_BTN3 = 0x041, MUTE_BTN4 = 0x049, 
-    MUTE_BTN5 = 0x031, MUTE_BTN6 = 0x039, MUTE_BTN7 = 0x021, MUTE_BTN8 = 0x029,
-    MUTE_BTN9 = 0x011, MUTE_BTN0 = 0x019, MUTE_BTN11 = 0x001, MUTE_BTN12 = 0x009,
-    MUTE_BTN13 = 0x179, MUTE_BTN14 = 0x161, MUTE_BTN15 = 0x169, MUTE_BTN16 = 0x151,
-    MUTE_BTN17 = 0x159, MUTE_BTN18 = 0x141, MUTE_BTN19 = 0x149, MUTE_BTN20 = 0x131,
-    MUTE_BTN21 = 0x139
-};
+// // Enum to use for indexing the event bus' array of button callbacks.
+// // The numbers assigned are listed in hex, since this is the values
+// // that the console sends as chars.
+// enum ChStripButtonID
+// {
+//     MUTE_BTN1 = 0x051, MUTE_BTN2 = 0x059, MUTE_BTN3 = 0x041, MUTE_BTN4 = 0x049, 
+//     MUTE_BTN5 = 0x031, MUTE_BTN6 = 0x039, MUTE_BTN7 = 0x021, MUTE_BTN8 = 0x029,
+//     MUTE_BTN9 = 0x011, MUTE_BTN0 = 0x019, MUTE_BTN11 = 0x001, MUTE_BTN12 = 0x009,
+//     MUTE_BTN13 = 0x179, MUTE_BTN14 = 0x161, MUTE_BTN15 = 0x169, MUTE_BTN16 = 0x151,
+//     MUTE_BTN17 = 0x159, MUTE_BTN18 = 0x141, MUTE_BTN19 = 0x149, MUTE_BTN20 = 0x131,
+//     MUTE_BTN21 = 0x139
+// };
 
 
-int channelStripButtonBaseIndex[]
-{
-    // Base button index of channelstrips
-    0x050, 0x058, 0x040, 0x048, 0x030, 0x038,   // 1 - 6
-    0x020, 0x028, 0x010, 0x018, 0x000, 0x008,   // 7 - 12
-    0x178, 0x160, 0x168, 0x150, 0x158, 0x140,   // 13 - 18
-    0x148, 0x130, 0x138, 0x120, 0x129, 0x110   // 19 - 24
-};
+// int channelStripButtonBaseIndex[]
+// {
+//     // Base button index of channelstrips
+//     0x050, 0x058, 0x040, 0x048, 0x030, 0x038,   // 1 - 6
+//     0x020, 0x028, 0x010, 0x018, 0x000, 0x008,   // 7 - 12
+//     0x178, 0x160, 0x168, 0x150, 0x158, 0x140,   // 13 - 18
+//     0x148, 0x130, 0x138, 0x120, 0x129, 0x110   // 19 - 24
+// };
 
 
 

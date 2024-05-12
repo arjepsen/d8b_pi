@@ -410,20 +410,20 @@ InitErrorType initializeMixer()
     // // For now, for testing, just open a pair of channels.
 
     // pan 9 Left
-    write(DSP, "0AdFEFFX0OFDFFXP", strlen("0AdFEFFX0OFDFFXP"));
+    //write(DSP, "0AdFEFFX0OFDFFXP", strlen("0AdFEFFX0OFDFFXP"));
 
     // pan 10 left
-    write(DSP, "22dFEFFX0OFDFFXP", strlen("22dFEFFX0OFDFFXP"));
+    //write(DSP, "22dFEFFX0OFDFFXP", strlen("22dFEFFX0OFDFFXP"));
 
     // pan 11 right
-    write(DSP, "0BdFEFFXFEOFDFFXP", strlen("0BdFEFFXFEOFDFFXP"));
+    //write(DSP, "0BdFEFFXFEOFDFFXP", strlen("0BdFEFFXFEOFDFFXP"));
 
     // Set both channels to unity
-    write(DSP, "0BcXC1Q", strlen("0BcXC1Q"));
-    write(DSP, "22cXC1Q", strlen("22cXC1Q"));
+   // write(DSP, "0BcXC1Q", strlen("0BcXC1Q"));
+    //write(DSP, "22cXC1Q", strlen("22cXC1Q"));
 
     // Turn up master
-    write(DSP, "4Cc9X70QAX70Q", strlen("4Cc9X70QAX70Q"));
+    //write(DSP, "4Cc9X70QAX70Q", strlen("4Cc9X70QAX70Q"));
 
     // After this there should be sound out on Masters.
     // lets activate some control room outs.
@@ -431,11 +431,13 @@ InitErrorType initializeMixer()
 
     write(BRAIN, "67d66e", strlen("67d66e"));
 
+    // Set speaker level
+    write(BRAIN, "BC0w", 4);
+
     // Activate Control room Mains:
     write(BRAIN, "5Fd", 3);
 
-    // Set speaker level
-    write(BRAIN, "BC0w", 4);
+
 
     // sleep(5);
 

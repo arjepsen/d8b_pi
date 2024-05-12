@@ -25,7 +25,6 @@ EventBus::EventBus() : channelStripButtonBase{
                            0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
                        }
 {
-    DEBUG_MSG("EVENTBUS CONSTRUCTOR\n");
 
     //Set the initial bank to Line Bank
     currentBank = LINE_BANK;
@@ -45,13 +44,14 @@ EventBus::EventBus() : channelStripButtonBase{
             unSubScribeCallback = emptyCallback;
         }
     }
-    DEBUG_MSG("END OF EVENTBUS CONSTRUCTOR\n");
 }
 
 // Destructor
 EventBus::~EventBus() {}
 
-//////////////////////////////////////////////////////////////////
+// ###################################################################################
+// ################################# SUBSCRIBERS #####################################
+// ###################################################################################
 
 /*******************************************************************************
  * @brief This method is used by the channel objects, to "subscribe" to events,
@@ -117,9 +117,20 @@ void EventBus::masterUiFaderSubscribe(MasterUiFaderCallback faderCallback)
     masterUiFaderCallback = faderCallback;
 }
 
-// BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
+
+void EventBus::buttonEventSubscribe(int buttonID, Bank bank, ButtonCallback buttonCallback)
+{
+    buttonCallbackMap[bank][buttonID] = buttonCallback;
+}
+
+
+// TODO: BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
 // YES - BUT THEN WHAT ABOUT NON-CHANNELSTRIP?
 // OK, ONE SUBSCRIBE METHOD FOR CHANNELS. ANOTHER FOR THE MASTER SECTION.
+
+// ##########################################################################################
+// ############################### POSTERS ##################################################
+// ##########################################################################################
 
 
 /******************************************************************************
@@ -173,7 +184,7 @@ void EventBus::updateUiMasterFaderEventPost(int faderValue)
 }
 
 // ##################################################################################
-// This method is used to change poster method, depending on which bank is selected.
+// ###################################### OTHERS ####################################
 // ##################################################################################
 void EventBus::setCurrentBank(Bank bank)
 {
@@ -207,7 +218,7 @@ Bank EventBus::getCurrentBank()
 
 void EventBus::initializeButtonCallbackMaps()
 {
-    // Initialize the buttonCallback maps with button ID's
+    // Initialize the buttonCallback maps with button ID's.
     // clang-format off
     buttonCallbackMap[LINE_BANK] = {
         // ================== CHANNELSTRIP 1-12 BUTTONS =============================
