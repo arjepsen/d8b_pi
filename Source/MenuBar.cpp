@@ -247,13 +247,12 @@ void MenuBar::menuItemSelected(int menuItemID, int topLevelMenuIndex)
     // Handle menuitem selection
     if (menuItemID == 87)
     {
-        std::cout << "settings chosen" << std::endl;
+        std::cout << "MenuBar::menuItemSelected. (settings chosen)" << std::endl;
 
         // Check if settings window is already open.
         if (SettingsWindow::currentInstance != nullptr)
         {
             SettingsWindow::currentInstance->toFront(true);
-            std::cout << "no more than one!" << std::endl;
         }
         else
         {

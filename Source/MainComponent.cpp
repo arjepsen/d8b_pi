@@ -4,9 +4,9 @@
 
 MainComponent::MainComponent()
     : eventBus(EventBus::getInstance()),
-      mixerManager(MixerManager::getInstance())
+      mixerManager(MixerManager::getInstance()),
+      masterChannel(MasterChannel::getInstance())
 {
-    std::cout << "MainComponent Constructor" << std::endl;
     // Main window size.
     setSize(1920, 1080);
 
@@ -14,47 +14,53 @@ MainComponent::MainComponent()
     // settings.printUsbDevices();
 
     // Show channelStrips.
-    for (auto &strip : chStrips)
+    for (auto &strip : channelStripComponetArray)
     {
         addAndMakeVisible(strip);
     }
 
     // Give the mixermanager a pointer to the channelstrip array.
-    mixerManager.setChannelStripComponentArray(chStrips);
+    // mixerManager.setChannelStripComponentArray(chStrips);
 
-    // addAndMakeVisible(channelStrip1);
-    // addAndMakeVisible(channelStrip2);
-    // addAndMakeVisible(channelStrip3);
-    // addAndMakeVisible(channelStrip4);
-    // addAndMakeVisible(channelStrip5);
-    // addAndMakeVisible(channelStrip6);
-    // addAndMakeVisible(channelStrip7);
-    // addAndMakeVisible(channelStrip8);
-    // addAndMakeVisible(channelStrip9);
-    // addAndMakeVisible(channelStrip10);
-    // addAndMakeVisible(channelStrip11);
-    // addAndMakeVisible(channelStrip12);
-    // addAndMakeVisible(channelStrip13);
-    // addAndMakeVisible(channelStrip14);
-    // addAndMakeVisible(channelStrip15);
-    // addAndMakeVisible(channelStrip16);
-    // addAndMakeVisible(channelStrip17);
-    // addAndMakeVisible(channelStrip18);
-    // addAndMakeVisible(channelStrip19);
-    // addAndMakeVisible(channelStrip20);
-    // addAndMakeVisible(channelStrip21);
-    // addAndMakeVisible(channelStrip22);
-    // addAndMakeVisible(channelStrip23);
-    // addAndMakeVisible(channelStrip24);
+    // Set up the pointers to the channelstrips in the eventbus
+    eventBus.setChannelStripComponentArray(channelStripComponetArray, &masterStripComponent);
+    eventBus.setChannelArray(channelArray);
+    eventBus.setChannelStripArray(channelStripArray, &masterChannel);
+
+
+    // Set the fader event handlers
+    
+
+
+    // Set the initial associations ()
+    // This will hand a pointer to a channel to each channelstrip.
+    // The channelstrip will then read info from the channel, and update it's settings (leds, fader)
+    for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
+    {
+        ChStripID chStripID = channelStripArray[i].getChannelStripID();
+        //ChStripID chStripID = channelStrip.getChannelStripID();
+
+        // The channelstrips controls one channel per bank. Set their initial pointers.
+        for (Bank bank = LINE_BANK; bank < NUMBER_OF_BANKS; bank = (Bank)(bank + 1))
+        {
+            int channelIndex = chStripID + (bank * CHANNEL_STRIP_COUNT);
+            //eventBus.channelStripEventSubscribe(channelIndex, chStripID, bank);
+
+            channelStripArray[i].setChannelPointer(bank, &channelArray[channelIndex]);
+
+            eventBus.channelStripEventSubscribe(channelIndex, chStripID, bank);
+        }
+    }
+
 
     // Show MasterStrip
-    addAndMakeVisible(masterStrip);
+    addAndMakeVisible(masterStripComponent);
 
     // Show MenuBar.
     addAndMakeVisible(menuBar);
 
-    // Set up an array of pointers to the channelStripcomponents
-    // ChannelStripComponent chStripComponentArray[24];
+    // TODO: how about the display.
+
 }
 
 MainComponent::~MainComponent()
@@ -84,7 +90,7 @@ void MainComponent::resized()
 
     // Channelstrip placements.
     int strip_x = 0;
-    for (auto &strip : chStrips)
+    for (auto &strip : channelStripComponetArray)
     {
         strip.setBounds(strip_x, 28, 75, 1024);
         strip_x += 75;
@@ -128,7 +134,7 @@ void MainComponent::resized()
     // channelStrip24.setBounds(1725, 28, 75, 1024);
 
     // Master strip placement
-    masterStrip.setBounds(1800, 28, 120, 1024);
+    masterStripComponent.setBounds(1800, 28, 120, 1024);
 
     // // Master strip fader callback
     // masterStrip.setMasterFaderMoveCallbackFunction

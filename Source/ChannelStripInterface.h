@@ -1,0 +1,27 @@
+/*
+  ==============================================================================
+
+    ChannelStripInterface.h
+    Created: 19 Jun 2024 10:31:24pm
+    Author:  anders
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "SharedDataStructures.h"
+#include "ChannelClass.h"
+
+
+
+class ChannelStripInterface
+{
+    public:
+        virtual ~ChannelStripInterface() {}
+        virtual void updateChannelVolume(Bank currentBank, const char (&faderValue)[2]) = 0;
+        virtual void setChannelAssociation(Bank activeBank, Bank associationBank, Channel *channelPtr = nullptr) = 0;
+        virtual void updateChStrip(Bank currentBank = LINE_BANK) = 0;
+        virtual void updateFaderPosition(Bank currentBank = LINE_BANK) = 0;
+
+};

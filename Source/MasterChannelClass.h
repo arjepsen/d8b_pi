@@ -10,25 +10,40 @@
 
 #pragma once
 
+
+#include "ChannelStripInterface.h"
 #include "BrainComClass.h"
 #include "DspComClass.h"
-#include "EventBusClass.h"
-#include <string>
-#include "SharedDataStructures.h"
+// #include "EventBusClass.h"
+// #include <string>
 
-class MasterChannel
+#include "Debug.h"
+
+constexpr int MASTER_VOL_DSP_CMD_LENGTH = 13;
+
+class Channel;  // Forward declaration of Channel - needed for setChannelAssociation.
+
+class MasterChannel : public ChannelStripInterface
 {
   private:
     // Private constructor, since this is a singleton
     MasterChannel();
     //~MasterChannel();
 
-    EventBus &eventBus;
+    // Bitmaps for maintaining current state of the LED's on the master strip.
+    uint32_t ledOnBitmap = 0;
+    uint32_t ledBlinkBitmap = 0;
+
+    // LEDringLookup &ledRingLookup;
+    // //EventBus &eventBus;
     BrainCom &brainCom;
     DspCom &dspCom;
-    HexToIntLookup &hexToIntLookup;
+    // //HexToIntLookup &hexToIntLookup;
 
-    const std::string MASTER_STRIP_ID = "18";
+    const char MASTER_STRIP_ID[3] = "18";
+    char faderMoveCmd[BRAIN_FADER_CMD_LENGTH] = {'1', '8', '0', '0', 'f'};  // Initialize the master fader move braincommand.
+    char dspMasterVolumeCommand[MASTER_VOL_DSP_CMD_LENGTH] = {'4', 'C', 'c', '9', 'X', '0', '0', 'Q', 'A', 'X', '0', '0', 'Q'}; // "4Cc9X--QAX--Q";
+
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
     MasterChannel(const MasterChannel &) = delete;
@@ -36,24 +51,17 @@ class MasterChannel
 
     char masterVolume[3] = "00";
 
-    
-
   public:
     static MasterChannel &getInstance(); // Returns a reference to the instance.
 
-    void masterFaderEventCallback(const char (&faderValue)[2],
-                                       Bank bank,
-                                       ChStripID channelStripID,
-                                       EventSource source);
+    void updateChannelVolume(Bank currentBank, const char (&faderValue)[2]) override;
+    void updateChStrip(Bank currentBank = LINE_BANK) override;
+    void updateFaderPosition(Bank currentBank = LINE_BANK) override;
+    inline void setChannelAssociation(Bank activeBank, Bank associationBank, Channel *channelPtr = nullptr) override
+    {
+        DEBUG_MSG("The method should not get called on master channel strip...\n");
+    }
 
-    void masterStripVpotEventCallback(const std::string vpotValue, const Bank bank, const std::string &channelStripID, EventSource source);
-    void masterStripButtonEventCallback(const std::string buttonID, const Bank bank, const std::string &channelStripID, EventSource source);
-
-    void removeMasterStripAssociationCallback(const Bank bank, const std::string channelStripID);
-
-    void setMasterVolume(std::string volumeString, int dspDescriptor);
-
-    void initializeMasterChannel();
 };
 
 // Singleton modifications
@@ -62,4 +70,3 @@ inline MasterChannel &MasterChannel::getInstance()
     static MasterChannel instance;
     return instance;
 }
-

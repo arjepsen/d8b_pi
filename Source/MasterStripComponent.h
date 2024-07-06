@@ -21,9 +21,14 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
-#include "EventBusClass.h"
+// #include "EventBusClass.h"
 #include "FaderValueLookupClass.h"
-//#include "SharedDataStructures.h"
+// #include "SharedDataStructures.h"
+#include "ChannelStripComponentInterface.h"
+
+// Forward declaration of eventBus - avoid circular dependency.
+class EventBus;
+
 //[/Headers]
 
 
@@ -36,7 +41,8 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class MasterStripComponent  : public juce::Component,
+class MasterStripComponent  : public ChannelStripComponentInterface,
+                              public juce::Component,
                               public juce::Slider::Listener,
                               public juce::ComboBox::Listener,
                               public juce::Button::Listener
@@ -51,16 +57,19 @@ public:
 
     void setMasterFaderPosition(double value);
 
-	// void faderMoveEventCallback(std::string faderValue);
+    // void faderMoveEventCallback(std::string faderValue);
     // void vpotTurnEventCallback(std::string vpotValue);
     // void buttonEventCallback(std::string buttonValue);
-	void faderUpdateEventCallback(int faderValue);
-    void vpotTurnEventCallback(std::string vpotValue);
-    void buttonEventCallback(std::string buttonValue);
+    //void faderUpdateEventCallback(int faderValue);
+    // void vpotTurnEventCallback(std::string vpotValue);
+    // void buttonEventCallback(std::string buttonValue);
+
+    // void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
+    // TODO: Set it up through event bus instead.
 
 
-    //void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
-    //TODO: Set it up through event bus instead.
+    void faderMoveEventCallback(const char (&faderHexValue)[2]) override;
+    void activateEventListeners() override;
 
     //[/UserMethods]
 
@@ -74,13 +83,13 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-    EventBus &eventBus;        // Reference to EventBus singleton.
+    EventBus &eventBus; // Reference to EventBus singleton.
     FaderValueLookup &faderValueLookup;
-    //HexToIntLookup &hexToIntLookup;
+    HexToIntLookup &hexToIntLookup;
 
-	std::function<void(float)> masterFaderMoveCallback;
+    std::function<void(float)> masterFaderMoveCallback;
 
-
+    void deactivateEventListeners();
 
     //[/UserVariables]
 
@@ -91,8 +100,8 @@ private:
     std::unique_ptr<juce::ComboBox> masterInsertR;
     std::unique_ptr<juce::TextButton> mastersBankBtn;
     std::unique_ptr<juce::TextButton> effectsBankBtn;
-    std::unique_ptr<juce::TextButton> tapeBanksBtn;
-    std::unique_ptr<juce::TextButton> lineBanksBtn;
+    std::unique_ptr<juce::TextButton> tapeBankBtn;
+    std::unique_ptr<juce::TextButton> lineBankBtn;
     std::unique_ptr<juce::TextButton> panMasterBtn;
     std::unique_ptr<juce::TextButton> soloMasterBtn;
     std::unique_ptr<juce::TextButton> cuePan1Btn;

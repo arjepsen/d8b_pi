@@ -1,11 +1,15 @@
 #pragma once
 
 #include "ChannelStripComponent.h"
+#include "ChannelClass.h"
+#include "ChannelStripClass.h"
+#include "ChannelStripInterface.h"
 #include "MenuBar.h"
 #include "MixerManagerClass.h"
 #include "MasterStripComponent.h"
 #include "EventBusClass.h"
 #include <JuceHeader.h>
+#include "SharedDataStructures.h"
 
 //#include "SettingsWindow.h"
 //#include "settingsplay.h"
@@ -42,34 +46,15 @@ private:
 
     MenuBar menuBar;
 
-    ChannelStripComponent chStrips[24];
+    // Declare array of UI channelstrips.
+    ChannelStripComponent channelStripComponetArray[CHANNEL_STRIP_COUNT];
 
-    // ChannelStripComponent channelStrip1;
-    // ChannelStripComponent channelStrip2;
-    // ChannelStripComponent channelStrip3;
-    // ChannelStripComponent channelStrip4;
-    // ChannelStripComponent channelStrip5;
-    // ChannelStripComponent channelStrip6;
-    // ChannelStripComponent channelStrip7;
-    // ChannelStripComponent channelStrip8;
-    // ChannelStripComponent channelStrip9;
-    // ChannelStripComponent channelStrip10;
-    // ChannelStripComponent channelStrip11;
-    // ChannelStripComponent channelStrip12;
-    // ChannelStripComponent channelStrip13;
-    // ChannelStripComponent channelStrip14;
-    // ChannelStripComponent channelStrip15;
-    // ChannelStripComponent channelStrip16;
-    // ChannelStripComponent channelStrip17;
-    // ChannelStripComponent channelStrip18;
-    // ChannelStripComponent channelStrip19;
-    // ChannelStripComponent channelStrip20;
-    // ChannelStripComponent channelStrip21;
-    // ChannelStripComponent channelStrip22;
-    // ChannelStripComponent channelStrip23;
-    // ChannelStripComponent channelStrip24;
+    // Same for the Channel and Channelstrip objects.
+    Channel channelArray[CHANNEL_COUNT]; 
+    ChannelStrip channelStripArray[CHANNEL_STRIP_COUNT];    // +1 for the master strip.
+    MasterChannel &masterChannel;
 
-    MasterStripComponent masterStrip;
+    MasterStripComponent masterStripComponent;
 
     EventBus &eventBus;
     MixerManager &mixerManager;

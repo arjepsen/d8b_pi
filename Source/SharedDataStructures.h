@@ -14,6 +14,20 @@
 #include <stdio.h>
 #include "Debug.h"
 
+static constexpr int CHANNEL_COUNT = 96;
+constexpr int CHANNEL_STRIP_COUNT = 24; // Number of channel strips, excluding the master strip.
+constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
+
+
+
+enum Bank
+{
+    LINE_BANK,
+    TAPE_BANK,
+    EFFECTS_BANK,
+    MASTERS_BANK,
+    NUMBER_OF_BANKS
+};
 
 // Enumeration of the channelstrips
 enum ChStripID
@@ -42,7 +56,7 @@ enum ChStripID
     CH_STRIP22,
     CH_STRIP23,
     CH_STRIP24,
-    CH_STRIP_COUNT
+    CH_STRIP_MASTER
 };
 
 const int MASTER_CH_STRIP = 24;

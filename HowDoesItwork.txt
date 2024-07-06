@@ -32,22 +32,32 @@ WHEN A CONSOLE PHYSICAL EVENT (like moving a fader) HAPPENS:
 1: The Brain board sends a message on the brain com uart.
 2: The BrainComClass' messageReceiver thread reads the message, and write it to the circular buffer singleton.
 3: The messageHandler thread in the mixerManager class pops the message off the buffer, and posts an event in the 
-    eventBus instance (like: eventBus.postEvent(FADER_EVENT, channelStripID, value, CONSOLE_EVENT);)
-    As seen in the example, the call specifies what the interaction was, and whether it was a console event, or ui event.
-4: The eventBus has a pointer to a data structure for the currently selected bank.
-    This structure holds an array of callbacks (fader, vpot, button) for the channel that is associated with the given 
-    channel strip. So the eventBus.postEvent() method will call the corresponding callback from the channel.
-5: The channel callback will first send a DSP command for the given channel.
-    Next, it will retreive a "set" of other associated channel strips on the current bank, which is copied, so
-    the set reflects both ui and console. The "calling" channel strip ID is removed from the corresponding set.
-    Then commands are sent to the console for any associated channel strips to be moved.
-    Finally, a new "associated" event post is called, for the ui to be updated.
-
-
-
-
+    eventBus instance.
+4: This event post first calls a method within the channelStrip object with the fader value.
+5: The channelStrip object then calls a method from the channel it is associated with
+   on that bank.
+6: The channel object then sends a DSP command to the DSP board, to update it's level.
+   (unless the channel is muted, in which case it only updates it's record of the volume.)
+7: Channel returns, channelstrip returns, so we're back in the event post method in eventbus.
+8: The eventBus keeps a 2D array of bitmaps for each channelstrip, on each bank.
+   So for each channelstrip on each bank, there is one bitmap, which shows
+   which other channelstrips on that bank control the same channel.
+   The bitmap will be copied to two new bitmaps, and one of them will have the
+   "caller" removed, to avoid sending a movement command to the caller (UI or Console).
+   It then iterates over the bitmap for ui and console, and sends commands for updating
+   all associated channelstrips.
 
 Things to explain:
 What is a "channel"
 What is a bank.
 The "Association" between the channelstrips and a channel.
+
+
+
+LEDS:
+So, a channel always keeps a bitmap of LED states. This is actually something belonging to the channelStrip, 
+But it makes sense that a channel keeps a bitmap corresponding to it's states - 'cause the channelstrip does not
+keep track of that.
+The channelstrip will keep track of it's currently lit LED's though.
+In this way, when there is a change, we can compare these two, to get a bitmap of which led's to change.
+This is also to prevent a situation where any change would require the channelstrip to track the changes on all of the four banks.

@@ -14,9 +14,9 @@
 #pragma once
 
 // #include "BankEnum.h" // moved to event bus
-#include "BrainComClass.h"
+//#include "BrainComClass.h"
 #include "DspComClass.h"
-#include "EventBusClass.h"
+//#include "EventBusClass.h"
 // #include "LedIDMaps.h"    // included in implementation.
 #include <array>
 #include <cstdint>
@@ -26,51 +26,64 @@
 // #include <functional> // For pointers to vpot function depending on vpot mode.
 #include "SharedDataStructures.h"
 #include "LEDClass.h"
+#include <functional>
+
+enum VpotFunctionEnum
+{
+    VPOT_PAN,
+    VPOT_AUXSEND,
+    VPOT_AUXSEND_STEREO,
+    VPOT_LVL2TAPE,
+    VPOT_DIGITAL_TRIM,
+    VPOT_AUX_STEREO_PAN,
+    NUMBER_OF_VPOT_FUNCTIONS
+};
 
 class Channel
 {
   private:
     // References to singletons
-    EventBus &eventBus;
-    BrainCom &brainCom;
+    //EventBus &eventBus;
+    //BrainCom &brainCom;
     DspCom &dspCom;
     IntToHexLookup &intToHexLookup;
     HexToIntLookup &hexToIntLookup;
-    LEDringLookup &ledRingLookup;
+    //LEDringLookup &ledRingLookup;
 
-
-    // int *dspDescriptorPtr; // Reference to the DSP file descriptor.
-    // int *brainDescriptorPtr; // Reference to the Brain file descriptor.
+    uint32_t ledOnBitmap = 0;
+    uint32_t ledBlinkBitmap = 0;
 
     const int CH_NUMBER;  // TODO: maybe enumerate this?
     // const std::string CH_ID_STR; // unique ID for each channel (1 - 48)
-    const char *const CH_ID_STR;
+    const char *const DSP_CH_ID_STR;
 
     // Map of all the channelstrips that are configured to control this channel.
     // std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
     //std::unordered_map<Bank, std::unordered_set<char[2]>> associatedChannelStrips;
-    bool associatedChannelStrips[NUMBER_OF_BANKS][CH_STRIP_COUNT];
+    //bool associatedChannelStrips[NUMBER_OF_BANKS][CHANNEL_STRIP_COUNT];
     
     // Lets try using a bitmask instead.
-    unsigned int associatedChannelStripBitmask[NUMBER_OF_BANKS];
+    //uint32_t associatedChannelStripBitmask[NUMBER_OF_BANKS];
 
 
     // Type definition of the pointer to the current function to handle vpot events.
-    typedef void (Channel::*VpotFunction)(const char (&)[2], const Bank, ChStripID, EventSource);
+    //typedef void (Channel::*VpotFunction)(const char (&)[2], const Bank, ChStripID, EventSource);
 
-    // Pointer to the currently selection vpot event handler function
-    VpotFunction currentVpotFunction;
+    // // Pointer to the currently selection vpot event handler function
+    // VpotFunction currentVpotFunction;
 
-    // These are the possible vpot event handlers
-    void handleVpotPan(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    void handleVpotAuxSend(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    void handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    void handleVpotLevelToTape(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    void handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    void handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    // // These are the possible vpot event handlers
+    // void handleVpotPan(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    // void handleVpotAuxSend(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    // void handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    // void handleVpotLevelToTape(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    // void handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
+    // void handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
     
+    void bankChangeCallback(ChStripID chStripID);
 
-
+    
+    ChStripLED currentRingLED;
 
 
     //... more....
@@ -81,20 +94,12 @@ class Channel
     // E - Level to tape
     // F - Digital trim.
 
-    // std::string volume;
+
     char volume[3] = "00"; // Initialize to "00".
-    // uint8_t volume;          // Fader & DSP volume level. (0 - FF (hex)/ 0 - 255)
-    int pan; // (0 - FE) - weird things happen on "FF".... 
-    //bool panDotCenter;
-
-    ChStripLED currentRingLED;
-
-    // std::string panValue = "7F";	// Center
-
-    bool muted; // Muting is done by setting volume to 0, so there should be some mechanism to return to previous volume, when unmuting.
-               // So when muted, receive fader volume changes and update the volume here, but dont send anything to dsp.
-
-    // bool solo;               // maybe there should be a general list of soloed channels somewhere?
+    int pan = 0x7F;; // (0 - FE) - weird things happen on "FF".... 
+    bool mute = false; // Muting sets mute=true and sends vol=0 DSP command, but keeps current volume registered, for unmuting.
+    bool solo = false;
+    bool select = false;
 
     // These should probably be made to classes.... Not sure... see below.
     // bool phaseReversed;
@@ -102,35 +107,17 @@ class Channel
     // bool compressorOn;
     // bool eqOn;
 
-    // bool assignments[9];     // This array should hold the list of which assignments the channel has (bus 1-8 plus L-R) (L-R = index 0)
-
-    // std::array<char, 8> label;          // channel label.
-
     // uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
     // bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
-    // void subscribeToLineBankEvents();
-    
 
   public:
     // Constructor
     Channel();
-    // uint8_t getVolume() { return volume; }
 
-    // void setVolume(std::string);
-    void setVolume(char *volumeString);
-        //std::string getID();
-
-    // void setChannelStrip(std::string stripID);
-    // void linkDspDescriptor(int *dspDescriptor);
-    // void removeLineBankStripSubscription(std::string channelStripID);
-    // void removeSubscription(BankEventType eventType, std::string channelStripID);
-
-    void channelStripFaderEventCallback(const char (&faderValue)[2], Bank bank, ChStripID channelStripID, EventSource source);
-    void channelStripVpotEventCallback(const char (&vPotValue)[2], Bank bank, ChStripID channelStripID, EventSource source);
-    //void channelStripButtonEventCallback(const char buttonAction);
+    void updateVolume(const char (&faderValue)[2]);
 
     // Button callbacks. 
     // 1: Send dsp command
@@ -150,6 +137,26 @@ class Channel
     void subscribeToChStrip(Bank bank, ChStripID chStripID);
 
     void initializeChannel();
+    int getCurrentVpotValue();
+    inline const char * getVolume() const {return volume;}
+    inline int getChannelNumber() {return CH_NUMBER; };
+    inline bool getMuteState() { return mute; };
+    inline bool getSoloState() { return solo; };
+    inline bool getSelectState() { return select; };
+    //inline bool getVpotDotState() { return vPotDotOn; };
+    inline uint32_t getLedOnBitmap() { return ledOnBitmap; };
+    inline uint32_t getLedBlinkBitmap() { return ledBlinkBitmap; };
+
+    void printMyBitmap()
+    {
+        printf("=== Ch: %d, bitmap: %d\n", CH_NUMBER, ledOnBitmap);
+    }
+
+    void test()
+    {
+        printf("I'm channel number %d, my ID is: %s\n", CH_NUMBER, DSP_CH_ID_STR);
+    }
+
 };
 
 // // Should these be classes also??
@@ -174,3 +181,31 @@ class Channel
 // float eqLowQ;
 // float eqMidQ;
 // float eqHighQ;
+
+// ================= CHANNEL VPOT FUNCTIONS =====================
+// Pan: 
+// Ch. 1 - 48: 127L-c-127R, Standard: c.
+// FX + RET: Stereo pairs: 127L+127R
+// Grp: None, MIDI: c, Bus: None
+// master: front(127)-back(127). Center dot on front. 
+//
+// Level to tape:
+// ALL channels: OFF(-90) - 0.0 - 10.0, standard: 0.0 (following same logarithmic steps as fader)
+// master: none/disabled.
+//
+// Digital Trim:
+// Ch. 1-48: Same as level to tape.
+// FX+Masters banks: None.
+//
+// Aux1-8: 
+// Line, Tape + FX banks: OFF - 10.0, standard: OFF
+// Masters bank: none.
+// master: OFF(-100.0) - 0.0, standard: 0.0 (dotted)
+// the values for master seems to follow different scale... center seems to be around -10.0
+//
+// Stereo Aux (9-10, 11-12):
+// Same as Aux1-8. This is called "Cue Level" in the UI.
+//
+// Cue Pans (two buttons below stereo auxes):
+// Controls the PAN of the stereo auxes.
+// Same as for the normal pan, except all None on Masters bank.

@@ -36,27 +36,24 @@ MixerManager::MixerManager()
       hexToIntLookup(HexToIntLookup::getInstance())
       //isInitializing(false)
 {
-    isInitializing = false;
-    // std::array automatically initializes elements to default value -
-    // so Channel constructor gets called automatically.
-    // So the channel objects are ready for when we instantiate the map of channelstrips after mixer init script.
+    // We already have an array of channels.
+    // TODO: maybe seperate class for FX, RET, MIDI, Grp and Bus?
+    // TODO: should this be made inherited classes of a Channel interface? yes.
 
-    // Pass the callback function to the message handlers.
-    // MAKE DIFFERENT CALLBAKCS FOR EACH BRAIN MESSAGE (fader, vpot, btndwn, btnup)
 
-    // Set up channelstrip map of pointers to channel objects. (initially Line bank, ch. 1-24)
-    for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
-    {
-        // TODO: Change to char array instead.
-        // Create the 2-digit hex code for the channelstrip.
-        std::stringstream stream;
-        stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << i;
-        std::string hexCode = stream.str();
+    // // Create the initial association between channel and channelstrip by writing
+    // // in pointers to the channels.
+    // for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
+    // {
+    //     channelStripArray[i].setChannelAssociation(LINE_BANK, &channelArray[i]);
+    //     channelStripArray[i].setChannelAssociation(TAPE_BANK, &channelArray[i + CHANNEL_STRIP_COUNT]);
+    //     channelStripArray[i].setChannelAssociation(EFFECTS_BANK, &channelArray[i + CHANNEL_STRIP_COUNT * 2]);
+    //     channelStripArray[i].setChannelAssociation(MASTERS_BANK, &channelArray[i + CHANNEL_STRIP_COUNT * 3]);
+    // }
 
-        // Create an element in the map
-        channelStripMap[hexCode] = &channels[i];
-
-    }
+    // // TODO: now, how do we handle the changing of association? Somehow we need
+    // // to be able to get a hold of the pointers for the channels....?
+    // FIX THIS NOW - HOW DO WE UPDATE ASSOCIATION? HOW DO WE GET THE POINTERS?
 }
 
 MixerManager::~MixerManager()
@@ -65,12 +62,12 @@ MixerManager::~MixerManager()
 }
 
 // ############################### METHODS ####################################
-const Channel &MixerManager::getChannel(uint8_t id) const
-{
-    if (id < CHANNEL_COUNT)
-        return channels[id];
-    throw std::out_of_range("Invalid channel ID");
-}
+// const Channel &MixerManager::getChannel(uint8_t id) const
+// {
+//     if (id < CHANNEL_COUNT)
+//         return channels[id];
+//     throw std::out_of_range("Invalid channel ID");
+// }
 
 bool MixerManager::setBrainPort(std::string deviceString)
 {
@@ -226,16 +223,35 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
 
                 // TODO: THIS - THIS is where we must initialize things - now the com is up.
                 // Handle saved settings.
-                // For now, just call each channel's init method
-                for (int i = 0; i < 24; i++)
-                {
-                    channels[i].initializeChannel();
-                }
+                // But maybe we should move channels and strips to eventbus?
+
+                // Initialize ALL channels. Coms are up now, so we can set things up.
+                // for (Channel channel : channelArray)
+                // {
+                //     channel.initializeChannel();
+                // }
+                
+                eventBus.initializeChannels();
+                eventBus.initializeUiStrips();
+                //eventBus.initializeChannelStrips();
 
                 // Also initialize the master channel
-                masterChannel.initializeMasterChannel();
+                // TODO: Move master channel object to eventbus also??
+                //masterChannel.initializeMasterChannel();
+
+                // Run through the channel strips, and update settings.
+                // This does nothing for now, but ,later when settings are saved and loaded
+                // this will have an impact.
+                // for (ChannelStrip chStrip : channelStripArray)
+                // {
+                //     chStrip.updateChStrip(LINE_BANK);
+                // }
+
 
                 isInitializing = false;
+
+                // Tell eventBus to activate the UI listeners.
+                eventBus.enableUiListeners();
 
                 // All the way at the end of the thread, re-enable the init button.
                 juce::MessageManager::callAsync([initMixerBtn]()
@@ -266,6 +282,8 @@ void MixerManager::handleBufferMessage()
         char msgCategory = msgBuffer[msgLength - 1]; 
 
         // TODO: Might need to make a check to ensure message is not empty....?
+        // TODO: How about console reset: "R"??
+
 
         switch (msgCategory)
         {
@@ -288,6 +306,7 @@ void MixerManager::handleBufferMessage()
             }
             case 'v': // V-Pot turned
             {
+                // Almost same as above, but because of buttons, it's faster to duplicate code.
                 // Get the ID of the activated channel. Convert to ChStripID
                 char hexIdString[2] = {msgBuffer[0], msgBuffer[1]};
                 ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexIdString));
@@ -348,10 +367,10 @@ void MixerManager::handleBufferMessage()
 // #########################################################################################
 // Method to a pointer to the channel Strip Component array from the MainComponent.
 // #########################################################################################
-void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripArray)
-{
-    chStripComponents = chStripArray;
-}
+// void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripArray)
+// {
+//     chStripComponents = chStripArray;
+// }
 
 // ###############################################################################
 // Faders sends a hex value (byte) on a linear scale.

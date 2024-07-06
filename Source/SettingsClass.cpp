@@ -49,7 +49,7 @@ Settings::Settings() : brainPort(""), dspPort(""), brainBoostState(false)
     //         pclose(lsusb_output);
     //     }
     // }
-    
+
 }
 
 Settings::~Settings() {}
@@ -148,6 +148,7 @@ void Settings::findUSBDevices() {
     }
 
     globfree(&glob_result);
+
 }
 
 

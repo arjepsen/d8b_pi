@@ -18,7 +18,7 @@
 */
 
 //[Headers] You can add your own extra header files here...
-
+#include "EventBusClass.h"
 //[/Headers]
 
 #include "ChannelStripComponent.h"
@@ -45,9 +45,6 @@ ChannelStripComponent::ChannelStripComponent ()
 
     // Give each new channelStripComponent a unique hex ID string, from "00" and upwards.
     // This corresponds to "channelStripID" in other places of the program.
-    // std::stringstream stream;
-    // stream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << nextChannelStripComponentID;
-    // channelStripComponentID = stream.str();
     channelStripComponentID = static_cast<ChStripID>(nextChannelStripComponentID);
 
     // // Precompute the array of logarithms the first time this class is instantiated.
@@ -67,30 +64,6 @@ ChannelStripComponent::ChannelStripComponent ()
     //     float faderValue = i / 10.0f;
     //     int dspValue = static_cast<int>((pow(10, (faderValue + 90) / 100.0) - 1) / 9.0 * 255);
 
-
-
-    // Set up lambda's for the callbacks, then collect them in a struct, for
-    // handing over to the event bus.
-    // These are the callbacks for updating the ui after DSP commands are sent.
-    AssociateUiFaderCallback uiFaderUpdateCallback = [this](const char (&faderHexValue)[2])
-    {
-        this->faderMoveEventCallback(faderHexValue);
-    };
-
-    AssociateUiVpotCallback uiVpotUpdateCallback = [this](int vPotValue)
-    {
-        this->vpotTurnEventCallback(vPotValue);
-    };
-
-
-    // Declare a struct of callbacks and write the fader and vpot callback to it.
-    EventBus::UiStripCallbacks uiStripCallbacks;
-    uiStripCallbacks.uiFaderCallback = uiFaderUpdateCallback;
-    uiStripCallbacks.uiVpotCallback = uiVpotUpdateCallback;
-
-    // Now call the Event Bus ui subscribe method.
-    eventBus.channelStripComponentsubscribe(LINE_BANK, channelStripComponentID, uiStripCallbacks);
-    // TODO: How to initialize/constructor the other bank strip callbacks?
 
     // Increment the static counter.
     nextChannelStripComponentID++;
@@ -609,6 +582,9 @@ ChannelStripComponent::ChannelStripComponent ()
 
     //[Constructor] You can add your own custom stuff here..
 
+    // Disable the listeners for controls - re-enable once the console is booted.
+    deactivateEventListeners();
+
     // Set initial channel strip label (nextID incremented, so fits now.)
     chLabel->setText("Ch. " + (juce::String)nextChannelStripComponentID, juce::dontSendNotification);
 
@@ -1023,16 +999,10 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
 
         // Fader was moved in the UI.
         // TODO: Clean up.
-
-        // float newFaderValue = std::round(sliderThatWasMoved->getValue() * 10.0f) / 10.0f;
-        // std::string dspFaderValue = faderValueLookup.dspHexLookupMap[newFaderValue];
-
         const char * faderHexString = faderValueLookup.getDspHexValue(sliderThatWasMoved->getValue());
         char eventValue[2] = {faderHexString[0], faderHexString[1]};
 
-
         // Use event post
-        //eventBus.postEvent(FADER_EVENT, channelStripComponentID, dspFaderValue, UI_EVENT);
         eventBus.postFaderEvent(channelStripComponentID, eventValue, UI_EVENT);
 
         //[/UserSliderCode_fader]
@@ -1364,15 +1334,8 @@ void ChannelStripComponent::setFaderPosition(double value)
 //void ChannelStripComponent::faderMoveEventCallback(std::string faderHexValue)
 void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2])
 {
-    // Convert the 2-char hex value to an int, using bitwise operations.
-
-    //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
-    //int faderIntValue = ((faderHexValue[0] << 8) | faderHexValue[1]);
+    // Convert the 2-char hex value to an int.
     int faderIntValue = hexToIntLookup.hexToInt(faderHexValue);
-
-
-    // double faderValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
-    // setFaderPosition(precomputedLog10Values[decimalValue]);
 
     // Use the integer value as index lookup in the array of precomputed log values
     float logValue = *faderValueLookup.getLog10Value(faderIntValue);
@@ -1413,6 +1376,107 @@ void ChannelStripComponent::buttonEventCallback(std::string buttonValue)
     // TODO implement handling of channel strip buttons.
 }
 
+
+/****************************************************************************
+ * @brief This method is used for removing the listeners from the UI objects.
+ *        This is used in the start, before the console has been booted, to
+ *        ensure that the user can fiddle with the UI without the program
+ *        crashing.
+ *        Projucer is bent on adding listeners, so we unfortunately have to
+ *        manually remove them, and the adding them again later, after the
+ *        console is ready.
+ ****************************************************************************/
+void ChannelStripComponent::deactivateEventListeners()
+{
+    fader->removeListener(this);
+    writeButton->removeListener(this);
+    vPot->removeListener(this);
+    selectBtn->removeListener(this);
+    soloBtn->removeListener(this);
+    muteBtn->removeListener(this);
+    recordBtn->removeListener(this);
+    channelSelector->removeListener(this);
+    preEqInsert->removeListener(this);
+    postEqInsert->removeListener(this);
+    aux1Send->removeListener(this);
+    aux2Send->removeListener(this);
+    aux3Send->removeListener(this);
+    aux4Send->removeListener(this);
+    aux5Send->removeListener(this);
+    aux6Send->removeListener(this);
+    aux7Send->removeListener(this);
+    aux8Send->removeListener(this);
+    aux9_10Pan->removeListener(this);
+    aux9_10Send->removeListener(this);
+    aux11_12Pan->removeListener(this);
+    aux11_12Send->removeListener(this);
+    phaseBtn->removeListener(this);
+    eqBtn->removeListener(this);
+    compressorBtn->removeListener(this);
+    gateBtn->removeListener(this);
+    chAssignLRBtn->removeListener(this);
+    bus1AssignBtn->removeListener(this);
+    bus2AssignBtn->removeListener(this);
+    bus3AssignBtn->removeListener(this);
+    bus4AssignBtn->removeListener(this);
+    bus5AssignBtn->removeListener(this);
+    bus6AssignBtn->removeListener(this);
+    bus7AssignBtn->removeListener(this);
+    bus8AssignBtn->removeListener(this);
+    chDigitalTrim->removeListener(this);
+    chLevelToTape->removeListener(this);
+    juce__comboBox4->removeListener(this);
+}
+
+
+
+/***************************************************************************
+ * @brief This method is used to attach eventListeners to the UI objects.
+ *        This allows the user to fiddle with the UI before booting the
+ *        console, without a lot of errors happening.
+ ***************************************************************************/
+void ChannelStripComponent::activateEventListeners()
+{
+    fader->addListener (this);
+    writeButton->addListener (this);
+    vPot->addListener (this);
+    selectBtn->addListener (this);
+    soloBtn->addListener (this);
+    muteBtn->addListener (this);
+    recordBtn->addListener (this);
+    channelSelector->addListener (this);
+    preEqInsert->addListener (this);
+    postEqInsert->addListener (this);
+    aux1Send->addListener (this);
+    aux2Send->addListener (this);
+    aux3Send->addListener (this);
+    aux4Send->addListener (this);
+    aux5Send->addListener (this);
+    aux6Send->addListener (this);
+    aux7Send->addListener (this);
+    aux8Send->addListener (this);
+    aux9_10Pan->addListener (this);
+    aux9_10Send->addListener (this);
+    aux11_12Pan->addListener (this);
+    aux11_12Send->addListener (this);
+    phaseBtn->addListener (this);
+    eqBtn->addListener (this);
+    compressorBtn->addListener (this);
+    gateBtn->addListener (this);
+    chAssignLRBtn->addListener (this);
+    bus1AssignBtn->addListener (this);
+    bus2AssignBtn->addListener (this);
+    bus3AssignBtn->addListener (this);
+    bus4AssignBtn->addListener (this);
+    bus5AssignBtn->addListener (this);
+    bus6AssignBtn->addListener (this);
+    bus7AssignBtn->addListener (this);
+    bus8AssignBtn->addListener (this);
+    chDigitalTrim->addListener (this);
+    chLevelToTape->addListener (this);
+    juce__comboBox4->addListener (this);
+}
+
 //[/MiscUserCode]
 
 
@@ -1426,7 +1490,7 @@ void ChannelStripComponent::buttonEventCallback(std::string buttonValue)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="ChannelStripComponent" componentName="ChannelStripComponent"
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())&#10;&#10;hexToIntLookup(HexToIntLookup::getInstance())"
+                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance())&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())&#10;&#10;hexToIntLookup(HexToIntLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="75" initialHeight="1024">
   <BACKGROUND backgroundColour="ff242d31">

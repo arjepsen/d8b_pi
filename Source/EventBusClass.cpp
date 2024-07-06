@@ -25,25 +25,42 @@ EventBus::EventBus() : channelStripButtonBase{
                            0x149, 0x131, 0x139, 0x121, 0x129, 0x111  // 19 - 24
                        }
 {
+    // Channels and channelstrips are instantiated by array instantiation.
+    // Create the initial association between channel and channelstrip by writing
+    // in pointers to the channels.
+    // for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
+    // {
+    //     channelStripArray[i].setChannelAssociation(LINE_BANK, &channelArray[i]);
+    //     channelStripArray[i].setChannelAssociation(TAPE_BANK, &channelArray[i + CHANNEL_STRIP_COUNT]);
+    //     channelStripArray[i].setChannelAssociation(EFFECTS_BANK, &channelArray[i + CHANNEL_STRIP_COUNT * 2]);
+    //     channelStripArray[i].setChannelAssociation(MASTERS_BANK, &channelArray[i + CHANNEL_STRIP_COUNT * 3]);
+    // }
 
     //Set the initial bank to Line Bank
     currentBank = LINE_BANK;
     // currentBankCallbacks = &lineBankCallbacks;
     // setBankPoster(LINE_BANK);
 
+    // Register master strip in the association bitmap (The regular strips are handled with "chStripEventSubscribe")
+    channelAssociationBitmaps[CH_STRIP_MASTER][LINE_BANK] |= 1 << CH_STRIP_MASTER;
+    channelAssociationBitmaps[CH_STRIP_MASTER][TAPE_BANK] |= 1 << CH_STRIP_MASTER;
+    channelAssociationBitmaps[CH_STRIP_MASTER][EFFECTS_BANK] |= 1 << CH_STRIP_MASTER;
+    channelAssociationBitmaps[CH_STRIP_MASTER][MASTERS_BANK] |= 1 << CH_STRIP_MASTER;
+
+
     initializeButtonCallbackMaps();
 
     // Write empty unsubscription callbacks into the unsubscriptions array
     // to avoid errors first time it is called (since it's called before
     // the new callbacks are written ...)
-    UnSubscribeCallback emptyCallback = [](Bank, ChStripID) {};
-    for (auto& bank : unSubScribeCallbackArray)
-    {
-        for (auto& unSubScribeCallback : bank)
-        {
-            unSubScribeCallback = emptyCallback;
-        }
-    }
+    // UnSubscribeCallback emptyCallback = [](Bank, ChStripID) {};
+    // for (auto& bank : unSubScribeCallbackArray)
+    // {
+    //     for (auto& unSubScribeCallback : bank)
+    //     {
+    //         unSubScribeCallback = emptyCallback;
+    //     }
+    // }
 }
 
 // Destructor
@@ -53,135 +70,202 @@ EventBus::~EventBus() {}
 // ################################# SUBSCRIBERS #####################################
 // ###################################################################################
 
-/*******************************************************************************
- * @brief This method is used by the channel objects, to "subscribe" to events,
- *        i.e. to write in their callback methods.
- *        First it calls the previously entered "unsubscribe" callback, which
- *        lets the channel update it's channelstrip associations.
- * 
- * @param bank 
- * @param chStripID 
- * @param callbacks This is a structure of all the callbacks for a channelstrip.
- *******************************************************************************/
-void EventBus::channelStripEventSubscribe(Bank bank, ChStripID chStripID, ChannelStripCallbacks& callbacks) 
-{
-    // First, call the unsubscribe callback, to let the channel update
-    // it's channelstrip association bitmap.
-    unSubScribeCallbackArray[bank][chStripID](bank, chStripID);
+// /*******************************************************************************
+//  * @brief This method is used by the channel objects, to "subscribe" to events,
+//  *        i.e. to write in their callback methods.
+//  *        First it calls the previously entered "unsubscribe" callback, which
+//  *        lets the channel update it's channelstrip associations.
+//  * 
+//  * @param bank 
+//  * @param chStripID 
+//  * @param callbacks This is a structure of all the callbacks for a channelstrip.
+//  *******************************************************************************/
+// void EventBus::channelStripEventSubscribe(Bank bank, ChStripID chStripID, ChannelStripCallbacks& callbacks) 
+// {
+//     WE MIGHT BE CHANGING THIS...
+//     first, we must fire a callback within the channelstrip object.
+//       This must receive a pointer to the (new) channel. bank must also be 
+//       passed.
+//       the channelstrip object will update it's settings, by retreiving info from
+//       the new channel. (updating led's and faders IF the change happens on
+//       the currently selected bank.)
+    
+//     Next, another callback must be made for updating the UI association....
 
 
-    // Next, write in the new callbacks.
-    faderCallbackArray[bank][chStripID] = callbacks.faderCallback;
-    vPotCallbackArray[bank][chStripID] = callbacks.vPotCallback;
-
-    // Get the button base id, for looking up the button ID's
-    int buttonBase = channelStripButtonBase[chStripID];
-
-    // Write in the button callbacks, using the button enumeration for map key.
-    buttonCallbackMap[bank][buttonBase + MUTE_BTN] = callbacks.muteBtnCallback;
-    buttonCallbackMap[bank][buttonBase + SOLO_BTN] = callbacks.soloBtnCallback;
-    buttonCallbackMap[bank][buttonBase + SELECT_BTN] = callbacks.selectBtnCallback;
-    buttonCallbackMap[bank][buttonBase + WRITE_BTN] = callbacks.writeBtnCallback;
-    buttonCallbackMap[bank][buttonBase + ASSIGN_BTN] = callbacks.assignBtnCallback;
-    buttonCallbackMap[bank][buttonBase + REC_RDY_BTN] = callbacks.recRdyBtnCallback;
-}
-
-void EventBus::channelStripComponentsubscribe(Bank bank, ChStripID stripID, UiStripCallbacks callbacks)
-{
-    associateUiFaderCallbackArray[bank][stripID] = callbacks.uiFaderCallback;
-    associateUiVpotCallbackArray[bank][stripID] = callbacks.uiVpotCallback;
-}
+//     // First, call the unsubscribe callback, to let the channel update
+//     // it's channelstrip association bitmap.
+//     unSubScribeCallbackArray[bank][chStripID](bank, chStripID);
 
 
+//     // Next, write in the new callbacks.
+//     faderCallbackArray[bank][chStripID] = callbacks.faderCallback;
+//     vPotCallbackArray[bank][chStripID] = callbacks.vPotCallback;
+
+//     // Get the button base id, for looking up the button ID's
+//     int buttonBase = channelStripButtonBase[chStripID];
+
+//     // Write in the button callbacks, using the button enumeration for map key.
+//     buttonCallbackMap[bank][buttonBase + MUTE_BTN] = callbacks.muteBtnCallback;
+//     buttonCallbackMap[bank][buttonBase + SOLO_BTN] = callbacks.soloBtnCallback;
+//     buttonCallbackMap[bank][buttonBase + SELECT_BTN] = callbacks.selectBtnCallback;
+//     buttonCallbackMap[bank][buttonBase + WRITE_BTN] = callbacks.writeBtnCallback;
+//     buttonCallbackMap[bank][buttonBase + ASSIGN_BTN] = callbacks.assignBtnCallback;
+//     buttonCallbackMap[bank][buttonBase + REC_RDY_BTN] = callbacks.recRdyBtnCallback;
+// }
+
+// void EventBus::channelStripComponentsubscribe(Bank bank, ChStripID stripID, UiStripCallbacks callbacks)
+// {
+//     associateUiFaderCallbackArray[bank][stripID] = callbacks.uiFaderCallback;
+//     associateUiVpotCallbackArray[bank][stripID] = callbacks.uiVpotCallback;
+// }
 
 
-/*****************************************************************************
- * @brief This method is for the master channel object to subscribe to master
- *        fader events. No unsubscribe, since this should not change.
- *        (We don't want to move the master fader to another strip, do we?)
- * 
- * @param masterFaderCallback 
- *****************************************************************************/
-void EventBus::masterFaderEventSubscribe(FaderCallback masterFaderCallback)
-{
-    // The master fader is called on all banks.
-    faderCallbackArray[LINE_BANK][MASTER_CH_STRIP] = masterFaderCallback;
-    faderCallbackArray[TAPE_BANK][MASTER_CH_STRIP] = masterFaderCallback;
-    faderCallbackArray[EFFECTS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
-    faderCallbackArray[MASTERS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
-}
 
 
-void EventBus::masterUiFaderSubscribe(MasterUiFaderCallback faderCallback)
-{
-    masterUiFaderCallback = faderCallback;
-}
+// /*****************************************************************************
+//  * @brief This method is for the master channel object to subscribe to master
+//  *        fader events. No unsubscribe, since this should not change.
+//  *        (We don't want to move the master fader to another strip, do we?)
+//  * 
+//  * @param masterFaderCallback 
+//  *****************************************************************************/
+// void EventBus::masterFaderEventSubscribe(FaderCallback masterFaderCallback)
+// {
+//     // The master fader is called on all banks.
+//     faderCallbackArray[LINE_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+//     faderCallbackArray[TAPE_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+//     faderCallbackArray[EFFECTS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+//     faderCallbackArray[MASTERS_BANK][MASTER_CH_STRIP] = masterFaderCallback;
+// }
 
 
-void EventBus::buttonEventSubscribe(int buttonID, Bank bank, ButtonCallback buttonCallback)
-{
-    buttonCallbackMap[bank][buttonID] = buttonCallback;
-}
+// void EventBus::masterUiFaderSubscribe(MasterUiFaderCallback faderCallback)
+// {
+//     masterUiFaderCallback = faderCallback;
+// }
+
+
+// void EventBus::buttonEventSubscribe(int buttonID, Bank bank, ButtonCallback buttonCallback)
+// {
+//     buttonCallbackMap[bank][buttonID] = buttonCallback;
+// }
 
 
 // TODO: BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
 // YES - BUT THEN WHAT ABOUT NON-CHANNELSTRIP?
 // OK, ONE SUBSCRIBE METHOD FOR CHANNELS. ANOTHER FOR THE MASTER SECTION.
 
+
+// NEW WAY (JUNE'24) USING BITMAPS FOR TRACKING SUBSCRIPTION
+void EventBus::channelStripEventSubscribe(int chArrayIndex, ChStripID channelStripID, Bank associationBank)
+{
+    // Set the bit in the map
+    channelAssociationBitmaps[channelStripID][associationBank] |= 1 << chArrayIndex;
+
+    // Call the channelStrip to set it's stuff.
+    channelStripArray[channelStripID]->setChannelAssociation(currentBank, associationBank, &channelArray[chArrayIndex]);
+}
+
+
 // ##########################################################################################
 // ############################### POSTERS ##################################################
 // ##########################################################################################
 
-
-/******************************************************************************
- * @brief This is an event post method, used to call the callbacks for updating
- *      the UI. So this is only cosmetical - nothing sent to the console.
- *
- * @param chStripBitMask An integer. This bitmap is used as an index of which
- *                      channelStrips are associated with a given channel.
- *                      We iterate over this bitmap to index an array of
- *                      callbacks for the UI Channelstrip Component, which then
- *                      updates the faders in the UI.
- *
- * @param faderValue    The value the fader should go to in the UI.
- *****************************************************************************/
-void EventBus::associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2])
+void EventBus::postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
 {
-    // Iterate through the bits in the mask, use them for indexing the callbacks.
-    while (chStripBitMask)
+    // First, let the channelstrip call the channel for sending DSP command.
+    //(channelStripArray[channelStripID]->*faderEventHandlers[channelStripID])(currentBank, eventValue);
+
+    channelStripArray[channelStripID]->updateChannelVolume(currentBank, eventValue);
+
+    // Prepare bitmaps for indexing all associated strips, excluding the "caller".
+    uint32_t fullBitmap = channelAssociationBitmaps[channelStripID][currentBank];
+    uint32_t reducedBitmap = fullBitmap & ~(1 << channelStripID);
+
+    // Next, we must move all associated fader, including the identical strip on the "opposite" (UI/Console).
+    // Use the fact that source is an enum (Console=0, UI=1), to set up bitmaps. (Avoids using conditionals.)
+    // So the idea is: "source" is either 0 or 1, so all it's bits will be 0, except the last, which can be 1 or 0.
+    // We want to create two bitmaps of all 1's or all 0's.
+    // For mask1, we first invert, then add 1. If source was 0, then mask1 is all 0's, if source was 1, it's now all 1's.
+    // For mask2, we simply invert mask1.
+
+    uint32_t mask1 = ~source + 1;
+    uint32_t mask2 = ~mask1; //(~source ^ 1) + 1;
+
+    // Use them to set the correct bitmasks, so the "caller" is not moved.
+    uint32_t consoleBitmap = (fullBitmap & mask1) | (reducedBitmap & mask2);
+    uint32_t uiBitmap = (fullBitmap & mask2) | (reducedBitmap & mask1);
+
+    // Now iterate using __builtin_ctz to count trailing zeros.
+    while (consoleBitmap)
     {
-        // Get the index of the lowest set bit.
-        int stripID = __builtin_ctz(chStripBitMask);
+        int stripID = __builtin_ctz(consoleBitmap);  // Get lowest set bit.
+        channelStripArray[stripID]->updateFaderPosition(currentBank);
+        consoleBitmap &= consoleBitmap - 1; // Clear lowest set bit.
+    }
 
-        // Use the index to look up the callback in the array.
-        // (So this will update the relevant faders, on the currently chosen bank.)
-        associateUiFaderCallbackArray[currentBank][stripID](faderValue);
-
-        // Clear lowest set bit
-        chStripBitMask &= chStripBitMask - 1;
+    // Do the same for the UI faders
+    while (uiBitmap)
+    {
+        int stripID = __builtin_ctz(uiBitmap);
+        channelStripComponentArray[stripID]->faderMoveEventCallback(eventValue);
+        uiBitmap &= uiBitmap - 1;
     }
 }
 
-void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
-{
-    // Since this is an associate event, all we do here is iterate
-    // Over the ui strips, and update the pot.
-    // We don't handle difference in vpot functionality here.
-    // So otherwise same procedure as for faders.
 
-    while (chStripBitMask)
-    {
 
-        int stripID = __builtin_ctz(chStripBitMask);
-        associateUiVpotCallbackArray[currentBank][stripID](vPotValue);
-        chStripBitMask &= chStripBitMask - 1;
-    }
-}
 
-void EventBus::updateUiMasterFaderEventPost(int faderValue)
-{
-    masterUiFaderCallback(faderValue);
-}
+// /******************************************************************************
+//  * @brief This is an event post method, used to call the callbacks for updating
+//  *      the UI. So this is only cosmetical - nothing sent to the console.
+//  *
+//  * @param chStripBitMask An integer. This bitmap is used as an index of which
+//  *                      channelStrips are associated with a given channel.
+//  *                      We iterate over this bitmap to index an array of
+//  *                      callbacks for the UI Channelstrip Component, which then
+//  *                      updates the faders in the UI.
+//  *
+//  * @param faderValue    The value the fader should go to in the UI.
+//  *****************************************************************************/
+// void EventBus::associateUiStripFaderEventPost(int chStripBitMask, const char (&faderValue)[2])
+// {
+//     // Iterate through the bits in the mask, use them for indexing the callbacks.
+//     while (chStripBitMask)
+//     {
+//         // Get the index of the lowest set bit.
+//         int stripID = __builtin_ctz(chStripBitMask);
+
+//         // Use the index to look up the callback in the array.
+//         // (So this will update the relevant faders, on the currently chosen bank.)
+//         associateUiFaderCallbackArray[currentBank][stripID](faderValue);
+
+//         // Clear lowest set bit
+//         chStripBitMask &= chStripBitMask - 1;
+//     }
+// }
+
+// void EventBus::associateUiStripVpotEventPost(int chStripBitMask, int vPotValue)
+// {
+//     // Since this is an associate event, all we do here is iterate
+//     // Over the ui strips, and update the pot.
+//     // We don't handle difference in vpot functionality here.
+//     // So otherwise same procedure as for faders.
+
+//     while (chStripBitMask)
+//     {
+
+//         int stripID = __builtin_ctz(chStripBitMask);
+//         associateUiVpotCallbackArray[currentBank][stripID](vPotValue);
+//         chStripBitMask &= chStripBitMask - 1;
+//     }
+// }
+
+// void EventBus::updateUiMasterFaderEventPost(int faderValue)
+// {
+//     masterUiFaderCallback(faderValue);
+// }
 
 // ##################################################################################
 // ###################################### OTHERS ####################################
@@ -322,3 +406,75 @@ void EventBus::initializeButtonCallbackMaps()
     buttonCallbackMap[MASTERS_BANK] = buttonCallbackMap[LINE_BANK];
 }
 
+void EventBus::initializeChannels()
+{
+    for (int i = 0; i < CHANNEL_COUNT; i++)
+    {
+        channelArray[i].initializeChannel();
+    }
+}
+
+void EventBus::initializeChannelStrips()
+{
+    for (int i = 0; i < CHANNEL_STRIP_COUNT + 1; i++)
+    {
+
+        //channelStripArray[i].updateChStrip(currentBank);
+    }
+}
+
+void EventBus::initializeUiStrips()
+{
+    // Set all UI faders to an initial position.
+    // TODO: eventually initialposition should be read from a file.
+    const char initialFaderPos[2] = {'0', '0'};
+    for (int i = 0; i < CHANNEL_STRIP_COUNT + 1; i++)   // Includes master strip.
+    {
+        channelStripComponentArray[i]->faderMoveEventCallback(initialFaderPos);
+    }
+
+
+    //TODO: Also set the pot position, and buttons....
+    // TODO: maybe this should be done with a more regular method?
+}
+
+void EventBus::setChannelStripComponentArray(ChannelStripComponent * chStripCompArray, MasterStripComponent * masterComponentPtr)
+{
+    for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
+    {
+        channelStripComponentArray[i] = &chStripCompArray[i];
+    }
+
+    channelStripComponentArray[CHANNEL_STRIP_COUNT] = masterComponentPtr;
+}
+
+// Set up our array of pointers to channelstrip objects, including the master strip.
+void EventBus::setChannelStripArray(ChannelStrip * chStripArray, MasterChannel * masterChannelPtr)
+{
+    //channelStripArray = chStripArray;
+    for (int i = 0; i < CHANNEL_STRIP_COUNT; i++) 
+    {
+        channelStripArray[i] = &chStripArray[i]; // Point to each ChannelStrip object
+    }
+    channelStripArray[CHANNEL_STRIP_COUNT] = masterChannelPtr; // Point to the MasterChannelStrip object
+
+}
+
+void EventBus::setChannelArray(Channel * chArray)
+{
+    channelArray = chArray;
+}
+
+void EventBus::enableUiListeners()
+{
+    for (int i = 0; i < CHANNEL_STRIP_COUNT + 1; i++)   // include the master strip.
+    {
+        channelStripComponentArray[i]->activateEventListeners();
+    }
+}
+
+
+// void EventBus::setFaderEventHandler(FaderEventHandler handler, ChStripID chStripID)
+// {
+//     faderEventHandlers[chStripID] = handler;
+// }

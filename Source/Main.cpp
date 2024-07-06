@@ -25,8 +25,6 @@ public:
     {
         // This method is where you should put your application's initialisation code..
 
-        
-        // Maybe run "boot" script here??
 
         mainWindow.reset (new MainWindow (getApplicationName()));
     }

@@ -18,6 +18,7 @@
 */
 
 //[Headers] You can add your own extra header files here...
+#include "EventBusClass.h"
 //[/Headers]
 
 #include "MasterStripComponent.h"
@@ -29,18 +30,19 @@
 //==============================================================================
 MasterStripComponent::MasterStripComponent ()
     : eventBus(EventBus::getInstance()),
-      faderValueLookup(FaderValueLookup::getInstance())
+      faderValueLookup(FaderValueLookup::getInstance()),
+      hexToIntLookup(HexToIntLookup::getInstance())
 {
     //[Constructor_pre] You can add your own custom stuff here..
     // ################## MY CONSTRUCTOR STUFF ###################
 
 
-    MasterUiFaderCallback masterFaderUpdateCallback = [this](int faderValue)
-    {
-        this->faderUpdateEventCallback(faderValue);
-    };
+    // MasterUiFaderCallback masterFaderUpdateCallback = [this](int faderValue)
+    // {
+    //     this->faderUpdateEventCallback(faderValue);
+    // };
 
-    eventBus.masterUiFaderSubscribe(masterFaderUpdateCallback);
+    //eventBus.masterUiFaderSubscribe(masterFaderUpdateCallback);
 
 
 
@@ -131,23 +133,23 @@ MasterStripComponent::MasterStripComponent ()
 
     effectsBankBtn->setBounds (16, 738, 88, 20);
 
-    tapeBanksBtn.reset (new juce::TextButton ("Tape Bank Button"));
-    addAndMakeVisible (tapeBanksBtn.get());
-    tapeBanksBtn->setButtonText (TRANS ("Tape"));
-    tapeBanksBtn->addListener (this);
-    tapeBanksBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
-    tapeBanksBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
+    tapeBankBtn.reset (new juce::TextButton ("Tape Bank Button"));
+    addAndMakeVisible (tapeBankBtn.get());
+    tapeBankBtn->setButtonText (TRANS ("Tape"));
+    tapeBankBtn->addListener (this);
+    tapeBankBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
+    tapeBankBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
 
-    tapeBanksBtn->setBounds (16, 712, 88, 20);
+    tapeBankBtn->setBounds (16, 712, 88, 20);
 
-    lineBanksBtn.reset (new juce::TextButton ("Line Bank Button"));
-    addAndMakeVisible (lineBanksBtn.get());
-    lineBanksBtn->setButtonText (TRANS ("Line"));
-    lineBanksBtn->addListener (this);
-    lineBanksBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
-    lineBanksBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
+    lineBankBtn.reset (new juce::TextButton ("Line Bank Button"));
+    addAndMakeVisible (lineBankBtn.get());
+    lineBankBtn->setButtonText (TRANS ("Line"));
+    lineBankBtn->addListener (this);
+    lineBankBtn->setColour (juce::TextButton::buttonColourId, juce::Colour (0xff3d3f4b));
+    lineBankBtn->setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffc8c892));
 
-    lineBanksBtn->setBounds (16, 686, 88, 20);
+    lineBankBtn->setBounds (16, 686, 88, 20);
 
     panMasterBtn.reset (new juce::TextButton ("Pan Master Button"));
     addAndMakeVisible (panMasterBtn.get());
@@ -391,6 +393,8 @@ MasterStripComponent::MasterStripComponent ()
     juce::MessageManager::callAsync([this, logValue]()
                                     { masterFader.get()->setValue(logValue, juce::dontSendNotification); });
 
+    // Deactivate listeners, reactivate them again once console is booted.
+    deactivateEventListeners();
 
     //[/Constructor]
 }
@@ -406,8 +410,8 @@ MasterStripComponent::~MasterStripComponent()
     masterInsertR = nullptr;
     mastersBankBtn = nullptr;
     effectsBankBtn = nullptr;
-    tapeBanksBtn = nullptr;
-    lineBanksBtn = nullptr;
+    tapeBankBtn = nullptr;
+    lineBankBtn = nullptr;
     panMasterBtn = nullptr;
     soloMasterBtn = nullptr;
     cuePan1Btn = nullptr;
@@ -738,15 +742,15 @@ void MasterStripComponent::buttonClicked (juce::Button* buttonThatWasClicked)
         //[UserButtonCode_effectsBankBtn] -- add your button handler code here..
         //[/UserButtonCode_effectsBankBtn]
     }
-    else if (buttonThatWasClicked == tapeBanksBtn.get())
+    else if (buttonThatWasClicked == tapeBankBtn.get())
     {
-        //[UserButtonCode_tapeBanksBtn] -- add your button handler code here..
-        //[/UserButtonCode_tapeBanksBtn]
+        //[UserButtonCode_tapeBankBtn] -- add your button handler code here..
+        //[/UserButtonCode_tapeBankBtn]
     }
-    else if (buttonThatWasClicked == lineBanksBtn.get())
+    else if (buttonThatWasClicked == lineBankBtn.get())
     {
-        //[UserButtonCode_lineBanksBtn] -- add your button handler code here..
-        //[/UserButtonCode_lineBanksBtn]
+        //[UserButtonCode_lineBankBtn] -- add your button handler code here..
+        //[/UserButtonCode_lineBankBtn]
     }
     else if (buttonThatWasClicked == panMasterBtn.get())
     {
@@ -878,41 +882,107 @@ void MasterStripComponent::setMasterFaderPosition(double value)
  *
  * @param faderValue
  ********************************************************************************/
-void MasterStripComponent::faderUpdateEventCallback(int faderValue)
+void MasterStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2])
 {
+    // Convert the 2-char hex value to an int.
+    int faderIntValue = hexToIntLookup.hexToInt(faderHexValue);
 
-    //int decimalValue = hexToIntLookup.hexToInt(faderHexValue);
-    //int decimalValue = std::stoi(faderHexValue, nullptr, 16);
-    float logValue = *faderValueLookup.getLog10Value(faderValue);
-    //float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
+    // Use the integer value as index lookup in the array of precomputed log values
+    float logValue = *faderValueLookup.getLog10Value(faderIntValue);
+
+    // Update the UI.
     juce::MessageManager::callAsync([this, logValue]()
                                     { masterFader.get()->setValue(logValue, juce::dontSendNotification); });
 }
 
-// ####################################################
-// Same as above, this just updates the VPot in the UI. This value should probably already be calculated
-// in the MasterChannel class?
-// ####################################################
-void MasterStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
-{
-    // TODO: Check what value we would get here....
 
-    // int decimalValue = std::stoi(vpotHexValue, nullptr, 16);
-    // float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
-    // juce::MessageManager::callAsync([this, logValue]()
-    //                                 { masterVpot.get()->setValue(logValue, juce::dontSendNotification); });
+
+// // ####################################################
+// // Same as above, this just updates the VPot in the UI. This value should probably already be calculated
+// // in the MasterChannel class?
+// // ####################################################
+// void MasterStripComponent::vpotTurnEventCallback(std::string vpotHexValue)
+// {
+//     // TODO: Check what value we would get here....
+
+//     // int decimalValue = std::stoi(vpotHexValue, nullptr, 16);
+//     // float logValue = faderValueLookup.precomputedLog10Values[decimalValue];
+//     // juce::MessageManager::callAsync([this, logValue]()
+//     //                                 { masterVpot.get()->setValue(logValue, juce::dontSendNotification); });
+// }
+
+// // #####################################################################################################
+// // This is the callback for a button event. This might be somewhat different than a button event,
+// // although this is primarily for updating the UI, after the Channel class has handled the button press.
+// // #####################################################################################################
+// void MasterStripComponent::buttonEventCallback(std::string buttonValue)
+// {
+//     // TODO implement handling of channel strip buttons.
+// }
+void MasterStripComponent::deactivateEventListeners()
+{
+    masterFader->removeListener (this);
+    masterVpot->removeListener (this);
+    masterInsertL->removeListener (this);
+    masterInsertR->removeListener (this);
+    mastersBankBtn->removeListener (this);
+    effectsBankBtn->removeListener (this);
+    tapeBankBtn->removeListener (this);
+    lineBankBtn->removeListener (this);
+    panMasterBtn->removeListener (this);
+    soloMasterBtn->removeListener (this);
+    cuePan1Btn->removeListener (this);
+    cuePan2Btn->removeListener (this);
+    cueLvl1Btn->removeListener (this);
+    cueLvl2Btn->removeListener (this);
+    aux1LevelsBtn->removeListener (this);
+    aux2LevelsBtn->removeListener (this);
+    aux3LevelsBtn->removeListener (this);
+    aux4LevelsBtn->removeListener (this);
+    aux5LevelsBtn->removeListener (this);
+    aux6LevelsBtn->removeListener (this);
+    aux7LevelsBtn->removeListener (this);
+    aux8LevelsBtn->removeListener (this);
+    digitalTrimBtn->removeListener (this);
+    trackingLvlBtn->removeListener (this);
+    metersTopBtn->removeListener (this);
+    metersBotmBtn->removeListener (this);
+    masterSelectBtn->removeListener (this);
+    masterWriteBtn->removeListener (this);
 }
 
-// #####################################################################################################
-// This is the callback for a button event. This might be somewhat different than a button event,
-// although this is primarily for updating the UI, after the Channel class has handled the button press.
-// #####################################################################################################
-void MasterStripComponent::buttonEventCallback(std::string buttonValue)
+
+void MasterStripComponent::activateEventListeners()
 {
-    // TODO implement handling of channel strip buttons.
+    masterFader->addListener (this);
+    masterVpot->addListener (this);
+    masterInsertL->addListener (this);
+    masterInsertR->addListener (this);
+    mastersBankBtn->addListener (this);
+    effectsBankBtn->addListener (this);
+    tapeBankBtn->addListener (this);
+    lineBankBtn->addListener (this);
+    panMasterBtn->addListener (this);
+    soloMasterBtn->addListener (this);
+    cuePan1Btn->addListener (this);
+    cuePan2Btn->addListener (this);
+    cueLvl1Btn->addListener (this);
+    cueLvl2Btn->addListener (this);
+    aux1LevelsBtn->addListener (this);
+    aux2LevelsBtn->addListener (this);
+    aux3LevelsBtn->addListener (this);
+    aux4LevelsBtn->addListener (this);
+    aux5LevelsBtn->addListener (this);
+    aux6LevelsBtn->addListener (this);
+    aux7LevelsBtn->addListener (this);
+    aux8LevelsBtn->addListener (this);
+    digitalTrimBtn->addListener (this);
+    trackingLvlBtn->addListener (this);
+    metersTopBtn->addListener (this);
+    metersBotmBtn->addListener (this);
+    masterSelectBtn->addListener (this);
+    masterWriteBtn->addListener (this);
 }
-
-
 
 
 
@@ -929,7 +999,8 @@ void MasterStripComponent::buttonEventCallback(std::string buttonValue)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="MasterStripComponent" componentName=""
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;faderValueLookup(FaderValueLookup::getInstance())"
+                 parentClasses="public ChannelStripComponentInterface, public juce::Component"
+                 constructorParams="" variableInitialisers="eventBus(EventBus::getInstance()),&#10;faderValueLookup(FaderValueLookup::getInstance()),&#10;hexToIntLookup(HexToIntLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ff323e44">
@@ -1014,11 +1085,11 @@ BEGIN_JUCER_METADATA
               virtualName="" explicitFocusOrder="0" pos="16 738 88 20" bgColOff="ff3d3f4b"
               bgColOn="ffc8c892" buttonText="Effects" connectedEdges="0" needsCallback="1"
               radioGroupId="0"/>
-  <TEXTBUTTON name="Tape Bank Button" id="81d8be7b3bdcb061" memberName="tapeBanksBtn"
+  <TEXTBUTTON name="Tape Bank Button" id="81d8be7b3bdcb061" memberName="tapeBankBtn"
               virtualName="" explicitFocusOrder="0" pos="16 712 88 20" bgColOff="ff3d3f4b"
               bgColOn="ffc8c892" buttonText="Tape" connectedEdges="0" needsCallback="1"
               radioGroupId="0"/>
-  <TEXTBUTTON name="Line Bank Button" id="e5d0d1771b8f7c35" memberName="lineBanksBtn"
+  <TEXTBUTTON name="Line Bank Button" id="e5d0d1771b8f7c35" memberName="lineBankBtn"
               virtualName="" explicitFocusOrder="0" pos="16 686 88 20" bgColOff="ff3d3f4b"
               bgColOn="ffc8c892" buttonText="Line" connectedEdges="0" needsCallback="1"
               radioGroupId="0"/>

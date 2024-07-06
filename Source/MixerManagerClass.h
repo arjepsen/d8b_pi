@@ -23,7 +23,7 @@
 // #include "BankMastersMessageHandlerClass.h"
 // #include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
-//#include "ChannelStripClass.h"
+#include "ChannelStripClass.h"
 #include "CircularBuffer.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
@@ -80,19 +80,20 @@ private:
     // MastersBankMessageHandler mastersBankMessageHandler;
 
     // Channel and Channelstrip
-    static constexpr uint8_t CHANNEL_COUNT = 48;
-	static constexpr uint8_t CHANNEL_STRIP_COUNT = 24;
-    std::array<Channel, CHANNEL_COUNT> channels;    // This will auto-instantiate channel objects
-	std::unordered_map<std::string, Channel*> channelStripMap;
+
+    // Moved to eventbus
+    // Channel channelArray[CHANNEL_COUNT]; 
+    // ChannelStrip channelStripArray[CHANNEL_STRIP_COUNT];
+
 
     // Component pointers
-    ChannelStripComponent *chStripComponents;
+//    ChannelStripComponent *chStripComponents;
 
     // Create a buffer with the defined width from the circular buffer.
     char msgBuffer[BUFFER_WIDTH];
 
 	// Various members/variables
-    bool isInitializing; // Flag for avoid starting multiple init threads.
+    bool isInitializing = false; // Flag for avoid starting multiple init threads.
 
     // CHANGE THESE TO THE BRAIN/DSPCOM CLASSES INSTEAD
 	// int brainDescriptor;
@@ -156,7 +157,7 @@ public:
 
     //void setBank(Bank bank);
 
-    void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
+    //void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
     // void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);
     // void handleUiMasterFaderMove(float newMasterFaderValue);
 

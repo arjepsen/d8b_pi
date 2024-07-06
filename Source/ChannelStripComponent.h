@@ -21,18 +21,17 @@
 
 //[Headers]     -- You can add your own extra header files here --
 
-
 #include <JuceHeader.h>
-#include "EventBusClass.h"
-#include <array>
+// #include "EventBusClass.h"
 #include "FaderValueLookupClass.h"
 #include "SharedDataStructures.h"
+#include "ChannelStripComponentInterface.h"
+//#include <array>
 
-
+// Forward declaration of eventBus - avoid circular dependency.
+class EventBus;
 
 //[/Headers]
-
-
 
 //==============================================================================
 /**
@@ -46,65 +45,69 @@
 
                                                                     //[/Comments]
 */
-class ChannelStripComponent  : public juce::Component,
-                               public juce::Slider::Listener,
-                               public juce::Button::Listener,
-                               public juce::ComboBox::Listener,
-                               public juce::Label::Listener
+class ChannelStripComponent : public ChannelStripComponentInterface,
+                              public juce::Component,
+                              public juce::Slider::Listener,
+                              public juce::Button::Listener,
+                              public juce::ComboBox::Listener,
+                              public juce::Label::Listener
 {
-public:
+  public:
     //==============================================================================
-    ChannelStripComponent ();
+    ChannelStripComponent();
     ~ChannelStripComponent() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     void setFaderPosition(double value);
 
-    //void setFaderUiMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
+    // void setFaderUiMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
 
-	// std::function<void(std::string, float)> faderMoveCallback;
+    // std::function<void(std::string, float)> faderMoveCallback;
 
     // Callback functions for the "Channel associate events".
     // These ONLY update the UI - purely cosmetical - so no need know which bank. (logic already handled elsewhere).
-	//void faderMoveEventCallback(std::string faderValue);
-    void faderMoveEventCallback(const char (&faderHexValue)[2]);
+    // void faderMoveEventCallback(std::string faderValue);
+    void faderMoveEventCallback(const char (&faderHexValue)[2]) override;
     void vpotTurnEventCallback(int vpotValue);
-    void buttonEventCallback(std::string buttonValue);  // This one is a bit different... but again mainly cosmetic.
+    void buttonEventCallback(std::string buttonValue); // This one is a bit different... but again mainly cosmetic.
+
+    // Create a method for attaching the "listeners" to the controls.
+    // This method is responsible for setting up the "listeners" for each interactible
+    // object in the UI.
+    // void deactivateEventListeners();  // moved to private
+    void activateEventListeners() override;
 
     //[/UserMethods]
 
-    void paint (juce::Graphics& g) override;
+    void paint(juce::Graphics &g) override;
     void resized() override;
-    void sliderValueChanged (juce::Slider* sliderThatWasMoved) override;
-    void buttonClicked (juce::Button* buttonThatWasClicked) override;
-    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
-    void labelTextChanged (juce::Label* labelThatHasChanged) override;
+    void sliderValueChanged(juce::Slider *sliderThatWasMoved) override;
+    void buttonClicked(juce::Button *buttonThatWasClicked) override;
+    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
+    void labelTextChanged(juce::Label *labelThatHasChanged) override;
 
-
-
-private:
+  private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
     // References to singletons.
-	EventBus &eventBus;
+    EventBus &eventBus;
     FaderValueLookup &faderValueLookup;
     IntToHexLookup &intToHexLookup;
     HexToIntLookup &hexToIntLookup;
 
-    //std::string channelStripComponentID;
+    // std::string channelStripComponentID;
     ChStripID channelStripComponentID;
 
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
-	// //const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
-    // static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
-    // std::map<float, std::string> dspHexLookupMap;   // Map for correlating the possible UI fader values to their dsp hex values.
+                                            // //const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
+                                            // static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
+                                            // std::map<float, std::string> dspHexLookupMap;   // Map for correlating the possible UI fader values to their dsp hex values.
 
-
+    void deactivateEventListeners();
 
     // Access to the mixermanager
-    //MixerManager &mixerManager;
-
+    // MixerManager &mixerManager;
 
     //[/UserVariables]
 
@@ -152,12 +155,10 @@ private:
     std::unique_ptr<juce::ComboBox> juce__comboBox4;
     std::unique_ptr<juce::Slider> chLevelToTape;
 
-
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelStripComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelStripComponent)
 };
 
 //[EndFile] You can add extra defines here...
 
 //[/EndFile]
-

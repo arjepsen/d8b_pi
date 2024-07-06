@@ -14,6 +14,8 @@
 #include <string>
 #include <unordered_map>
 
+constexpr int LED_COMMAND_LENGTH = 4; // Including null terminator
+
 // We use this enumeration to index the array in the map below.
 enum ChStripLED
 {
@@ -42,12 +44,23 @@ enum ChStripLED
 
 enum LedStateCommand : char
 {
-    LED_ON_CMD = 'i',
-    LED_OFF_CMD = 'j',
-    LED_BLINK_CMD = 'k'
+    LED_ON_CMD = 'i',   // 105
+    LED_OFF_CMD = 'j',  // 106
+    LED_BLINK_CMD = 'k' // 107
 };
 
-constexpr int LED_COMMAND_LENGTH = 4; // Including null terminator
+// Enumeration for help in setting the green/red channel led's.
+// These will be bit-shifted, so they correspond to the RED_CH_LED and 
+// GREEN_CH_LED in the above enumeration
+enum ChannelLeds
+{
+    CH_LEDS_NONE,   // 0b00
+    CH_LEDS_RED,    // 0b01
+    CH_LEDS_GREEN,  // 0b10
+    CH_LEDS_BOTH    // 0b11
+};
+
+
 
 // Ring LED's for channel strips.
 // This ought to be a const, but that would require using .at() for access, and the [] operator is faster.
