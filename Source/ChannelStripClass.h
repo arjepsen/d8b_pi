@@ -38,15 +38,23 @@ class ChannelStrip : public ChannelStripInterface
     void setChannelAssociation(Bank activeBank, Bank associationBank, Channel *channelPtr) override;
 
     void updateChStrip(Bank currentBank) override;
-    //void initializeChStrip();
+    void updateVpotLeds(Bank bank, VpotFunction vPotFunc) override;
 
-
-    //void updateChannelVolume(Bank currentBank, const char (&faderValue)[2]) override;
-    inline void updateChannelVolume(Bank currentBank, const char (&faderValue)[2])
+    // Method called by eventbus on fader action.
+    inline void updateChannelVolume(Bank currentBank, const char (&faderValue)[2]) override
     {
        channelPtrs[currentBank]->updateVolume(faderValue);  // Call the channel object method for sending the DSP command.
     }
 
+    // Method called by eventbus on vpot action.
+    //inline void vPotEventHandler(Bank currentBank, const char (&vPotValue)[2], VpotFunction vPotFunc, EventSource source) override
+    inline int vPotEventHandler(Bank currentBank, int vPotValue, VpotFunction vPotFunc, EventSource source) override
+    {
+        return channelPtrs[currentBank]->vPotEvent(vPotFunc, vPotValue, source);
+    }
+
+    // TODO: when vpot functionality changes, channelstrips on current bank must be updated.
+    // TODO: THis also goes for the UI.
 
     void updateFaderPosition(Bank currentBank);
 
@@ -56,7 +64,6 @@ class ChannelStrip : public ChannelStripInterface
     inline int getChannelStripIndex() { return CH_STRIP_INDEX; };
     inline ChStripID getChannelStripID() { return CH_STRIP_ID; };
 
-    void test(Bank bank) {channelPtrs[bank]->test(); };
 
   private:
     // Objects & Singletons
@@ -83,6 +90,8 @@ class ChannelStrip : public ChannelStripInterface
     uint32_t currentLedOnStates = 0; // Initially all off.
     uint32_t currentLedBlinkStates = 0;
 
+    static const int32_t RING_LED_MASK = 0x0FFF8;   // mask for selecting only the ring LED's, incl. the dot.
+
     // Keep arrays of led states as the registry of how the leds SHOULD be
     // lit for this channelstrip, on any given bank.
     // uint32_t desiredLedOnStates[NUMBER_OF_BANKS] {0};
@@ -97,8 +106,7 @@ class ChannelStrip : public ChannelStripInterface
 
     //void faderMoveCallback(Bank currentBank, const char (&faderValue)[2], EventSource source);
 
-
-    void updateVpotLeds(Bank bank);
+    
     void updateChStripLedsBitmap(Bank bank);
     void refreshStrip();    // Used for simply updating the LED's according to "currentStates", and updating fader position.
 };

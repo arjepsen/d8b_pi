@@ -69,6 +69,7 @@ public:
 
 
     void faderMoveEventCallback(const char (&faderHexValue)[2]) override;
+    void vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction) override;
     void activateEventListeners() override;
 
     //[/UserMethods]

@@ -18,7 +18,11 @@ static constexpr int CHANNEL_COUNT = 96;
 constexpr int CHANNEL_STRIP_COUNT = 24; // Number of channel strips, excluding the master strip.
 constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
 
-
+enum EventSource
+{
+    CONSOLE_EVENT,
+    UI_EVENT
+};
 
 enum Bank
 {
@@ -61,6 +65,31 @@ enum ChStripID
 
 const int MASTER_CH_STRIP = 24;
 
+
+
+enum VpotFunction
+{
+    VPOT_PAN,
+    VPOT_AUXSEND1,
+    VPOT_AUXSEND2,
+    VPOT_AUXSEND3,
+    VPOT_AUXSEND4,
+    VPOT_AUXSEND5,
+    VPOT_AUXSEND6,
+    VPOT_AUXSEND7,
+    VPOT_AUXSEND8,
+    VPOT_AUXSEND9_10,
+    VPOT_AUXPAN9_10,
+    VPOT_AUXSEND11_12,
+    VPOT_AUXPAN11_12,
+    VPOT_LVL2TAPE,
+    VPOT_DIGITAL_TRIM,
+    NUMBER_OF_VPOT_FUNCTIONS
+};
+
+
+
+
 enum ChStripButtonBase
 {
     STRIP1_BTN_BASE = 0x051,
@@ -96,6 +125,11 @@ enum ButtonAction : char
     BTN_RELEASE = 'u'
 };
 
+
+enum Aux
+{
+    AUX1, AUX2, AUX3, AUX4, AUX5, AUX6, AUX7, AUX8
+};
 
 
 // Lookup table for converting hexadecimal digits to their integer values.

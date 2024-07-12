@@ -14,6 +14,8 @@
 #include <string.h>
 #include "Debug.h"
 
+#include <iostream>
+#include <string>
 
 
 
@@ -155,18 +157,14 @@ void ComBase::startReceiverThread()
  ***************************************************************************/
 void ComBase::send(const char *command)
 {
-	// TODO: Check if we need this safety:
-	//if (command == nullptr) return;
-
     std::lock_guard<std::mutex> lock(writeMutex); // Automatically locks the mutex for current scope.
     write(boardCom, command, strlen(command));  // Note, strlen does not include the null terminator.
 }
 
 void ComBase::send(const char *command, size_t commandLength)
 {
-	// TODO: Check if we need this safety:
-	//if (command == nullptr) return;
-
     std::lock_guard<std::mutex> lock(writeMutex); // Automatically locks the mutex for current scope.
     write(boardCom, command, commandLength);
 }
+
+// TODO seems we need some buffer clearing - when program starts, something is sent...

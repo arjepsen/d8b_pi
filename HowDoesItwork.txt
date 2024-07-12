@@ -25,32 +25,34 @@ can be configured to handle any specific channel.
 A channel can even be configured to more than one strip on the same bank. This creates a bit of trickyness in handling
 a channel event, as it needs to update the ui, but also all other associated strips on the current bank.
 
-
-
-So:
-WHEN A CONSOLE PHYSICAL EVENT (like moving a fader) HAPPENS:
-1: The Brain board sends a message on the brain com uart.
-2: The BrainComClass' messageReceiver thread reads the message, and write it to the circular buffer singleton.
-3: The messageHandler thread in the mixerManager class pops the message off the buffer, and posts an event in the 
-    eventBus instance.
-4: This event post first calls a method within the channelStrip object with the fader value.
-5: The channelStrip object then calls a method from the channel it is associated with
-   on that bank.
-6: The channel object then sends a DSP command to the DSP board, to update it's level.
-   (unless the channel is muted, in which case it only updates it's record of the volume.)
-7: Channel returns, channelstrip returns, so we're back in the event post method in eventbus.
-8: The eventBus keeps a 2D array of bitmaps for each channelstrip, on each bank.
-   So for each channelstrip on each bank, there is one bitmap, which shows
-   which other channelstrips on that bank control the same channel.
-   The bitmap will be copied to two new bitmaps, and one of them will have the
-   "caller" removed, to avoid sending a movement command to the caller (UI or Console).
-   It then iterates over the bitmap for ui and console, and sends commands for updating
-   all associated channelstrips.
-
 Things to explain:
 What is a "channel"
 What is a bank.
 The "Association" between the channelstrips and a channel.
+
+So:
+When a fader is moved, either in console or UI:
+1: The Brain board sends a message on the brain com uart.
+2: The BrainComClass' messageReceiver thread reads the message, and write it to the circular buffer singleton.
+3: The messageHandler thread in the mixerManager class pops the message off the buffer, and posts an event in the 
+    eventBus instance.
+4: The "postFaderEvent" method in the eventbus runs. 
+   First, it uses the array of pointers to channel objects, to run the "updateChannelVolume" method
+   for the channel that is currently associated with this channelstrip.
+5: The channel object method sends a DSP command to the DSP board, to update it's level.
+   (unless the channel is muted, in which case it only updates it's record of the volume.)
+6: Next, the postFaderEvent method in eventbus continues, and constructs two bitmasks of 
+   associated channels, where one is "reduced", meaning it leaves out the "calling" strip.
+   These two bitmasks are then used to call methods for both the UI and the console, to update
+   it's fader positions. This is how we handle the situation where more than one strip on a given
+   bank is controling the same channel.
+   Using the bitmasks should potentially be a bit faster than using arrays, and uses less memory.
+
+
+When a vpot on a channelstrip is moved, it's a bit more tricky, because they can control 
+different things.
+
+
 
 
 

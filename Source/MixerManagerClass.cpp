@@ -311,10 +311,12 @@ void MixerManager::handleBufferMessage()
                 char hexIdString[2] = {msgBuffer[0], msgBuffer[1]};
                 ChStripID channelStripID = static_cast<ChStripID>(hexToIntLookup.hexToInt(hexIdString));
                 
+                // Get value from message.
                 char vPotValue[2] = {msgBuffer[2], msgBuffer[3]};
+                int vPotChangeValue = static_cast<int8_t>(hexToIntLookup.hexToInt(vPotValue));
 
                 // eventBus.postEvent(VPOT_EVENT, channelStripID, value, CONSOLE_EVENT);
-                eventBus.postVpotEvent(channelStripID, vPotValue, CONSOLE_EVENT);
+                eventBus.postVpotEvent(channelStripID, vPotChangeValue, CONSOLE_EVENT);
                 break;
             }
             case 's':   

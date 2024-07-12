@@ -12,7 +12,6 @@
 #include "ChannelClass.h"
 //#include "ButtonLookupTable.h"
 #include "ChannelIDMap.h"
-//#include "LEDClass.h"
 #include <iomanip>
 #include <sstream>
 #include <string.h>
@@ -32,6 +31,8 @@ constexpr int DSP_PAN_CMD_LENGTH = 16;
 //constexpr int BRAIN_LED_CMD_LENGTH = 4;
 
 constexpr int DSP_ID_LENGTH = 3;
+
+const char Channel::DSP_PAN_CMD[18] = "--dFEFFX--OFDFFXP";
 
 // Array of DSP command channel ID's. Note that these are dependant on what type of command is sent.
 // Note also that the bank is just an initial settings, as any channel can be moved to any channelstrip on any bank.
@@ -74,8 +75,8 @@ Channel::Channel()
       //brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       intToHexLookup(IntToHexLookup::getInstance()),
-      hexToIntLookup(HexToIntLookup::getInstance())
-      //ledRingLookup(LEDringLookup::getInstance())
+      hexToIntLookup(HexToIntLookup::getInstance()),
+      ledRingLookup(LEDringLookup::getInstance())
 {
     // TODO: Get saved settings....
 
@@ -88,13 +89,35 @@ Channel::Channel()
     else if (CH_NUMBER < 72)
         chLeds = CH_LEDS_BOTH;
 
-    ledOnBitmap = static_cast<uint32_t>(chLeds) << 18;  // Shift enum to set bits.
+    desiredLedOnBitmap = static_cast<uint32_t>(chLeds) << 18;  // Shift enum to set bits.
 
 
     // // TODO: OTHER LEDS??
 
+    // Initialize the method pointers to their corresponding member functions
+    vPotMethods[VPOT_PAN] = &Channel::updatePan;
+    vPotMethods[VPOT_AUXSEND1] = &Channel::updateAuxSend1;
+    vPotMethods[VPOT_AUXSEND2] = &Channel::updateAuxSend2;
+    vPotMethods[VPOT_AUXSEND3] = &Channel::updateAuxSend3;
+    vPotMethods[VPOT_AUXSEND4] = &Channel::updateAuxSend4;
+    vPotMethods[VPOT_AUXSEND5] = &Channel::updateAuxSend5;
+    vPotMethods[VPOT_AUXSEND6] = &Channel::updateAuxSend6;
+    vPotMethods[VPOT_AUXSEND7] = &Channel::updateAuxSend7;
+    vPotMethods[VPOT_AUXSEND8] = &Channel::updateAuxSend8;
+    vPotMethods[VPOT_AUXSEND9_10] = &Channel::updateAuxSend9_10;
+    vPotMethods[VPOT_AUXPAN9_10] = &Channel::updateAuxPan9_10;
+    vPotMethods[VPOT_AUXSEND11_12] = &Channel::updateAuxSend11_12;
+    vPotMethods[VPOT_AUXPAN11_12] = &Channel::updateAuxPan11_12;
+    vPotMethods[VPOT_LVL2TAPE] = &Channel::updateLvl2Tape;
+    vPotMethods[VPOT_DIGITAL_TRIM] = &Channel::updateDigitalTrim;
 
-    // TODO How to handle other associates....?
+
+    // Set stereo aux pan value to middle
+    vPotFunctionValues[VPOT_AUXPAN9_10] = 127;
+    vPotFunctionValues[VPOT_AUXPAN11_12] = 127;
+
+
+
 
     // ============================ SET INITIAL SETTINGS ============================
     // TODO: We need to be able to save and recall settings across reboots.
@@ -145,6 +168,7 @@ void Channel::updateVolume(const char (&faderValue)[2])
 
 
 
+
 // /*********************************************************************************
 //  * @brief This method is used when we make a new association, i.e. when we want
 //  *        to set up some specific channelstrip to control this channel.
@@ -163,7 +187,73 @@ void Channel::updateVolume(const char (&faderValue)[2])
 
 
 
-// // ===========================================  VPOT EVENT HANDLERS  =======================================
+// ===========================================  VPOT EVENT HANDLERS  =======================================
+
+
+
+int Channel::updatePan(int vPotValue, EventSource source)
+{
+    // If the event is from UI, we can use the value directly.
+    // If it is from console, it is a CHANGE value.
+    // Use the source enumeration to choose - avoid conditionals.
+
+    // Do calculations for the cases where the pot was turned on the console
+    // The value is indicating how much the pot was turned. Add the value to the 
+    // current pan value, and clamp it within 0 - 254
+    int panChangeValue = std::clamp(static_cast<int>(vPotFunctionValues[VPOT_PAN] + vPotValue), 0, 254);
+
+    // Use source enum in calculation to store the correct value, and avoid conditionals.
+    // This is because UI sends new pan value, and console sends amount of change.
+    //vPotFunctionValues[VPOT_PAN] = (panChangeValue * !source) + (vPotValue * source);
+    int newPanValue = (panChangeValue * !source) + (vPotValue * source);    // Seperate variable for readable code.
+    
+    vPotFunctionValues[VPOT_PAN] = newPanValue;
+
+    // Convert to 2-char hex value for command.
+    const char *panHexValue = intToHexLookup.getHexValue(newPanValue);
+
+    // Create initial DSP command string.
+    char dspPanCommand[18];
+    memcpy(dspPanCommand, DSP_PAN_CMD, DSP_PAN_CMD_LENGTH); // "--dFEFFX--OFDFFXP"
+
+    // Copy in ID and pan value.
+    dspPanCommand[0] = DSP_CH_ID_STR[0];
+    dspPanCommand[1] = DSP_CH_ID_STR[1];
+    dspPanCommand[8] = panHexValue[0];
+    dspPanCommand[9] = panHexValue[1];
+
+    dspCom.send(dspPanCommand, 17); // Ignoring terminator.
+
+    // Now update the LED bitmap. First, look up which ring LED should be lit.
+    ChStripLED ringBit = ledRingLookup.getRingID(newPanValue);
+
+    // Clear all ring bits, then set the one we looked up.
+    desiredLedOnBitmap &= CLEAR_RING_MASK;
+    desiredLedOnBitmap |= 1 << ringBit;
+
+    // Set dot LED bit if pan is centered
+    desiredLedOnBitmap |= ((newPanValue == 127) << RING_DOT); 
+
+    return newPanValue;
+}
+
+// TODO:
+int Channel::updateAuxSend1(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend2(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend3(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend4(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend5(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend6(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend7(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend8(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend9_10(int vPotValue, EventSource source) {}
+int Channel::updateAuxPan9_10(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend11_12(int vPotValue, EventSource source) {}
+int Channel::updateAuxPan11_12(int vPotValue, EventSource source) {}
+int Channel::updateLvl2Tape(int vPotValue, EventSource source) {}
+int Channel::updateDigitalTrim(int vPotValue, EventSource source) {}
+
+
 
 // /*********************************************************************************
 //  * @brief Vpot pan event handler. 
@@ -429,6 +519,11 @@ void Channel::initializeChannel()
 
     // TODO: BUT - is this necessary? Isn't this the standard settings?
 
+
+    // TODO: For now, ignore midi channels - THEY PROLLY HAVE DIFFERENT COMMAND??
+    // right now we are sending stuff that aint right at bootup....
+
+
     // ================ SET VOLUME TO 0 =======================
     char dspVolumeCommand[DSP_VOL_CMD_LENGTH] = "--cX--Q";
     dspVolumeCommand[0] = DSP_CH_ID_STR[0];
@@ -439,10 +534,23 @@ void Channel::initializeChannel()
 
     // =============== SET PAN TO CENTER ======================
     // TODO: Also change this to fetch the pan value - fits better with saved settings.
-    pan = 0x7F; // Center
+
     char dspPanCommand[] = "--dFEFFX7FOFDFFXP";
     dspPanCommand[0] = DSP_CH_ID_STR[0];
     dspPanCommand[1] = DSP_CH_ID_STR[1];
     dspCom.send(dspPanCommand,17);
+
+
+    // For now, just set up ch10 for left, and 11 for right
+    // dspCom.send("22dFEFFX0OFDFFXP");
+    // dspCom.send("0BdFEFFXFEOFDFFXP");
+
+
+        // pan 10 left
+    //write(DSP, "22dFEFFX0OFDFFXP", strlen("22dFEFFX0OFDFFXP"));
+
+    // pan 11 right
+    //write(DSP, "0BdFEFFXFEOFDFFXP", strlen("0BdFEFFXFEOFDFFXP"));
+
 
 }

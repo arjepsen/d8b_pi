@@ -40,11 +40,7 @@
 
 
 
-enum EventSource
-{
-    CONSOLE_EVENT,
-    UI_EVENT
-};
+
 
 
 
@@ -119,6 +115,9 @@ class EventBus
     ChannelStripInterface* channelStripArray[CHANNEL_STRIP_COUNT + 1];
 
 
+    // Keep a variable for current vpot functionality.
+    VpotFunction currentVpotFunction = VPOT_PAN;
+
     //FaderEventHandler faderEventHandlers[CHANNEL_STRIP_COUNT + 1];  // Let's try with function pointers.
 
     // Create arrays of Channels and Channelstrips. This instantiates the objects.
@@ -177,17 +176,16 @@ class EventBus
     Bank getCurrentBank(); 
 
     void postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source);
-
-    
-
+    //void postVpotEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source);
+    void postVpotEvent(ChStripID channelStripID, int vPotChangeValue, EventSource source);
 
     // TODO: Handle different pot functions - some - maybe most - are within
     // the channel class.
-    inline void postVpotEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
-    {
-        printf("vpot event\n");
-        //vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
-    }
+    // inline void postVpotEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
+    // {
+    //     printf("vpot event\n");
+    //     //vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
+    // }
 
     inline void postButtonEvent(int buttonID, ButtonAction buttonAction)
     {

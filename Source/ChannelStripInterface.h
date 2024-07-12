@@ -24,4 +24,6 @@ class ChannelStripInterface
         virtual void updateChStrip(Bank currentBank = LINE_BANK) = 0;
         virtual void updateFaderPosition(Bank currentBank = LINE_BANK) = 0;
 
+        virtual int vPotEventHandler(Bank currentBank, int vPotChangeValue, VpotFunction vPotFunc, EventSource source) = 0;
+        virtual void updateVpotLeds(Bank bank, VpotFunction vPotFunc) = 0;
 };

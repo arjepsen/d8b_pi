@@ -69,7 +69,8 @@ class ChannelStripComponent : public ChannelStripComponentInterface,
     // These ONLY update the UI - purely cosmetical - so no need know which bank. (logic already handled elsewhere).
     // void faderMoveEventCallback(std::string faderValue);
     void faderMoveEventCallback(const char (&faderHexValue)[2]) override;
-    void vpotTurnEventCallback(int vpotValue);
+    //void vpotTurnEventCallback(int vpotValue);
+    void vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction) override;
     void buttonEventCallback(std::string buttonValue); // This one is a bit different... but again mainly cosmetic.
 
     // Create a method for attaching the "listeners" to the controls.

@@ -214,7 +214,49 @@ void EventBus::postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], E
     }
 }
 
+void EventBus::postVpotEvent(ChStripID channelStripID, int eventValue, EventSource source)
+{
+    // First let the channelStrip call the channel to update DSP.
+    // We must supply the currently selected vPot functionality.
+    // Since console sends a change and UI a specific value, this returns the specific.
+    int newValue = channelStripArray[channelStripID]->vPotEventHandler(currentBank, eventValue, currentVpotFunction, source);
 
+    // Update LED's for all associated pots.
+    uint32_t associationBitmap = channelAssociationBitmaps[channelStripID][currentBank];
+    while (associationBitmap)
+    {
+        int stripID = __builtin_ctz(associationBitmap);  // Get lowest set bit for indexing array.
+
+        // Call update methods for console and UI
+        channelStripArray[stripID]->updateVpotLeds(currentBank, currentVpotFunction);
+        channelStripComponentArray[stripID]->vPotTurnEventCallback(newValue, currentVpotFunction);
+
+        associationBitmap &= associationBitmap - 1;
+    }
+
+
+
+    // // Handle UI + Console updates same way as fader events.
+    // uint32_t fullBitmap = channelAssociationBitmaps[channelStripID][currentBank];
+    // uint32_t reducedBitmap = fullBitmap & ~(1 << channelStripID);
+    // uint32_t mask1 = ~source + 1;
+    // uint32_t mask2 = ~mask1;
+    // uint32_t consoleBitmap = (fullBitmap & mask1) | (reducedBitmap & mask2);
+    // uint32_t uiBitmap = (fullBitmap & mask2) | (reducedBitmap & mask1);
+    // while (consoleBitmap)
+    // {
+    //     int stripID = __builtin_ctz(consoleBitmap);
+    //     channelStripArray[stripID]->updateFaderPosition(currentBank);
+    //     consoleBitmap &= consoleBitmap - 1;
+    // }
+
+    // while (uiBitmap)
+    // {
+    //     int stripID = __builtin_ctz(uiBitmap);
+    //     channelStripComponentArray[stripID]->faderMoveEventCallback(eventValue);
+    //     uiBitmap &= uiBitmap - 1;
+    // }
+}
 
 
 // /******************************************************************************

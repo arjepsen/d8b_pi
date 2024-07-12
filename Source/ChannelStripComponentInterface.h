@@ -21,6 +21,8 @@ class ChannelStripComponentInterface
     // virtual void updateChStrip(Bank currentBank = LINE_BANK) = 0;
     // virtual void updateFaderPosition(Bank currentBank = LINE_BANK) = 0;
 
-    virtual void faderMoveEventCallback(const char (&faderHexValue)[2]) = 0;
     virtual void activateEventListeners() = 0;
+
+    virtual void faderMoveEventCallback(const char (&faderHexValue)[2]) = 0;
+    virtual void vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction) = 0;
 };

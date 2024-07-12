@@ -53,4 +53,5 @@ class ComBase
     // void send(const std::string &command);
     void send(const char *command);
     void send(const char *command, size_t commandLength);
+    
 };

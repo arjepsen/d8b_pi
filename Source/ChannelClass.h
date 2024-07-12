@@ -17,7 +17,6 @@
 //#include "BrainComClass.h"
 #include "DspComClass.h"
 //#include "EventBusClass.h"
-// #include "LedIDMaps.h"    // included in implementation.
 #include <array>
 #include <cstdint>
 #include <string>
@@ -28,16 +27,6 @@
 #include "LEDClass.h"
 #include <functional>
 
-enum VpotFunctionEnum
-{
-    VPOT_PAN,
-    VPOT_AUXSEND,
-    VPOT_AUXSEND_STEREO,
-    VPOT_LVL2TAPE,
-    VPOT_DIGITAL_TRIM,
-    VPOT_AUX_STEREO_PAN,
-    NUMBER_OF_VPOT_FUNCTIONS
-};
 
 class Channel
 {
@@ -48,14 +37,21 @@ class Channel
     DspCom &dspCom;
     IntToHexLookup &intToHexLookup;
     HexToIntLookup &hexToIntLookup;
-    //LEDringLookup &ledRingLookup;
+    LEDringLookup &ledRingLookup;
 
-    uint32_t ledOnBitmap = 0;
-    uint32_t ledBlinkBitmap = 0;
+    // Declare bitmaps of LED states that will represent the current state of the channel.
+    // These are read by channelstrips for updating their LED's.
+    uint32_t desiredLedOnBitmap = 0;
+    uint32_t desiredLedBlinkBitmap = 0;
+
+    static const int32_t CLEAR_RING_MASK = ~0x07FF8;   // Mask for clearing the ring LED bits.
 
     const int CH_NUMBER;  // TODO: maybe enumerate this?
     // const std::string CH_ID_STR; // unique ID for each channel (1 - 48)
     const char *const DSP_CH_ID_STR;
+
+    static constexpr size_t DSP_PAN_CMD_LENGTH = 18;
+    static const char DSP_PAN_CMD[DSP_PAN_CMD_LENGTH]; // Declaration
 
     // Map of all the channelstrips that are configured to control this channel.
     // std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
@@ -80,7 +76,7 @@ class Channel
     // void handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
     // void handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
     
-    void bankChangeCallback(ChStripID chStripID);
+    //void bankChangeCallback(ChStripID chStripID);
 
     
     ChStripLED currentRingLED;
@@ -96,7 +92,18 @@ class Channel
 
 
     char volume[3] = "00"; // Initialize to "00".
-    int pan = 0x7F;; // (0 - FE) - weird things happen on "FF".... 
+
+    // Vpot controls
+    int vPotFunctionValues[NUMBER_OF_VPOT_FUNCTIONS] = {0};
+
+
+    // int pan = 0x7F; // (0 - FE) - weird things happen on "FF".... Initially "c"
+    // int auxSend[8] = {0};
+    // int auxStereoSend = 0;
+    // int lvl2tape = 0;       // OFF - 10.0
+    // int digitalTrim = 0;    // OFF - 10.0
+    // int auxStereoPan = 127;
+
     bool mute = false; // Muting sets mute=true and sends vol=0 DSP command, but keeps current volume registered, for unmuting.
     bool solo = false;
     bool select = false;
@@ -112,12 +119,39 @@ class Channel
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
+    int (Channel::*vPotMethods[NUMBER_OF_VPOT_FUNCTIONS])(int vPotValue, EventSource source);
+    int updatePan(int vPotValue, EventSource source);
+    int updateAuxSend1(int vPotValue, EventSource source);
+    int updateAuxSend2(int vPotValue, EventSource source);
+    int updateAuxSend3(int vPotValue, EventSource source);
+    int updateAuxSend4(int vPotValue, EventSource source);
+    int updateAuxSend5(int vPotValue, EventSource source);
+    int updateAuxSend6(int vPotValue, EventSource source);
+    int updateAuxSend7(int vPotValue, EventSource source);
+    int updateAuxSend8(int vPotValue, EventSource source);
+    int updateAuxSend9_10(int vPotValue, EventSource source);
+    int updateAuxPan9_10(int vPotValue, EventSource source);
+    int updateAuxSend11_12(int vPotValue, EventSource source);
+    int updateAuxPan11_12(int vPotValue, EventSource source);
+    int updateLvl2Tape(int vPotValue, EventSource source);
+    int updateDigitalTrim(int vPotValue, EventSource source);
+
+
 
   public:
     // Constructor
     Channel();
 
     void updateVolume(const char (&faderValue)[2]);
+
+    inline int vPotEvent(VpotFunction vPotFunction, int vPotValue, EventSource source)
+    {
+        return (this->*vPotMethods[vPotFunction])(vPotValue, source);
+    }
+
+
+
+
 
     // Button callbacks. 
     // 1: Send dsp command
@@ -131,31 +165,21 @@ class Channel
     void assignBtnCallback(ButtonAction btnAction, Bank currentBank);
     void recRdyBtnCallback(ButtonAction btnAction, Bank currentBank);
 
-    void removeChStripAssociationCallback(Bank bank, ChStripID chStripID);
+    //void removeChStripAssociationCallback(Bank bank, ChStripID chStripID);
 
-    void setVpotFunction(std::function<void(int)> func); // {vPotFunction = func}
-    void subscribeToChStrip(Bank bank, ChStripID chStripID);
+    //void setVpotFunction(std::function<void(int)> func); // {vPotFunction = func}
+    //void subscribeToChStrip(Bank bank, ChStripID chStripID);
 
     void initializeChannel();
-    int getCurrentVpotValue();
+    //int getCurrentVpotValue();
     inline const char * getVolume() const {return volume;}
     inline int getChannelNumber() {return CH_NUMBER; };
     inline bool getMuteState() { return mute; };
     inline bool getSoloState() { return solo; };
     inline bool getSelectState() { return select; };
     //inline bool getVpotDotState() { return vPotDotOn; };
-    inline uint32_t getLedOnBitmap() { return ledOnBitmap; };
-    inline uint32_t getLedBlinkBitmap() { return ledBlinkBitmap; };
-
-    void printMyBitmap()
-    {
-        printf("=== Ch: %d, bitmap: %d\n", CH_NUMBER, ledOnBitmap);
-    }
-
-    void test()
-    {
-        printf("I'm channel number %d, my ID is: %s\n", CH_NUMBER, DSP_CH_ID_STR);
-    }
+    inline uint32_t getLedOnBitmap() { return desiredLedOnBitmap; };
+    inline uint32_t getLedBlinkBitmap() { return desiredLedBlinkBitmap; };
 
 };
 

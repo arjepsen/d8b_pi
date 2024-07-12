@@ -239,3 +239,9 @@ void MasterChannel::updateChStrip(Bank bank)
     // brainCom.send(brainFaderCommand, BRAIN_FADER_CMD_LENGTH);
 
 }
+
+void MasterChannel::updateVpotLeds(Bank bank, VpotFunction vPotFunc)
+{
+    // TODO:
+    // Check how it's done in the regular channelstrip class.
+}

@@ -13,6 +13,8 @@
 //constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
 
 
+constexpr int BRAIN_LED_CMD_LENGTH = 4;
+
 // Set first strip ID. (Increments with every object constructed)
 int ChannelStrip::nextChannelStripNumber = 0;
 
@@ -137,6 +139,52 @@ void ChannelStrip::setChannelPointer(Bank bank, Channel *channelPtr)
 }
 
 
+
+void ChannelStrip::updateVpotLeds(Bank bank, VpotFunction vPotFunc)
+{
+    // TODO: not using vPotFunc?
+
+    // ChannelStrip objects keeps bitmaps of its current LED On and Blink states.
+    // Channel objects keeps bitmaps of "desired" states.
+
+    // First, get the bitmap of desired LED states from the channel
+    uint32_t desiredRingBits = channelPtrs[bank]->getLedOnBitmap();
+
+    // Do an XOR with the bitmap of currently lit channelStrip LED's, to find differences.
+    uint32_t diffMask = currentLedOnStates ^ desiredRingBits;
+
+    // Limit the mask to only consider the ring LED's
+    diffMask = diffMask & RING_LED_MASK;
+
+    // Iterate over the mask and send commands.
+    char brainLedCommand[BRAIN_LED_CMD_LENGTH];
+    while (diffMask)
+    {
+        // Use lowest set bit to index the chars in the command array
+        int charIndex = __builtin_ctz(diffMask);
+
+        // Copy the ID parts of the LED command
+        brainLedCommand[0] = CH_STRIP_LED_MAP[CH_STRIP_ID][charIndex][0];
+        brainLedCommand[1] = CH_STRIP_LED_MAP[CH_STRIP_ID][charIndex][1];
+        brainLedCommand[2] = CH_STRIP_LED_MAP[CH_STRIP_ID][charIndex][2];
+
+        // The on/off command needs to be deduced from the desired bitmap
+        brainLedCommand[3] = LED_OFF_CMD - ((desiredRingBits >> charIndex) & 1);  // Computes either 'j' or 'i'
+    
+        // Send the command
+        brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
+
+        // Update currentLedOnStates by toggling the bit at charIndex
+        currentLedOnStates ^= (1 << charIndex); // Toggle the bit to reflect new state
+
+        // Clear the processed bit from the difference mask
+        diffMask &= ~(1 << charIndex);
+    }
+}
+
+
+
+
 // void ChannelStrip::faderMoveCallback(Bank currentBank, const char (&faderValue)[2], EventSource source)
 // {
 //     // First, call our associated channel, to let it send DSP commands
@@ -195,131 +243,3 @@ void ChannelStrip::refreshStrip()
 }
 
 
-
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
-////////////////////////////////////////////////////////////////////////////
-//////////////////// UNUSED OLD STUFF //////////////////////////////////////
-
-// void ChannelStrip::updateChStrip(Bank bank)
-// {
-//     // TODO: Maybe seperate this into fader, vpot, btnleds?
-
-//     // Fetch info from the associated channel object on the given bank.
-//     // Then update fader position, Vpot LED's, and button LED's
-
-//     // Fetch pointer to volume string from the channel.
-    
-//     // ================ Update Fader ==========================
-//     const char * volumeString = channelPtrs[bank]->getVolume();
-//     char brainFaderCommand[] = "----f";
-//     brainFaderCommand[0] = CHSTRIP_ID_STR[0];
-//     brainFaderCommand[1] = CHSTRIP_ID_STR[1];
-//     brainFaderCommand[2] = volumeString[0];
-//     brainFaderCommand[3] = volumeString[1];
-//     brainCom.send(brainFaderCommand, 5);
-
-//     // =============== Update Pan LED's ======================
-//     // Since we don't know what might have been on, we might need to turn
-//     // all LED's off to start with.
-
-//     // Actually, Channelstrip is completely oblivious to current active 
-//     // vpot functionality.... It must retreive a simple value from
-//     // the Channel object, and use that to deduce led activity.
-//     // Should this value be the 2-char value, or an int?
-
-
-//     int vPotValue = channelPtrs[bank]->getCurrentVpotValue;
-//     char brainLedCommand[4];
-//     MAYBE SEND ONE LONG STRING?
-//     // brainLedCommand[0] = CH_STRIP_LED_MAP[CH_NUMBER][RING_DOT][0];
-//     // brainLedCommand[1] = CH_STRIP_LED_MAP[CH_NUMBER][RING_DOT][1];
-//     // brainLedCommand[2] = CH_STRIP_LED_MAP[CH_NUMBER][RING_DOT][2];
-//     // brainLedCommand[3] = LED_ON_CMD;
-//     // brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
-
-//     // First, retrieve the pan value.
-
-//     for 
-
-
-
-// }
-
-// void ChannelStrip::updateVpotLeds(Bank bank)
-// {
-//     // First, we need to get the current value of the active vpot function
-//     // from the channel. This must be a value between 0 and 255,
-//     // regardless of active function.
-//     int vPotValue = channelPtrs[bank]->getCurrentVpotValue();
-
-//     // Use the lookup to find which ring LED should be on for the current 
-//     // vPot value, and update the array.
-//     ChStripLED activeRingLED = ledRingLookup.getRingID(vPotValue);
-
-
-
-//     // TODO: Are there any case where we need more than one ring led on??
-
-
-//     // Compare to the array of currently lit LED's
-//     // update as necessary....
-
-
-// }
-
-
-// // We already set up an array of LED enumeration ID's.
-// // Lets create a temporary comparitive array, that we update with
-// // which led's SHOULD be on, and then compare the two, and send commands.
-// void ChannelStrip::updateChStripLedsBitmap(Bank bank)
-// {
-//     // First, set up bitmaps of desired led states for the channelstrip
-//     // The first indicates on/off state for all channelstrip leds.
-//     // The second only indicates whether a led is blinking.
-//     desiredLedOnStates[bank] = 0;
-//     desiredLedBlinkStates[bank] = 0;
-
-//     // Retreive the boolean state of various channel attributes, and
-//     // use them to set the bits for the button LED's
-//     // TODO: WHICH OF THESE MIGHT BE BLINKING? RECRDY ONLY?
-//     desiredLedOnStates[bank] |= (channelPtrs[bank]->getMuteState() << MUTE_LED);
-//     desiredLedOnStates[bank] |= (channelPtrs[bank]->getSoloState() << SOLO_LED);
-//     desiredLedOnStates[bank] |= (channelPtrs[bank]->getSelectState() << SELECT_LED);
-//     // TODO: remaining button led's
-
-//     // Now handle the Ring LED's. First, retreive the current vPot value for
-//     // the currently selected vPot function. (Must be between 0 and 255).
-//     // Convert to ring led enumeration, and set the bit.
-//     int vPotValue = channelPtrs[bank]->getCurrentVpotValue();
-//     ChStripLED activeRingLED = ledRingLookup.getRingID(vPotValue);
-//     desiredLedOnStates[bank] |= (1 << activeRingLED);
-
-//     // Set the bit for the Vpot center dot.
-//     desiredLedOnStates[bank] |= (channelPtrs[bank]->getVpotDotState() << RING_DOT);
-
-//     // Get the channel number, for setting the channel LED's (red/green).
-//     int chNumber = channelPtrs[bank]->getChannelNumber();
-
-//     // From the channel number, deduce the desired state of the red/green leds.
-//     // (channel numbering starts from 0).
-//     ChannelLeds chLeds = CH_LEDS_NONE;  
-//     if (chNumber < 24)
-//         chLeds = CH_LEDS_GREEN;
-//     else if (chNumber < 48)
-//         chLeds = CH_LEDS_RED;
-//     else if (chNumber < 72)
-//         chLeds = CH_LEDS_BOTH;
-
-//     // Create a bitmask from the state, by shifting the enum.
-//     uint32_t newChLedsBitmap = static_cast<uint32_t>(chLeds) << 18;
-
-//     // Use the channelStrips bitmap for the red/green channel leds to set those
-//     desiredLedOnStates[bank] |= newChLedsBitmap;
-
-//     // TODO: NOW HOW TO HANDLE BLINKING?
-// }

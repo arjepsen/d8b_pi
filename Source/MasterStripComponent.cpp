@@ -896,6 +896,11 @@ void MasterStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2]
 }
 
 
+void MasterStripComponent::vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction) 
+{
+    // TODO implement
+}
+
 
 // // ####################################################
 // // Same as above, this just updates the VPot in the UI. This value should probably already be calculated

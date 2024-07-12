@@ -1026,12 +1026,12 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
         // std::string dspVpotValue = ss.str();
 
         // Convert to 2-char hex string
-        const char * hexString = intToHexLookup.getHexValue(shiftedValue);
-        char dspVpotValue[2] = {hexString[0], hexString[1]};
+        // const char * hexString = intToHexLookup.getHexValue(shiftedValue);
+        // char dspVpotValue[2] = {hexString[0], hexString[1]};
         //sprintf(dspVpotValue, "%02X", shiftedValue);
 
         // Post the event for the Channel object to handle.
-        eventBus.postVpotEvent(channelStripComponentID, dspVpotValue, UI_EVENT);
+        eventBus.postVpotEvent(channelStripComponentID, shiftedValue, UI_EVENT);
 
         //[/UserSliderCode_vPot]
     }
@@ -1351,17 +1351,19 @@ void ChannelStripComponent::faderMoveEventCallback(const char (&faderHexValue)[2
  *
  * @param vPotValue
  *****************************************************************************/
-void ChannelStripComponent::vpotTurnEventCallback(int vPotValue)
+//void ChannelStripComponent::vpotTurnEventCallback(int vPotValue)
+void ChannelStripComponent::vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction)
 {
     // TODO:
     // BUT, there are different vpot functions, which displays differnt things...
     // Maybe we need different callbacks for each function.
+    // IMPLEMENT SAME WAY AS IN CHANNELSTRIP
 
     // Convert string hex value to a float
     //float decimalValue = std::stoi(vpotHexValue, nullptr, 16);
 
     // Adjust to fit the -127 to 127 range
-    float decimalValue = vPotValue - 127.0;
+    float decimalValue = eventValue - 127.0;
 
     juce::MessageManager::callAsync([this, decimalValue]()
                                     { vPot.get()->setValue(decimalValue, juce::dontSendNotification); });

@@ -62,7 +62,20 @@ class MasterChannel : public ChannelStripInterface
         DEBUG_MSG("The method should not get called on master channel strip...\n");
     }
 
+    inline int vPotEventHandler(Bank currentBank, int vPotChangeValue, VpotFunction vPotFunc, EventSource source) override
+    //inline void vPotEventHandler(Bank currentBank, const char (&vPotValue)[2], VpotFunction vPotFunc) override
+    {
+        // TODO
+        return 127;
+    }
+
+    void updateVpotLeds(Bank bank, VpotFunction vPotFunc) override;
+
 };
+
+
+
+
 
 // Singleton modifications
 inline MasterChannel &MasterChannel::getInstance()
