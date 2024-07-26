@@ -228,20 +228,6 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 // TODO: maybe adapt to accept filename?
                 eventBus.loadSettings();
 
-                // eventBus.initializeChannels();
-                // eventBus.initializeUiStrips();
-                //eventBus.initializeChannelStrips();
-
-
-                // Run through the channel strips, and update settings.
-                // This does nothing for now, but ,later when settings are saved and loaded
-                // this will have an impact.
-                // for (ChannelStrip chStrip : channelStripArray)
-                // {
-                //     chStrip.updateChStrip(LINE_BANK);
-                // }
-
-
                 isInitializing = false;
 
                 // Tell eventBus to activate the UI listeners.

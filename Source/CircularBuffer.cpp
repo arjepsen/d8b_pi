@@ -31,11 +31,8 @@ void CircularBuffer::push(const char *message, size_t msgLength)
     }
 
     // Copy message to buffer.
-    // strncpy(buffer_[head_].data(), message, BUFFER_WIDTH - 1);
-    // buffer_[head_][BUFFER_WIDTH - 1] = '\0'; // Ensure null-termination
     strcpy(buffer_[head_], message);
     
-
     // Write the message length (index of last char) to the message length array.
     messageLengths_[head_] = msgLength;
 
@@ -53,32 +50,6 @@ void CircularBuffer::push(const char *message, size_t msgLength)
     condVar_.notify_one(); // Notify reader
 }
 
-// std::string CircularBuffer::pop()
-// {
-//     // Lock mutex.
-//     std::unique_lock<std::mutex> lock(mutex_);
-
-//     // If head and tail points to the same, the buffer is empty.
-//     // Then put the thread to sleep, until signaled. (use while, for spurious wakeups)
-//     while (head_ == tail_)
-//     {
-//         condVar_.wait(lock);
-//     }
-
-//     // Ok, we're asked for a message, and there's something in the queue.
-//     // Find acutal length of message
-//     // size_t messageLength = strnlen(buffer_[tail_].data(), BUFFER_WIDTH);
-
-//     std::string message(buffer_[tail_].data(), strnlen(buffer_[tail_].data(), BUFFER_WIDTH));
-//     tail_ = next_index(tail_);
-
-//     msgCount--;
-//     // printf("POP - messages in queue: %d\n", msgCount);
-
-//     printf("returning %s, max buffer msgs: %d\n", message.c_str(), maxMsgCount);
-//     lock.unlock();
-//     return message;
-// }
 
 /****************************************************************
  * @brief Method for popping messages.
@@ -87,7 +58,6 @@ void CircularBuffer::push(const char *message, size_t msgLength)
  *
  * @return Returns the length of the message (index of last char)
  ****************************************************************/
-// std::string CircularBuffer::pop()
 size_t CircularBuffer::pop(char *messageBuffer)
 {
     // Lock mutex.
@@ -101,12 +71,6 @@ size_t CircularBuffer::pop(char *messageBuffer)
     }
 
     // Ok, we're asked for a message, and there's something in the queue.
-    // Find acutal length of message
-    // size_t messageLength = strnlen(buffer_[tail_].data(), BUFFER_WIDTH);
-
-    // std::string message(buffer_[tail_].data(), strnlen(buffer_[tail_].data(), BUFFER_WIDTH));
-
-    //strncpy(message, buffer_[tail_].data(), BUFFER_WIDTH - 1);
     strcpy(messageBuffer, buffer_[tail_]);
 
     // Get message length
@@ -114,9 +78,7 @@ size_t CircularBuffer::pop(char *messageBuffer)
 
     // Move tail to next index
     tail_ = next_index(tail_);
-
     msgCount--;
-
     lock.unlock();
 
     return messageLength;

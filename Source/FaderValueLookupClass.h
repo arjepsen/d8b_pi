@@ -54,17 +54,10 @@ class FaderValueLookup
 
 
         // Precompute the map of fader/vpot values and their corresponding DSP hex strings:
-        //for (int i = -900; i <= 100; i++)
         for (int i = 0; i <= 1000; ++i)
         {
             float faderValue = -90.0f + (i * 0.1f); // Convert 'i' to the values reported by the ui fader.
             int dspValue = static_cast<int>((pow(10, (faderValue + 90) / 100.0) - 1) / 9.0 * 255);
-
-
-            // Convert dspValue to 2-digit uppercase hex string, and store in map
-            // std::stringstream hexStream;
-            // hexStream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << dspValue;
-            // dspHexLookupMap[faderValue] = hexStream.str();
             sprintf(dspHexLookupArray[i], "%02X", dspValue);
         }
     }
@@ -76,9 +69,6 @@ class FaderValueLookup
     // Delete copy constructor and assignment operator (singleton)
     FaderValueLookup(const FaderValueLookup &) = delete;
     FaderValueLookup &operator=(const FaderValueLookup &) = delete;
-
-    //std::array<float, 256> precomputedLog10Values;          // Array for the 256 precomputed logarithmic values that faders and vpots can send.
-    //std::unordered_map<float, std::string> dspHexLookupMap; // Map for correlating the possible UI fader values to their dsp hex values.
 
     // Getter method for converting a ui fader/vpot value to the 2-char hex string
     // used for the console commands.

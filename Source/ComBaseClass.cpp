@@ -18,7 +18,6 @@
 #include <string>
 
 
-
 // Constructor with initialization list for the circular buffer
 ComBase::ComBase() : circBuffer(CircularBuffer::getInstance()) 
 {
@@ -26,9 +25,6 @@ ComBase::ComBase() : circBuffer(CircularBuffer::getInstance())
 }
 
 ComBase::~ComBase() {}
-
-
-
 
 
 /************************************************************************

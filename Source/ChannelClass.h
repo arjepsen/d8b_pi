@@ -13,16 +13,12 @@
 
 #pragma once
 
-// #include "BankEnum.h" // moved to event bus
-//#include "BrainComClass.h"
 #include "DspComClass.h"
-//#include "EventBusClass.h"
 #include <array>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-// #include <functional> // For pointers to vpot function depending on vpot mode.
 #include "SharedDataStructures.h"
 #include "LEDClass.h"
 #include <functional>
@@ -44,40 +40,26 @@ class Channel
     uint32_t desiredLedOnBitmap = 0;
     uint32_t desiredLedBlinkBitmap = 0;
 
-    static const int32_t CLEAR_RING_MASK = ~0x07FF8;   // Mask for clearing the ring LED bits.
+    // Mask for clearing the ring LED bits.
+    static const int32_t CLEAR_RING_MASK = ~0x07FF8;   
 
     const int CH_NUMBER;  // TODO: maybe enumerate this?
-    // const std::string CH_ID_STR; // unique ID for each channel (1 - 48)
     const char *const DSP_CH_ID_STR;
 
     static constexpr size_t DSP_PAN_CMD_LENGTH = 18;
     static const char DSP_PAN_CMD[DSP_PAN_CMD_LENGTH]; // Declaration
 
-    
-    ChStripLED currentRingLED;
+    char volume[3] = "00"; // Initialize to "00".
 
-
-    //... more....
+    // Vpot controls
     // A - Master Pan (pan button below master vpot) - ch. 1-72 + 81-88 pan control.
     // B - Aux Send Level (Aux1-8 buttons)
     // C - Aux 9-10 / 11-12 send level for the stereo pair
     // D - Aux 9-10 / 11-12 PAN pan control for the stereo pair.
     // E - Level to tape
     // F - Digital trim.
-
-
-    char volume[3] = "00"; // Initialize to "00".
-
-    // Vpot controls
     int vPotFunctionValues[NUMBER_OF_VPOT_FUNCTIONS] = {0};
 
-
-    // int pan = 0x7F; // (0 - FE) - weird things happen on "FF".... Initially "c"
-    // int auxSend[8] = {0};
-    // int auxStereoSend = 0;
-    // int lvl2tape = 0;       // OFF - 10.0
-    // int digitalTrim = 0;    // OFF - 10.0
-    // int auxStereoPan = 127;
 
     bool mute = false; // Muting sets mute=true and sends vol=0 DSP command, but keeps current volume registered, for unmuting.
     bool solo = false;
@@ -89,8 +71,6 @@ class Channel
     // bool compressorOn;
     // bool eqOn;
 
-    // uint8_t auxSend[12];    // saved send volume for the auxes (1-8, plus 9-10, 11-12 and their pans.)
-    // bool pre_post_aux_send; // saved reference of whether aux send is set to pre- or post-fader.SHOULD THIS BE SOMEHOW COMBINED WITH THE AUX-ARRAY?
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
@@ -125,9 +105,6 @@ class Channel
     }
 
 
-
-
-
     // Button callbacks. 
     // 1: Send dsp command
     // 2: Send Brain command for all associated strip LED's
@@ -140,13 +117,8 @@ class Channel
     void assignBtnCallback(ButtonAction btnAction, Bank currentBank);
     void recRdyBtnCallback(ButtonAction btnAction, Bank currentBank);
 
-    //void removeChStripAssociationCallback(Bank bank, ChStripID chStripID);
-
-    //void setVpotFunction(std::function<void(int)> func); // {vPotFunction = func}
-    //void subscribeToChStrip(Bank bank, ChStripID chStripID);
-
     void initializeChannel(VpotFunction currentVpotFunction);
-    //int getCurrentVpotValue();
+
     inline const char * getVolume() const {return volume;}
     inline int getChannelNumber() {return CH_NUMBER; };
     inline bool getMuteState() { return mute; };

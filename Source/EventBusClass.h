@@ -104,27 +104,13 @@ class EventBus
     void postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source);
     void postVpotEvent(ChStripID channelStripID, int vPotChangeValue, EventSource source);
 
-    // TODO: Handle different pot functions - some - maybe most - are within
-    // the channel class.
-    // inline void postVpotEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
-    // {
-    //     printf("vpot event\n");
-    //     //vPotCallbackArray[currentBank][channelStripID](eventValue, currentBank, channelStripID, source);
-    // }
-
     inline void postButtonEvent(int buttonID, ButtonAction buttonAction)
     {
         printf("calling button callback - now in eventbus.h\n");
         //buttonCallbackMap[currentBank][buttonID](buttonAction, currentBank);
     }
 
-
-
     void channelStripEventSubscribe(int chArrayIndex, ChStripID channelStripID, Bank bank);
-
-
-
-
     void setChannelStripComponentArray(ChannelStripComponent * chStripCompArray, MasterStripComponent * masterComponentPtr);
     void setChannelStripArray(ChannelStrip * chStripArray, MasterChannel * masterChannelPtr);
     void setChannelArray(Channel * chArray);

@@ -19,7 +19,6 @@ class CircularBuffer
 
     void push(const char *message, size_t msgLength);
     size_t pop(char *message);	// Returns the length of the message.
-    // std::string pop();
 
   private:
     CircularBuffer();
@@ -28,8 +27,6 @@ class CircularBuffer
     // Delete copy constructor & assignment operator, no copying a singleton!
     CircularBuffer(const CircularBuffer &) = delete;
     CircularBuffer &operator=(const CircularBuffer &) = delete;
-
-    //std::array<std::array<char, BUFFER_WIDTH>, BUFFER_LENGTH> buffer_;
 
 	// Define the circular buffer array, and a second array to keep the length of each message.
 	char buffer_[BUFFER_LENGTH][BUFFER_WIDTH];

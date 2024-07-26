@@ -41,7 +41,6 @@ class ComBase
 
     // ========= Common Methods ==========
     int openSerialPort(const char *comPortPath, speed_t baudRate);
-    // void flushComBuffer();
     virtual void messageReceiver() = 0; // Pure Virtual Method.
 
   public:
@@ -50,7 +49,6 @@ class ComBase
     void setBaudRate(speed_t baud);
     speed_t getBaudRate();
     void startReceiverThread();
-    // void send(const std::string &command);
     void send(const char *command);
     void send(const char *command, size_t commandLength);
     
