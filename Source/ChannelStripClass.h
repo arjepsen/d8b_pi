@@ -63,6 +63,12 @@ class ChannelStrip : public ChannelStripInterface
     // TODO: These are probably not both necessary.
     inline int getChannelStripIndex() { return CH_STRIP_INDEX; };
     inline ChStripID getChannelStripID() { return CH_STRIP_ID; };
+    
+    inline int getChannelStripVpotValue(Bank currentBank, VpotFunction currentVpotFunction) override 
+    { 
+        return channelPtrs[currentBank]->getVpotValue(currentVpotFunction); 
+    }
+
 
 
   private:
@@ -92,21 +98,7 @@ class ChannelStrip : public ChannelStripInterface
 
     static const int32_t RING_LED_MASK = 0x0FFF8;   // mask for selecting only the ring LED's, incl. the dot.
 
-    // Keep arrays of led states as the registry of how the leds SHOULD be
-    // lit for this channelstrip, on any given bank.
-    // uint32_t desiredLedOnStates[NUMBER_OF_BANKS] {0};
-    // uint32_t desiredLedBlinkStates[NUMBER_OF_BANKS] {0};
 
-    // Do we then need this one for just the red/green?
-    // uint32_t redGreenChLedState[NUMBER_OF_BANKS] {0};
-    
-
-
-    // Methods
-
-    //void faderMoveCallback(Bank currentBank, const char (&faderValue)[2], EventSource source);
-
-    
     void updateChStripLedsBitmap(Bank bank);
     void refreshStrip();    // Used for simply updating the LED's according to "currentStates", and updating fader position.
 };

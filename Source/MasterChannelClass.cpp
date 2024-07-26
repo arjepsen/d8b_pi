@@ -177,6 +177,13 @@ void MasterChannel::updateChStrip(Bank bank)
 {
     // Not using the bank for master.
 
+
+    // TODO: FIX THE LED STUFF FOR MASTER STRIP
+
+    // // First, retreive the bitmaps for the LED's for the current channel
+    // // uint32_t currentOnLedBitmap = channelPtrs[activeBank]->getLedOnBitmap();
+    // // uint32_t currentBlinkLedBitmap = channelPtrs[activeBank]->getLedBlinkBitmap();
+
     // // THE CURRENT STATE IS SAVED IN THE OBJECT. COMPARE FOR CHECKING WHAT TO CHANGE
     // uint32_t newLedOnStates = channelPtrs[bank]->getLedOnBitmap();
     // uint32_t newLedBlinkStates = channelPtrs[bank]->getLedBlinkBitmap();
@@ -230,13 +237,13 @@ void MasterChannel::updateChStrip(Bank bank)
     // Now update the fader position.
     // Create a fader command string from the new channel's volume string,
     // and send it.
-    // char brainFaderCommand[BRAIN_FADER_CMD_LENGTH]; 
-    // brainFaderCommand[0] = CH_STRIP_ID_STR[0];
-    // brainFaderCommand[1] = CH_STRIP_ID_STR[1];
-    // brainFaderCommand[2] = channelPtrs[bank]->getVolume()[0];
-    // brainFaderCommand[3] = channelPtrs[bank]->getVolume()[1];
-    // brainFaderCommand[4] = 'f';
-    // brainCom.send(brainFaderCommand, BRAIN_FADER_CMD_LENGTH);
+    //char brainFaderCommand[BRAIN_FADER_CMD_LENGTH]; 
+    //brainFaderCommand[0] = CH_STRIP_ID_STR[0];
+    //brainFaderCommand[1] = CH_STRIP_ID_STR[1];
+    faderMoveCmd[2] = masterVolume[0];
+    faderMoveCmd[3] = masterVolume[1];
+    brainCom.send(faderMoveCmd, BRAIN_FADER_CMD_LENGTH);
+
 
 }
 

@@ -78,8 +78,6 @@ Channel::Channel()
       hexToIntLookup(HexToIntLookup::getInstance()),
       ledRingLookup(LEDringLookup::getInstance())
 {
-    // TODO: Get saved settings....
-
     // Set the two bits of the LED bitmask from the channel number.
     ChannelLeds chLeds = CH_LEDS_NONE;  
     if (CH_NUMBER < 24)
@@ -111,8 +109,10 @@ Channel::Channel()
     vPotMethods[VPOT_LVL2TAPE] = &Channel::updateLvl2Tape;
     vPotMethods[VPOT_DIGITAL_TRIM] = &Channel::updateDigitalTrim;
 
+    // Set initial pan value to center
+    vPotFunctionValues[VPOT_PAN] = 127;
 
-    // Set stereo aux pan value to middle
+    // Set stereo aux pan value to center
     vPotFunctionValues[VPOT_AUXPAN9_10] = 127;
     vPotFunctionValues[VPOT_AUXPAN11_12] = 127;
 
@@ -238,20 +238,20 @@ int Channel::updatePan(int vPotValue, EventSource source)
 }
 
 // TODO:
-int Channel::updateAuxSend1(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend2(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend3(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend4(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend5(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend6(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend7(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend8(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend9_10(int vPotValue, EventSource source) {}
-int Channel::updateAuxPan9_10(int vPotValue, EventSource source) {}
-int Channel::updateAuxSend11_12(int vPotValue, EventSource source) {}
-int Channel::updateAuxPan11_12(int vPotValue, EventSource source) {}
-int Channel::updateLvl2Tape(int vPotValue, EventSource source) {}
-int Channel::updateDigitalTrim(int vPotValue, EventSource source) {}
+int Channel::updateAuxSend1(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend2(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend3(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend4(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend5(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend6(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend7(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend8(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend9_10(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxPan9_10(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxSend11_12(int vPotValue, EventSource source) {return 0;}
+int Channel::updateAuxPan11_12(int vPotValue, EventSource source) {return 0;}
+int Channel::updateLvl2Tape(int vPotValue, EventSource source) {return 0;}
+int Channel::updateDigitalTrim(int vPotValue, EventSource source) {return 0;}
 
 
 
@@ -509,20 +509,20 @@ void Channel::recRdyBtnCallback(ButtonAction btnAction, Bank currentBank)
 }
 
 
-void Channel::initializeChannel()
+/****************************************************************************
+ * @brief This method is called by the "loadSettings" method in eventbus,
+ *        which in turn is called by the mixermanager when the console
+ *        has been booted and comms are set up. 
+ *        LoadSettings is responsible for loading the settings saved to file,
+ *        and then run this method to handle the channel side of things.
+ ****************************************************************************/
+void Channel::initializeChannel(VpotFunction currentVPotFunction)
 {
-    // TODO: The channels are constructed at program start, but the console
-    // is booted later. This means that any settings for the console - be it Brain or DSP
-    // has to happen later.
-    // So this method is called after the console is up an running, to do any commands to 
-    // these two as initialization for the channel.
-
-    // TODO: BUT - is this necessary? Isn't this the standard settings?
-
 
     // TODO: For now, ignore midi channels - THEY PROLLY HAVE DIFFERENT COMMAND??
     // right now we are sending stuff that aint right at bootup....
 
+    
 
     // ================ SET VOLUME TO 0 =======================
     char dspVolumeCommand[DSP_VOL_CMD_LENGTH] = "--cX--Q";
@@ -538,7 +538,27 @@ void Channel::initializeChannel()
     char dspPanCommand[] = "--dFEFFX7FOFDFFXP";
     dspPanCommand[0] = DSP_CH_ID_STR[0];
     dspPanCommand[1] = DSP_CH_ID_STR[1];
-    dspCom.send(dspPanCommand,17);
+    dspCom.send(dspPanCommand, 17);
+
+
+
+    // ============= REGISTER LED's ==========================
+    // Get the vPot Value for the registered function.
+    int vPotValue = vPotFunctionValues[currentVPotFunction];
+    
+    // Update the LED bitmap. First, look up which ring LED should be lit.
+    ChStripLED ringBit = ledRingLookup.getRingID(vPotValue);
+
+    // Clear all ring bits, then set the one we looked up.
+    desiredLedOnBitmap &= CLEAR_RING_MASK;
+    desiredLedOnBitmap |= 1 << ringBit;
+
+    // Set dot LED bit if pan is centered
+    // TODO: This might need more work, depending on function?
+    desiredLedOnBitmap |= ((vPotValue == 127) << RING_DOT); 
+
+
+    // TODO: Button LED's
 
 
     // For now, just set up ch10 for left, and 11 for right

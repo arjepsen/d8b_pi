@@ -53,6 +53,8 @@
       <FILE id="ROWLES" name="EventBusClass.h" compile="0" resource="0" file="Source/EventBusClass.h"/>
       <FILE id="KBfc7i" name="FaderValueLookupClass.h" compile="0" resource="0"
             file="Source/FaderValueLookupClass.h"/>
+      <FILE id="iGI3dL" name="FileManager.cpp" compile="1" resource="0" file="Source/FileManager.cpp"/>
+      <FILE id="rVLCvd" name="FileManager.h" compile="0" resource="0" file="Source/FileManager.h"/>
       <FILE id="lkn7of" name="FXCardClass.h" compile="0" resource="0" file="Source/FXCardClass.h"/>
       <FILE id="EOEs3v" name="FXSlotClass.cpp" compile="1" resource="0" file="Source/FXSlotClass.cpp"/>
       <FILE id="cfuxAA" name="FXSlotClass.h" compile="0" resource="0" file="Source/FXSlotClass.h"/>

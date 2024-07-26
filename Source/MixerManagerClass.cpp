@@ -29,7 +29,7 @@
 MixerManager::MixerManager()
     : settings(Settings::getInstance()),
       eventBus(EventBus::getInstance()),
-      masterChannel(MasterChannel::getInstance()),
+      //masterChannel(MasterChannel::getInstance()),
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       circBuffer(CircularBuffer::getInstance()),
@@ -193,7 +193,7 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
         juce::Thread::launch(
             [this, initMixerBtn]()
             {
-                // Perform Mixer initialization.
+                // Perform Mixer initialization / boot.
                 InitErrorType initResult = initializeMixer();
 
                 // Check if an error returned
@@ -221,23 +221,17 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
                 dspCom.startReceiverThread();
                 messageHandlerThread = std::thread(&MixerManager::handleBufferMessage, this);
 
-                // TODO: THIS - THIS is where we must initialize things - now the com is up.
-                // Handle saved settings.
-                // But maybe we should move channels and strips to eventbus?
-
-                // Initialize ALL channels. Coms are up now, so we can set things up.
-                // for (Channel channel : channelArray)
-                // {
-                //     channel.initializeChannel();
-                // }
+                // At this point the mixer is booted, and communication is 
+                // initialized.
+                // Now we need to send the initial settings to the console.
                 
-                eventBus.initializeChannels();
-                eventBus.initializeUiStrips();
+                // TODO: maybe adapt to accept filename?
+                eventBus.loadSettings();
+
+                // eventBus.initializeChannels();
+                // eventBus.initializeUiStrips();
                 //eventBus.initializeChannelStrips();
 
-                // Also initialize the master channel
-                // TODO: Move master channel object to eventbus also??
-                //masterChannel.initializeMasterChannel();
 
                 // Run through the channel strips, and update settings.
                 // This does nothing for now, but ,later when settings are saved and loaded
@@ -358,89 +352,3 @@ void MixerManager::handleBufferMessage()
     }
 }
 
-// // ########################################################################################
-// // Heartbeat handler method - this is invoked when an "l" or "k" is received from the Brain
-// // ########################################################################################
-// void MixerManager::heartBeatReceived()
-// {
-//     // For now, do nothing, but maybe we can implement a timer/watchdog thingie?
-// }
-
-// #########################################################################################
-// Method to a pointer to the channel Strip Component array from the MainComponent.
-// #########################################################################################
-// void MixerManager::setChannelStripComponentArray(ChannelStripComponent *chStripArray)
-// {
-//     chStripComponents = chStripArray;
-// }
-
-// ###############################################################################
-// Faders sends a hex value (byte) on a linear scale.
-// This method calculates the corresponding value to show in the ui.
-// ###############################################################################
-
-// TODO MAYBE THIS BELONGS IN CHANNELSTRIPCOMPONENT??
-
-// double MixerManager::mapToSliderScale(std::string hexValue)
-// {
-//     int decimalValue = std::stoi(hexValue, nullptr, 16);
-
-//     double returnValue = log10((decimalValue * logFactor) + 1) * 100 - 90;
-
-//     return returnValue;
-// }
-
-// ##########################################################################################
-// This method gets called by MainComponent's callback function, when a fader is moved in UI
-// It converts the value from the fader logarithmic scale to a byte. The value sent to the
-// Channel object, which sends the command to the DSP board.
-// Then a command is also sent to the Brain, to move the fader.
-
-// WE STILL NEED TO EXPAND THIS TO TAKE SELECTED BANK INTO CONSIDERATION!!!!!!!!!!!!
-
-// ###########################################################################################
-
-// TODO MAYBE THIS BELONGS IN CHANNELSTRIPCOMPONENT??
-
-// void MixerManager::handleUiFaderMove(std::string channelStripComponentID, float newFaderValue)
-// {
-//     // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
-//     float x = 28.3f * powf(10.0f, 0.01f * newFaderValue + 0.9f) - 28.3f;
-
-//     // Round to integer
-//     int roundedX = static_cast<int>(x + 0.5f);
-
-//     // Convert to 2-digit hex string
-//     std::stringstream stream;
-//     stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
-//     std::string faderHexValue = stream.str();
-
-//     // Tell channel object to send volume command, and update it's record.
-//     // IF BANK == LINE BANK:
-//     channelStripMap[channelStripComponentID]->setVolume(faderHexValue, dspDescriptor);
-
-//     // Send a fader move command to the Brain:
-//     std::string brainCommand = channelStripComponentID + faderHexValue + "f";
-//     write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
-// }
-
-// void MixerManager::handleUiMasterFaderMove(float newMasterFaderValue)
-// {
-//     // Change value from logarithmic fader scale, to linear 0-255 scale. (approximation)
-//     float x = 28.3f * powf(10.0f, 0.01f * newMasterFaderValue + 0.9f) - 28.3f;
-
-//     // Round to integer
-//     int roundedX = static_cast<int>(x + 0.5f);
-
-//     // Convert to 2-digit hex string
-//     std::stringstream stream;
-//     stream << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << roundedX;
-//     std::string faderHexValue = stream.str();
-
-//     // Tell MasterChannel singleton to send volume command to dsp, and update it's record.
-//     masterChannel.setMasterVolume(faderHexValue, dspDescriptor);
-
-//     // Send a fader move command to the brain.
-//     std::string brainCommand = "18" + faderHexValue + "f";
-//     write(brainDescriptor, brainCommand.c_str(), brainCommand.length());
-// }

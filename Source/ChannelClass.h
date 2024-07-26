@@ -53,31 +53,6 @@ class Channel
     static constexpr size_t DSP_PAN_CMD_LENGTH = 18;
     static const char DSP_PAN_CMD[DSP_PAN_CMD_LENGTH]; // Declaration
 
-    // Map of all the channelstrips that are configured to control this channel.
-    // std::unordered_map<Bank, std::unordered_set<std::string>> associatedChannelStrips;
-    //std::unordered_map<Bank, std::unordered_set<char[2]>> associatedChannelStrips;
-    //bool associatedChannelStrips[NUMBER_OF_BANKS][CHANNEL_STRIP_COUNT];
-    
-    // Lets try using a bitmask instead.
-    //uint32_t associatedChannelStripBitmask[NUMBER_OF_BANKS];
-
-
-    // Type definition of the pointer to the current function to handle vpot events.
-    //typedef void (Channel::*VpotFunction)(const char (&)[2], const Bank, ChStripID, EventSource);
-
-    // // Pointer to the currently selection vpot event handler function
-    // VpotFunction currentVpotFunction;
-
-    // // These are the possible vpot event handlers
-    // void handleVpotPan(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    // void handleVpotAuxSend(const char (&vPotValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    // void handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    // void handleVpotLevelToTape(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    // void handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    // void handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source);
-    
-    //void bankChangeCallback(ChStripID chStripID);
-
     
     ChStripLED currentRingLED;
 
@@ -170,7 +145,7 @@ class Channel
     //void setVpotFunction(std::function<void(int)> func); // {vPotFunction = func}
     //void subscribeToChStrip(Bank bank, ChStripID chStripID);
 
-    void initializeChannel();
+    void initializeChannel(VpotFunction currentVpotFunction);
     //int getCurrentVpotValue();
     inline const char * getVolume() const {return volume;}
     inline int getChannelNumber() {return CH_NUMBER; };
@@ -180,6 +155,8 @@ class Channel
     //inline bool getVpotDotState() { return vPotDotOn; };
     inline uint32_t getLedOnBitmap() { return desiredLedOnBitmap; };
     inline uint32_t getLedBlinkBitmap() { return desiredLedBlinkBitmap; };
+
+    inline int getVpotValue(VpotFunction currentVpotFunction) {return vPotFunctionValues[currentVpotFunction]; };
 
 };
 

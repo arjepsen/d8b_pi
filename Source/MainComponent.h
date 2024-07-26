@@ -1,64 +1,57 @@
+/**********************************************************************
+ * @file MainComponent.h
+ * @author Anders R. Jepsen
+ * @brief The "Main Component" is run inside the JUCE program window.
+ *        This is effectively the starting point of the program.
+ *        Here we instantiate various UI objects, and also the
+ *        Channelstrip and channel objects, along with the EventBus and
+ *        MixerManager.
+ * @version 0.1
+ * @date 2024-07-26
+ **********************************************************************/
+
 #pragma once
 
-#include "ChannelStripComponent.h"
 #include "ChannelClass.h"
 #include "ChannelStripClass.h"
+#include "ChannelStripComponent.h"
 #include "ChannelStripInterface.h"
+#include "EventBusClass.h"
+#include "MasterStripComponent.h"
 #include "MenuBar.h"
 #include "MixerManagerClass.h"
-#include "MasterStripComponent.h"
-#include "EventBusClass.h"
-#include <JuceHeader.h>
 #include "SharedDataStructures.h"
-
-//#include "SettingsWindow.h"
-//#include "settingsplay.h"
-
-
-//==============================================================================
-/*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
-*/
+#include <JuceHeader.h>
 
 class MainComponent : public juce::Component
-
 {
 
-public:
-    //==============================================================================
-
+  public:
     MainComponent();
     ~MainComponent() override;
-
-    //==============================================================================
 
     void paint(juce::Graphics &) override;
     void resized() override;
 
-    // My stuff
-    //void faderUiMoveCallback(const std::string channelStripComponentID, float newValue);
-    //void masterFaderMoveCallback(float newValue);
-
-
-private:
-    //==============================================================================
-
+  private:
+    // Instantiate the top menubar component.
     MenuBar menuBar;
 
-    // Declare array of UI channelstrips.
-    ChannelStripComponent channelStripComponetArray[CHANNEL_STRIP_COUNT];
+    // Declare arrays of ChannelStrip objects, both UI and for console.
+    // This declaration will instantiate the objects, running their constructors.
+    ChannelStripComponent channelStripComponentArray[CHANNEL_STRIP_COUNT];
+    ChannelStrip channelStripArray[CHANNEL_STRIP_COUNT];
 
-    // Same for the Channel and Channelstrip objects.
-    Channel channelArray[CHANNEL_COUNT]; 
-    ChannelStrip channelStripArray[CHANNEL_STRIP_COUNT];    // +1 for the master strip.
+    // Likewise, declare array of Channel objects.
+    Channel channelArray[CHANNEL_COUNT];
+
+    // Instantiate the Master channel (strip) and the master UI strip.
     MasterChannel &masterChannel;
-
     MasterStripComponent masterStripComponent;
 
+    // Finally, instantiate the EventBus and MixerManager singletons.
     EventBus &eventBus;
     MixerManager &mixerManager;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

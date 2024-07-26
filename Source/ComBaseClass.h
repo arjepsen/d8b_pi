@@ -36,7 +36,7 @@ class ComBase
     std::thread receiverThread;
     bool receiverThreadRunning = false;
     std::string port = "";
-    speed_t baudRate = B0;      // Inital
+    speed_t baudRate = B0;      // Inital 
     CircularBuffer &circBuffer; // Buffer singleton reference
 
     // ========= Common Methods ==========

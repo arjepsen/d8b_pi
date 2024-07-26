@@ -26,4 +26,5 @@ class ChannelStripInterface
 
         virtual int vPotEventHandler(Bank currentBank, int vPotChangeValue, VpotFunction vPotFunc, EventSource source) = 0;
         virtual void updateVpotLeds(Bank bank, VpotFunction vPotFunc) = 0;
+        virtual int getChannelStripVpotValue(Bank currentBank, VpotFunction currentVpotFunction) = 0;
 };

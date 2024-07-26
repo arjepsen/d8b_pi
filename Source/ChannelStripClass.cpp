@@ -35,7 +35,6 @@ ChannelStrip::ChannelStrip() :
     faderMoveCmd[2] = '0';
     faderMoveCmd[3] = '0';
     faderMoveCmd[4] = 'f';
-    
 
     // Increment for next object instantiation.
     nextChannelStripNumber++;
@@ -62,6 +61,7 @@ void ChannelStrip::setChannelAssociation(Bank activeBank, Bank associationBank, 
 
 // This is for updating a strip according to it's channel. It is up to the caller to ensure that this is
 // called on an active bank.
+// TODO: ARE WE USING THIS?
 void ChannelStrip::updateChStrip(Bank bank)
 {
     // First, retreive the bitmaps for the LED's for the current channel
@@ -129,6 +129,8 @@ void ChannelStrip::updateChStrip(Bank bank)
     brainCom.send(faderMoveCmd, BRAIN_FADER_CMD_LENGTH);
 
 }
+
+
 
 void ChannelStrip::setChannelPointer(Bank bank, Channel *channelPtr)
 {

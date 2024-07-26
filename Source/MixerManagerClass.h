@@ -38,7 +38,7 @@
 //#include "BankEnum.h" // moved to eventbus
 #include "ChannelIDMap.h"
 #include "ChannelStripComponent.h"
-#include "MasterChannelClass.h"
+//#include "MasterChannelClass.h"
 #include "EventBusClass.h"
 #include "BrainComClass.h"
 #include "DspComClass.h"
@@ -48,7 +48,7 @@ class MixerManager
 private:
     // References to singletons
     Settings &settings; 
-    MasterChannel &masterChannel;   
+    //MasterChannel &masterChannel;   
     EventBus &eventBus;     
     BrainCom &brainCom;
     DspCom &dspCom;
@@ -69,38 +69,11 @@ private:
     FXSlot *fxSlotC;
     FXSlot *fxSlotD;
 
-    // Create the circular buffer object.
-    //CircularBuffer circBuffer;
-
-    // MessageHandler objects
-    // MessageHandler *messageHandler;
-    // LineBankMessageHandler lineBankMessageHandler;
-    // TapeBankMessageHandler tapeBankMessageHandler;
-    // EffectsBankMessageHandler effectsBankMessageHandler;
-    // MastersBankMessageHandler mastersBankMessageHandler;
-
-    // Channel and Channelstrip
-
-    // Moved to eventbus
-    // Channel channelArray[CHANNEL_COUNT]; 
-    // ChannelStrip channelStripArray[CHANNEL_STRIP_COUNT];
-
-
-    // Component pointers
-//    ChannelStripComponent *chStripComponents;
-
     // Create a buffer with the defined width from the circular buffer.
     char msgBuffer[BUFFER_WIDTH];
 
 	// Various members/variables
     bool isInitializing = false; // Flag for avoid starting multiple init threads.
-
-    // CHANGE THESE TO THE BRAIN/DSPCOM CLASSES INSTEAD
-	// int brainDescriptor;
-	// int dspDescriptor;
-
-    // Maybe this should be purely in the channelstrip component?
-    // const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
 
 
     MixerManager();  // Constructor
@@ -110,36 +83,12 @@ private:
     MixerManager(const MixerManager &) = delete;
     MixerManager &operator=(const MixerManager &) = delete;
 
-    // // Communication threads
-    // std::thread brainReceiverThread;
-    // std::thread dspReceiverThread;
     std::thread messageHandlerThread;
 
-    // Thread methods
-    // void brainMessageReceiver();
-    // void dspMessageReceiver();
     void handleBufferMessage();
-
-    // Other Methods
-    //int openSerialPort(const char *devicePath, speed_t baudRate);
-    //void heartBeatReceived();
-    double mapToSliderScale(std::string hexValue);
-
-	// Callback function for handling the message structures from the message handlers
-	// void messageHandlerCallback(const MessageData& messageData);
-    // void faderMessageCallback(const MessageData& messageData);
-    // void vPotMessageHandlerCallback(const MessageData& messageData);
-    // void ButtonDwnMessageHandlerCallback(const MessageData& messageData);
-    // void ButtonUpMessageHandlerCallback(const MessageData& messageData);
 
 public:
     static MixerManager &getInstance(); // Returns a reference to the instance.
-
-    // Public methods for interacting with channels
-    const Channel &getChannel(uint8_t id) const; // Ensure channels stay in their place in the array.
-
-    // Public method for providing access to the Settings instance
-    // const Settings &getSettings() const;
 
     bool setBrainPort(std::string deviceString);
     bool setDspPort(std::string deviceString);
@@ -155,14 +104,6 @@ public:
 
     void initMixer(juce::Button *initMixerBtn);
 
-    //void setBank(Bank bank);
-
-    //void setChannelStripComponentArray(ChannelStripComponent * chStripArray);
-    // void handleUiFaderMove(std::string channelsTripComponentID, float newFaderValue);
-    // void handleUiMasterFaderMove(float newMasterFaderValue);
-
-
-    // TODO: Add methods to handle communication with the Brain and DSP boards
 };
 
 // Singleton modifications
@@ -172,25 +113,3 @@ inline MixerManager &MixerManager::getInstance()
     return instance;
 }
 
-//////////////////////////////////
-// VARIOUS NOTES //
-
-// Mixermanager object should be instantiated in MainComponent. (So it's accessible for everything else...)
-// Remaining classes should be instantiated in mixermanager.
-// So channels gets instantiated in mixermanager.
-// But channelstripcomponent are also instantiated in maincomponent, since they are a gui element.
-// Channels are data storage. When updated, the mixermanager also updates the channelstripcomponent.
-
-// There are four banks - and the two first are channels.
-// SO MAYBE THE CONNECTION BETWEEN CHANNELSTRIP AND CHANNEL LIES ENTIRELY IN MIXERMANAGER?
-
-// This could make BANK selection easier, since it's simply an update in mixermanager, which then updates the
-// channelstrip graphically.
-
-// There should be a "ChangeBank" method here  in mixermanager, which is called, when a bank button is pressed
-// (either physically, or though gui)
-
-// There are several sections on the mixer - but some of them are maybe just purely variables?
-// for example "Assignments" only contain buttons...
-
-// SELECT button is probably a variable in MixerManager.

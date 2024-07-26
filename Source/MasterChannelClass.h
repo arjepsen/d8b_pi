@@ -69,6 +69,13 @@ class MasterChannel : public ChannelStripInterface
         return 127;
     }
 
+    inline int getChannelStripVpotValue(Bank currentBank, VpotFunction currentVpotFunction) override 
+    { 
+        // TODO
+        return 127;
+    }
+
+
     void updateVpotLeds(Bank bank, VpotFunction vPotFunc) override;
 
 };
