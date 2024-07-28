@@ -574,7 +574,6 @@ ChannelStripComponent::ChannelStripComponent ()
 
 
     //[UserPreSize]
-
     //[/UserPreSize]
 
     setSize (75, 1024);
@@ -1013,22 +1012,7 @@ void ChannelStripComponent::sliderValueChanged (juce::Slider* sliderThatWasMoved
 
         // The pan pot in the UI gives a value between -127 and 127 as a double.
 
-        // TODO: Clean up.
-        // Shift the value from -127 - 127 to 0 - 255
-        //uint8_t shiftedValue = static_cast<uint8_t>(sliderThatWasMoved->getValue() + 127.0);
         int shiftedValue = static_cast<int>(sliderThatWasMoved->getValue() + 127.0);
-
-        // // Use a stringstream to convert the uint8_t to a 2-digit upper case hex string
-        // std::stringstream ss;
-        // ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(shiftedValue);
-
-        // // The hex string is now in ss.str()
-        // std::string dspVpotValue = ss.str();
-
-        // Convert to 2-char hex string
-        // const char * hexString = intToHexLookup.getHexValue(shiftedValue);
-        // char dspVpotValue[2] = {hexString[0], hexString[1]};
-        //sprintf(dspVpotValue, "%02X", shiftedValue);
 
         // Post the event for the Channel object to handle.
         eventBus.postVpotEvent(channelStripComponentID, shiftedValue, UI_EVENT);
@@ -1316,11 +1300,6 @@ void ChannelStripComponent::setFaderPosition(double value)
                                     { fader.get()->setValue(value, juce::dontSendNotification); });
 }
 
-// void ChannelStripComponent::setFaderMoveCallbackFunction(std::function<void(std::string, float)> callbackFunction)
-// {
-// 	faderMoveCallback = callbackFunction;
-// }
-
 
 /*****************************************************************************
  * @brief This is a callback method to be used by the event bus.
@@ -1358,9 +1337,6 @@ void ChannelStripComponent::vPotTurnEventCallback(int eventValue, VpotFunction c
     // BUT, there are different vpot functions, which displays differnt things...
     // Maybe we need different callbacks for each function.
     // IMPLEMENT SAME WAY AS IN CHANNELSTRIP
-
-    // Convert string hex value to a float
-    //float decimalValue = std::stoi(vpotHexValue, nullptr, 16);
 
     // Adjust to fit the -127 to 127 range
     float decimalValue = eventValue - 127.0;

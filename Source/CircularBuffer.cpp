@@ -1,12 +1,12 @@
 #include "CircularBuffer.h"
-#include <cstring>
 #include "Debug.h"
+#include <cstring>
 
 CircularBuffer::CircularBuffer()
-    : head_(0), tail_(0) 
-    {
-        DEBUG_MSG("CIRCBUF CONSTRUCTOR\n");
-    }
+    : head_(0), tail_(0)
+{
+    DEBUG_MSG("CIRCBUF CONSTRUCTOR\n");
+}
 
 CircularBuffer::~CircularBuffer() {}
 
@@ -32,7 +32,7 @@ void CircularBuffer::push(const char *message, size_t msgLength)
 
     // Copy message to buffer.
     strcpy(buffer_[head_], message);
-    
+
     // Write the message length (index of last char) to the message length array.
     messageLengths_[head_] = msgLength;
 
@@ -49,7 +49,6 @@ void CircularBuffer::push(const char *message, size_t msgLength)
     lock.unlock();
     condVar_.notify_one(); // Notify reader
 }
-
 
 /****************************************************************
  * @brief Method for popping messages.

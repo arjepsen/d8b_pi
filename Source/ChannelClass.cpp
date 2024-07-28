@@ -8,9 +8,7 @@
   ==============================================================================
 */
 
-// TODO: Change from std::string to c-style strings where applicable.
 #include "ChannelClass.h"
-//#include "ButtonLookupTable.h"
 #include "ChannelIDMap.h"
 #include <iomanip>
 #include <sstream>
@@ -23,13 +21,8 @@
 constexpr size_t LED_CMD_LENGTH = 5; // Number of chars in the LED DSP commands, including null terminator.
 constexpr int STRIP_ID_LENGTH = 3;   // Number of chars in the channel strip ID, incl. null.
 constexpr int VOL_VALUE_LENGTH = 3;  // Max chars in the volume value string. (one or two.) Incl. null.
-
-// constexpr char DSP_VOL_CMD_PRT1[] = "cX";
-// constexpr char DSP_CMD_END[] = "Q";
 constexpr int DSP_VOL_CMD_LENGTH = 8;     // Max dsp volume command length. (for setting array). ie. "0AcXC8Q" (can be only 7, when just one hex digit for volume)
 constexpr int DSP_PAN_CMD_LENGTH = 16;
-//constexpr int BRAIN_LED_CMD_LENGTH = 4;
-
 constexpr int DSP_ID_LENGTH = 3;
 
 const char Channel::DSP_PAN_CMD[18] = "--dFEFFX--OFDFFXP";
@@ -71,8 +64,6 @@ uint8_t Channel::nextChannelNumber = 0;
 Channel::Channel()
     : DSP_CH_ID_STR{DSP_CH_ID_ARRAY[nextChannelNumber]}, // Get unique channel ID for dsp commands.
       CH_NUMBER{nextChannelNumber},                  // Set unique channel number.
-      //eventBus(EventBus::getInstance()),             // Get the singleton instances
-      //brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       intToHexLookup(IntToHexLookup::getInstance()),
       hexToIntLookup(HexToIntLookup::getInstance()),
@@ -167,26 +158,6 @@ void Channel::updateVolume(const char (&faderValue)[2])
 
 
 
-
-
-// /*********************************************************************************
-//  * @brief This method is used when we make a new association, i.e. when we want
-//  *        to set up some specific channelstrip to control this channel.
-//  *        (any channelstrip on any bank can be configured to control any channel).
-//  *        When a new association is made, we first need to let the old associated
-//  *        channel know that it is no longer associated with that strip, so it can
-//  *        update it's register of associated channels - done by this callback.
-//  * 
-//  * @param bank
-//  * @param chStripID 
-//  *********************************************************************************/
-// void Channel::removeChStripAssociationCallback(Bank bank, ChStripID chStripID)
-// {
-//     associatedChannelStripBitmask[bank] &= ~(1U << chStripID);
-// }
-
-
-
 // ===========================================  VPOT EVENT HANDLERS  =======================================
 
 
@@ -252,172 +223,6 @@ int Channel::updateAuxSend11_12(int vPotValue, EventSource source) {return 0;}
 int Channel::updateAuxPan11_12(int vPotValue, EventSource source) {return 0;}
 int Channel::updateLvl2Tape(int vPotValue, EventSource source) {return 0;}
 int Channel::updateDigitalTrim(int vPotValue, EventSource source) {return 0;}
-
-
-
-// /*********************************************************************************
-//  * @brief Vpot pan event handler. 
-//  *        When a channelstrip vpot is turned, the Brain sends a message in the same 
-//  *        format as the faders: XXYYv, where XX is the channelstrip ID, and YY 
-//  *        is the value. The value will be Fy for CCW movement, and 0y for CW 
-//  *        movement, where y is a value depending on how fast the pot is turned.
-//  *        When converting this to an int8_t, it becomes negative for Fy values,
-//  *        which means we can simply add this value to the previously stored pan.
-//  * 
-//  * @param panValue 
-//  * @param bank 
-//  * @param channelStripID 
-//  * @param source 
-//  **********************************************************************************/
-// void Channel::handleVpotPan(const char (&panValue)[2], Bank bank, ChStripID channelStripID, EventSource source)
-// {
-//     // If old pan value was 127, then we are moving away from dead center
-//     // And need to turn the dot off.
-//     bool handleDot = (pan == 127);
-
-//     // Create initial DSP command string.
-//     char dspPanCommand[] = "--dFEFFX--OFDFFXP";
-
-//     // Write in the dsp channel ID code.
-//     dspPanCommand[0] = DSP_CH_ID_STR[0];
-//     dspPanCommand[1] = DSP_CH_ID_STR[1];
-
-//     // The pan value needs to be handled depending on whether it was console 
-//     // or UI
-//     if (source == CONSOLE_EVENT)
-//     {
-//         // Convert hex string to signed int8_t. (CCW becomes negative)
-//         int panChangeValue = static_cast<int8_t>(hexToIntLookup.hexToInt(panValue));
-
-//         // Adding to the current value will result in the new value to write.
-//         // Clamp the value, so it stays within 0 to 254 when turning at max/min 
-//         // values. Write to class member.
-//         pan = std::max(0, std::min(254, static_cast<int>(pan + panChangeValue)));
-//     }
-//     else
-//     {
-//         // This is a UI event, so we're receiving the value that the pot has 
-//         // been moved _TO_ as a hex string.
-//         // Update the pan member of this channel
-//         pan = hexToIntLookup.hexToInt(panValue);
-//     }
-
-//     // Convert pan to a 2-digit hex string
-//     const char *panHexValue = intToHexLookup.getHexValue(pan);
-
-//     // Write the hex value to the dsp command string
-//     dspPanCommand[8] = panHexValue[0];
-//     dspPanCommand[9] = panHexValue[1];
-
-//     // Send the DSP command
-//     dspCom.send(dspPanCommand);
-
-//     // Handle dot also, if we move TO 127 (then turn on instead of off.)
-//     // Check up against the new updated pan value.
-//     handleDot = (pan == 127) ? true : handleDot;
-
-
-
-
-//     // // Next, update the LED's around the vpot.
-//     // // Do a lookup of the vPot LED corresponding to the new pan value.
-//     // ChStripLED newRingLED = ledRingLookup.getRingID(pan);
-
-
-//     // bool updateRing = (newRingLED != currentRingLED);
-
-//     // // Check it up against last saved - update if necessary.
-//     // if (updateRing || handleDot)
-//     // {
-//     //     // New pan value requires an LED change.
-//     //     // Iterate through all associated channels (including this one)
-//     //     // and turn off the current LED and turn on the new one.
-
-//     //     // First, set up a char array for the command
-//     //     char brainLedCommand[4];
-
-//     //     // Copy the bitmask, and iterate over the bits
-//     //     uint32_t channelMask = associatedChannelStripBitmask[bank];
-//     //     while (channelMask)
-//     //     {
-//     //         // Get the index of the lowest set bit
-//     //         ChStripID stripID = static_cast<ChStripID>(__builtin_ctz(channelMask));
-
-//     //         if (updateRing)
-//     //         {
-//     //             // Copy and send command from set, to turn off previous LED
-//     //             brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][currentRingLED][0];
-//     //             brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][currentRingLED][1];
-//     //             brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][currentRingLED][2];
-//     //             brainLedCommand[3] = LED_OFF_CMD;
-//     //             brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
-
-//     //             // Likewise, turn on new LED
-//     //             brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][newRingLED][0];
-//     //             brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][newRingLED][1];
-//     //             brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][newRingLED][2];
-//     //             brainLedCommand[3] = LED_ON_CMD;
-//     //             brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
-
-//     //             // Update the current LED record
-//     //             currentRingLED = newRingLED;
-//     //         }
-
-//     //         // Update center dot if necessary.
-//     //         if (handleDot)
-//     //         {
-//     //             brainLedCommand[0] = CH_STRIP_LED_MAP[stripID][RING_DOT][0];
-//     //             brainLedCommand[1] = CH_STRIP_LED_MAP[stripID][RING_DOT][1];
-//     //             brainLedCommand[2] = CH_STRIP_LED_MAP[stripID][RING_DOT][2];
-//     //             brainLedCommand[3] = (pan == 127) ? LED_ON_CMD : LED_OFF_CMD;
-//     //             brainCom.send(brainLedCommand, BRAIN_LED_CMD_LENGTH);
-//     //         }
-
-//     //         // Clear lowest set bit
-//     //         channelMask &= channelMask - 1;
-//     //     }
-//     // }
-
-//     // // Finally, let's update the ui. 
-//     // // If this was a UI event, first remove the calling stripID.
-//     // // Instead of using conditional check, use the fact that "UI_EVENT" = 1
-//     // // and CONSOLE_EVENT = 0;
-    
-//     // // First, get the bitmask
-//     // int uiMask = associatedChannelStripBitmask[bank];
-
-//     // // Update the bit for the calling channel according to what source was.
-//     // uiMask |= (source << channelStripID);
-
-//     // // Post a ui event
-//     // eventBus.associateUiStripVpotEventPost(uiMask, pan);
-// }
-
-// void Channel::handleVpotAuxSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
-// {
-//     // TODO
-
-// }
-
-// void Channel::handleVpotAuxStereoSend(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
-// {
-//     // TODO
-// }
-
-// void Channel::handleVpotLevelToTape(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
-// {
-//     // TODO
-// }
-
-// void Channel::handleVpotDigitalTrim(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
-// {
-//     // TODO
-// }
-
-// void Channel::handleVpotAuxStereoPan(const char (&panValue)[2], const Bank bank, ChStripID channelStripID, EventSource source)
-// {
-//     // TODO
-// }
 
 
 // ===========================================  BUTTON EVENT CALLBACKS  =======================================
@@ -559,18 +364,4 @@ void Channel::initializeChannel(VpotFunction currentVPotFunction)
 
 
     // TODO: Button LED's
-
-
-    // For now, just set up ch10 for left, and 11 for right
-    // dspCom.send("22dFEFFX0OFDFFXP");
-    // dspCom.send("0BdFEFFXFEOFDFFXP");
-
-
-        // pan 10 left
-    //write(DSP, "22dFEFFX0OFDFFXP", strlen("22dFEFFX0OFDFFXP"));
-
-    // pan 11 right
-    //write(DSP, "0BdFEFFXFEOFDFFXP", strlen("0BdFEFFXFEOFDFFXP"));
-
-
 }

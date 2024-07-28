@@ -29,31 +29,14 @@
 MixerManager::MixerManager()
     : settings(Settings::getInstance()),
       eventBus(EventBus::getInstance()),
-      //masterChannel(MasterChannel::getInstance()),
       brainCom(BrainCom::getInstance()),
       dspCom(DspCom::getInstance()),
       circBuffer(CircularBuffer::getInstance()),
       hexToIntLookup(HexToIntLookup::getInstance())
-      //isInitializing(false)
 {
     // We already have an array of channels.
     // TODO: maybe seperate class for FX, RET, MIDI, Grp and Bus?
     // TODO: should this be made inherited classes of a Channel interface? yes.
-
-
-    // // Create the initial association between channel and channelstrip by writing
-    // // in pointers to the channels.
-    // for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
-    // {
-    //     channelStripArray[i].setChannelAssociation(LINE_BANK, &channelArray[i]);
-    //     channelStripArray[i].setChannelAssociation(TAPE_BANK, &channelArray[i + CHANNEL_STRIP_COUNT]);
-    //     channelStripArray[i].setChannelAssociation(EFFECTS_BANK, &channelArray[i + CHANNEL_STRIP_COUNT * 2]);
-    //     channelStripArray[i].setChannelAssociation(MASTERS_BANK, &channelArray[i + CHANNEL_STRIP_COUNT * 3]);
-    // }
-
-    // // TODO: now, how do we handle the changing of association? Somehow we need
-    // // to be able to get a hold of the pointers for the channels....?
-    // FIX THIS NOW - HOW DO WE UPDATE ASSOCIATION? HOW DO WE GET THE POINTERS?
 }
 
 MixerManager::~MixerManager()
@@ -62,12 +45,6 @@ MixerManager::~MixerManager()
 }
 
 // ############################### METHODS ####################################
-// const Channel &MixerManager::getChannel(uint8_t id) const
-// {
-//     if (id < CHANNEL_COUNT)
-//         return channels[id];
-//     throw std::out_of_range("Invalid channel ID");
-// }
 
 bool MixerManager::setBrainPort(std::string deviceString)
 {
@@ -242,16 +219,14 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
     }
 }
 
-// #################################################################################
-// This method is a "dispatcher" sort of thing, which is called
-// and run in a thread. It continually pops messages off the buffer, and
-// sends them to the current selected handler (depending on which bank is selected.)
-    // REMEMBER: ChStripID is an enumeration starting at "0" for channel "1"
-// #################################################################################
+
+/**************************************************************************
+ * @brief This method is kind of a "dispatcher", running in its own thread.
+ *        It is responsible for popping messages off the buffer, and
+ *        posting events on the eventbus accordingly.
+ *************************************************************************/
 void MixerManager::handleBufferMessage()
 {
-    printf("Running Reader Thread\n");
-
     // Run the message receiver thread loop
     while (true)
     {

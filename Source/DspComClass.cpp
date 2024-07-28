@@ -21,11 +21,7 @@ DspCom::~DspCom() {}
 // ################################################################################################
 void DspCom::messageReceiver()
 {
-    // Set up the file descriptor for the DSP port.
-    // const int DSP = openSerialPort(getDspPort().c_str(), B115200);
-
     char recvChar = '\0';
-    //std::string message = "";
     char message[BUFFER_WIDTH];
     size_t msgIndex = 0;
     int result;
@@ -40,10 +36,8 @@ void DspCom::messageReceiver()
 
         if (result == 1)
         {
-            //message += recvChar;
             message[msgIndex] = recvChar;
             msgIndex++;
-
 
             if (recvChar >= 'a' && recvChar <= 'z')
             {

@@ -11,20 +11,13 @@
   ==============================================================================
 */
 
-// TODO: Some cleanup...
-
 #pragma once
 
 #include "ComBaseClass.h"
-// #include <mutex>
-// #include <string>
-// #include <termios.h>
-// #include <thread>
-//#include "CircularBuffer.h"
 
 class BrainCom : public ComBase
 {
-private:
+  private:
     BrainCom();  // Constructor
     ~BrainCom(); // Destructor
 
@@ -32,45 +25,14 @@ private:
     BrainCom(const BrainCom &) = delete;
     BrainCom &operator=(const BrainCom &) = delete;
 
-	bool brainBoostState = false;
+    bool brainBoostState = false;
 
     virtual void messageReceiver() override;
 
     void heartbeatReceived();
 
-
-	//CircularBuffer &circBuffer;	// Buffer singleton reference
-
-
-    // std::mutex brainWriteMutex; // Mutex for thread-safe write operations.
-
-    // int openSerialPort(const char *devicePath, speed_t baudRate);
-
-    // std::string brainPort = "";
-    
-
-    // int brain; // This is the file descripter
-
-    // std::thread brainReceiverThread;
-    // bool brainThreadRunning = false;
-
-
-
-public:
+  public:
     static BrainCom &getInstance(); // Returns a reference to the instance.
-
-    // void settingSetBrainPort(std::string deviceString);
-    // void setBrainPort(std::string port);
-    // std::string getBrainPort();
-
-    // void flushBuffer();
-
-    // void initializeBrainCom();
-
-    // const std::string &getMessage();
-    // void sendCmd(const std::string &command);
-
-    // void startBrainReceiverThread();
 };
 
 // Singleton modifications

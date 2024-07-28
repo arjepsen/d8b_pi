@@ -21,9 +21,7 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
-// #include "EventBusClass.h"
 #include "FaderValueLookupClass.h"
-// #include "SharedDataStructures.h"
 #include "ChannelStripComponentInterface.h"
 
 // Forward declaration of eventBus - avoid circular dependency.
@@ -56,18 +54,6 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
 
     void setMasterFaderPosition(double value);
-
-    // void faderMoveEventCallback(std::string faderValue);
-    // void vpotTurnEventCallback(std::string vpotValue);
-    // void buttonEventCallback(std::string buttonValue);
-    //void faderUpdateEventCallback(int faderValue);
-    // void vpotTurnEventCallback(std::string vpotValue);
-    // void buttonEventCallback(std::string buttonValue);
-
-    // void setMasterFaderMoveCallbackFunction(std::function<void(float)> callbackFunction);
-    // TODO: Set it up through event bus instead.
-
-
     void faderMoveEventCallback(const char (&faderHexValue)[2]) override;
     void vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction) override;
     void activateEventListeners() override;

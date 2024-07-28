@@ -10,12 +10,12 @@
 
 #pragma once
 
+#include "Debug.h"
 #include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <unordered_map>
-#include "Debug.h"
 
 /*******************************************************************************
  * @brief This class is used to optimize the conversion between the linear
@@ -25,16 +25,13 @@
  ******************************************************************************/
 class FaderValueLookup
 {
-
   private:
-
     // Lookup array for converting ui value to console command value.
     char dspHexLookupArray[1001][3];
 
-    // Lookup array for converting console value (0 - 255) to the logarithmic scale 
+    // Lookup array for converting console value (0 - 255) to the logarithmic scale
     // used by the faders.
     float preComputedLog10Values[256];
-
 
     FaderValueLookup()
     {
@@ -50,8 +47,6 @@ class FaderValueLookup
                 preComputedLog10Values[i] = static_cast<float>(log10((i * logFactor) + 1) * 100 - 90);
             }
         }
-
-
 
         // Precompute the map of fader/vpot values and their corresponding DSP hex strings:
         for (int i = 0; i <= 1000; ++i)
@@ -72,7 +67,7 @@ class FaderValueLookup
 
     // Getter method for converting a ui fader/vpot value to the 2-char hex string
     // used for the console commands.
-    inline const char* getDspHexValue(float uiFaderValue) const
+    inline const char *getDspHexValue(float uiFaderValue) const
     {
         int index = static_cast<int>((uiFaderValue + 90.0) * 10);
         return dspHexLookupArray[index];
@@ -80,7 +75,7 @@ class FaderValueLookup
 
     // Getter method for converting a console fader value (integer) to the
     // logarithmic value used by the fader representation of sound volume. (decibel)
-    inline const float* getLog10Value(int consoleValue) const
+    inline const float *getLog10Value(int consoleValue) const
     {
         return &preComputedLog10Values[consoleValue];
     }

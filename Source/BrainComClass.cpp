@@ -9,25 +9,12 @@
 */
 
 #include "BrainComClass.h"
-//#include <fcntl.h>
+#include "Debug.h"
 #include <stdexcept>
 #include <unistd.h>
-#include "Debug.h"
 
-BrainCom::BrainCom(){}
-BrainCom::~BrainCom(){}
-
-
-
-// // #######################################
-// // Method for flushing the receiver buffer
-// // #######################################
-// void BrainCom::flushBuffer()
-// {
-//     std::lock_guard<std::mutex> lock(brainWriteMutex); // Automatically locks the mutex for current scope.
-//     tcflush(brain, TCIOFLUSH);
-// }
-
+BrainCom::BrainCom() {}
+BrainCom::~BrainCom() {}
 
 // ################################################################################################
 // This method is run in a thread. It is responsible for reading messages from the Brain board, and
@@ -50,7 +37,6 @@ void BrainCom::messageReceiver()
     char recvChar = '\0';
 
     // Set up the message string buffer - use width defined in circular buffer.
-    //std::string message = "";
     char message[BUFFER_WIDTH];
 
     // Set up a variable for which index to write next char to in the message array.
@@ -84,7 +70,7 @@ void BrainCom::messageReceiver()
                 // In that case, don't increment index, or reset.
                 if (recvChar == 'l' || recvChar == 'k')
                 {
-                    //DEBUG_MSG("hearbeat: %c\n", recvChar);
+                    // DEBUG_MSG("hearbeat: %c\n", recvChar);
                     msgIndex--; // Decrement, to erase from messages.
                     heartbeatReceived();
                 }
@@ -97,9 +83,6 @@ void BrainCom::messageReceiver()
                     // Reset index for next message
                     msgIndex = 0;
                 }
-
-                // Message was handled, reset for next message.
-                //message = "";
             }
         }
 
@@ -124,18 +107,5 @@ void BrainCom::messageReceiver()
 // ##################################################################################
 void BrainCom::heartbeatReceived()
 {
-    // empty for now - maybe send the L / 0???
+    // TODO: empty for now - maybe send the L / 0???
 }
-
-// void BrainCom::initializeBrainCom()
-// {
-// 	// Check that port was set.
-// 	if (brainPort == "")
-// 	{
-// 		printf("PORT NOT SET!");
-// 		exit(1);
-// 	}
-
-// 	brain = openSerialPort(brainPort.c_str(), brainBoostState ? B230400 : B115200);
-// }
-

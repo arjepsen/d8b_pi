@@ -13,7 +13,6 @@
 
 #include "ChannelStripInterface.h"
 #include "ChannelClass.h"
-//#include "EventBusClass.h"
 #include "SharedDataStructures.h"
 #include "BrainComClass.h"
 #include "LEDClass.h"
@@ -84,11 +83,6 @@ class ChannelStrip : public ChannelStripInterface
     const char *const CH_STRIP_ID_STR;   // Pointer to this strip's ID.
 
     char faderMoveCmd[BRAIN_FADER_CMD_LENGTH];  // Care must be taken to avoid changing index 0,1 and 4 in this array!!
-
-
-    // Make an array for the state of each channelStrip LED state.
-    // Initialize all to off ("j") in the constructor.
-    //LedStateCommand chStripLeds[CH_STRIP_LED_COUNT];
 
     // Keep two bitmaps of LED states - one for On/Off, another for blinking.
     // These must always reflect currently state, and will be compared

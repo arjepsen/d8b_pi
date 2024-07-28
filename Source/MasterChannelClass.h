@@ -10,18 +10,15 @@
 
 #pragma once
 
-
-#include "ChannelStripInterface.h"
 #include "BrainComClass.h"
+#include "ChannelStripInterface.h"
 #include "DspComClass.h"
-// #include "EventBusClass.h"
-// #include <string>
 
 #include "Debug.h"
 
 constexpr int MASTER_VOL_DSP_CMD_LENGTH = 13;
 
-class Channel;  // Forward declaration of Channel - needed for setChannelAssociation.
+class Channel; // Forward declaration of Channel - needed for setChannelAssociation.
 
 class MasterChannel : public ChannelStripInterface
 {
@@ -33,17 +30,12 @@ class MasterChannel : public ChannelStripInterface
     // Bitmaps for maintaining current state of the LED's on the master strip.
     uint32_t ledOnBitmap = 0;
     uint32_t ledBlinkBitmap = 0;
-
-    // LEDringLookup &ledRingLookup;
-    // //EventBus &eventBus;
     BrainCom &brainCom;
     DspCom &dspCom;
-    // //HexToIntLookup &hexToIntLookup;
 
     const char MASTER_STRIP_ID[3] = "18";
-    char faderMoveCmd[BRAIN_FADER_CMD_LENGTH] = {'1', '8', '0', '0', 'f'};  // Initialize the master fader move braincommand.
+    char faderMoveCmd[BRAIN_FADER_CMD_LENGTH] = {'1', '8', '0', '0', 'f'};                                                      // Initialize the master fader move braincommand.
     char dspMasterVolumeCommand[MASTER_VOL_DSP_CMD_LENGTH] = {'4', 'C', 'c', '9', 'X', '0', '0', 'Q', 'A', 'X', '0', '0', 'Q'}; // "4Cc9X--QAX--Q";
-
 
     // Delete copy constructor and assignment operator, to avoid copying the singleton.
     MasterChannel(const MasterChannel &) = delete;
@@ -63,26 +55,20 @@ class MasterChannel : public ChannelStripInterface
     }
 
     inline int vPotEventHandler(Bank currentBank, int vPotChangeValue, VpotFunction vPotFunc, EventSource source) override
-    //inline void vPotEventHandler(Bank currentBank, const char (&vPotValue)[2], VpotFunction vPotFunc) override
+    // inline void vPotEventHandler(Bank currentBank, const char (&vPotValue)[2], VpotFunction vPotFunc) override
     {
         // TODO
         return 127;
     }
 
-    inline int getChannelStripVpotValue(Bank currentBank, VpotFunction currentVpotFunction) override 
-    { 
+    inline int getChannelStripVpotValue(Bank currentBank, VpotFunction currentVpotFunction) override
+    {
         // TODO
         return 127;
     }
 
-
     void updateVpotLeds(Bank bank, VpotFunction vPotFunc) override;
-
 };
-
-
-
-
 
 // Singleton modifications
 inline MasterChannel &MasterChannel::getInstance()

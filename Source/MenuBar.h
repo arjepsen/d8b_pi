@@ -12,10 +12,7 @@
 
 #pragma once
 
-// #include "SettingsWindowComponent.h"
 #include <JuceHeader.h>
-// #include "MySettingsWindow.h"
-// #include "settingsplay.h"
 #include "SettingsWindow.h"
 
 //==============================================================================
@@ -23,8 +20,6 @@
  */
 class MenuBar : public juce::Component,
                 public juce::MenuBarModel
-// public juce::ApplicationCommandTarget
-
 {
   public:
     MenuBar();
@@ -39,7 +34,6 @@ class MenuBar : public juce::Component,
 
   private:
     std::unique_ptr<juce::MenuBarComponent> menuBar;
-    // juce::ApplicationCommandManager commandManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBar)
 };

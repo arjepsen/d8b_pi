@@ -5,29 +5,20 @@
     Created: 14 Apr 2023 10:12:41pm
     Author:  anders
 
-    The MixerManager class is where the UI is tied together with the rest
-    of the program. Everything should pass through here, so we have
-    seperation of concerns.
-    This should be a "singleton" class, so only one instance can exist.
+    Mixermanager is responsible for maintaining the comm receiver threads that
+    receives messages from the console and then posts events in the eventbus.
+    It is also responsible for running the mixer initialization/boot script.
 
-    But having everything pass through here might be to heavy?
-    Instead, we try to implement asort of event bus...
   ==============================================================================
 */
 
 #pragma once
 
-
-// #include "BankEffectsMessageHandlerClass.h"
-// #include "BankLineMessageHandlerClass.h"
-// #include "BankMastersMessageHandlerClass.h"
-// #include "BankTapeMessageHandlerClass.h"
 #include "ChannelClass.h"
 #include "ChannelStripClass.h"
 #include "CircularBuffer.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
-// #include "MessageHandlerInterface.h"
 #include "MixerInitScripts.h"
 #include "SettingsClass.h"
 #include <JuceHeader.h>
@@ -35,10 +26,8 @@
 #include <cstdint>
 #include <termios.h>
 #include <unordered_map>
-//#include "BankEnum.h" // moved to eventbus
 #include "ChannelIDMap.h"
 #include "ChannelStripComponent.h"
-//#include "MasterChannelClass.h"
 #include "EventBusClass.h"
 #include "BrainComClass.h"
 #include "DspComClass.h"

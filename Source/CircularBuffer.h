@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <array>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
@@ -14,11 +13,10 @@ constexpr size_t BUFFER_WIDTH = 100; // The max number of characters in each ele
 class CircularBuffer
 {
   public:
-    // CircularBuffer();
     static CircularBuffer &getInstance(); // Return reference to this instance.
 
     void push(const char *message, size_t msgLength);
-    size_t pop(char *message);	// Returns the length of the message.
+    size_t pop(char *message); // Returns the length of the message.
 
   private:
     CircularBuffer();
@@ -28,9 +26,9 @@ class CircularBuffer
     CircularBuffer(const CircularBuffer &) = delete;
     CircularBuffer &operator=(const CircularBuffer &) = delete;
 
-	// Define the circular buffer array, and a second array to keep the length of each message.
-	char buffer_[BUFFER_LENGTH][BUFFER_WIDTH];
-	size_t messageLengths_[BUFFER_LENGTH];
+    // Define the circular buffer array, and a second array to keep the length of each message.
+    char buffer_[BUFFER_LENGTH][BUFFER_WIDTH];
+    size_t messageLengths_[BUFFER_LENGTH];
 
     std::atomic<size_t> head_;
     std::atomic<size_t> tail_;

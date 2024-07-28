@@ -61,22 +61,6 @@ enum ChannelLeds
 };
 
 
-
-// Ring LED's for channel strips.
-// This ought to be a const, but that would require using .at() for access, and the [] operator is faster.
-// TODO: Work on changing the use of std::strings to c-style strings.
-
-// So, the channel strip ID's are a two-char string, representing a hex value.
-// Since a char is basically an integer, we can effectively translate this hex-string to
-// an integer, by shifting the first char/int 8 bit, and then OR the second char/int:
-// ID_INTEGER = id[0] << 8) | id[1];
-// SO: this means we can simply use the direct integer, written as a hex value, for the first value.
-
-
-// uint16_t for two-char hex value
-// std::unordered_map<uint16_t, char[CH_STRIP_LED_COUNT][4] > CHSTRIPLEDMAP =
-// const uint16_t CH_STRIP_LED_MAP[CH_STRIP_COUNT]
-
 // Array of LED command. Use ChStripID enumeration for first index, 
 // then ChStripLED enumeration for indexing the specific command.
 // Some commands are padded with zeros for effeciency in handling. 

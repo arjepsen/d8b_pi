@@ -22,11 +22,9 @@
 //[Headers]     -- You can add your own extra header files here --
 
 #include <JuceHeader.h>
-// #include "EventBusClass.h"
 #include "FaderValueLookupClass.h"
 #include "SharedDataStructures.h"
 #include "ChannelStripComponentInterface.h"
-//#include <array>
 
 // Forward declaration of eventBus - avoid circular dependency.
 class EventBus;
@@ -38,11 +36,7 @@ class EventBus;
                                                                     //[Comments]
 
     An auto-generated component, created by the Projucer.
-
-
-
     Describe your class and how it works here!
-
                                                                     //[/Comments]
 */
 class ChannelStripComponent : public ChannelStripComponentInterface,
@@ -60,25 +54,10 @@ class ChannelStripComponent : public ChannelStripComponentInterface,
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     void setFaderPosition(double value);
-
-    // void setFaderUiMoveCallbackFunction(std::function<void(const std::string, float)> callbackFunction);
-
-    // std::function<void(std::string, float)> faderMoveCallback;
-
-    // Callback functions for the "Channel associate events".
-    // These ONLY update the UI - purely cosmetical - so no need know which bank. (logic already handled elsewhere).
-    // void faderMoveEventCallback(std::string faderValue);
     void faderMoveEventCallback(const char (&faderHexValue)[2]) override;
-    //void vpotTurnEventCallback(int vpotValue);
     void vPotTurnEventCallback(int eventValue, VpotFunction currentVpotFunction) override;
     void buttonEventCallback(std::string buttonValue); // This one is a bit different... but again mainly cosmetic.
-
-    // Create a method for attaching the "listeners" to the controls.
-    // This method is responsible for setting up the "listeners" for each interactible
-    // object in the UI.
-    // void deactivateEventListeners();  // moved to private
     void activateEventListeners() override;
-
     //[/UserMethods]
 
     void paint(juce::Graphics &g) override;
@@ -91,24 +70,17 @@ class ChannelStripComponent : public ChannelStripComponentInterface,
   private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
-    // References to singletons.
+    // References to singletons, and other objects instantiations.
     EventBus &eventBus;
     FaderValueLookup &faderValueLookup;
     IntToHexLookup &intToHexLookup;
     HexToIntLookup &hexToIntLookup;
-
-    // std::string channelStripComponentID;
     ChStripID channelStripComponentID;
 
     static int nextChannelStripComponentID; // Static variable to keept track of next object's ID
-                                            // //const float logFactor = 9.0 / 255;    // Factor used in linear byte to fader log scale conversion.
-                                            // static std::array<float, 256> precomputedLog10Values;   // Array for the 256 precomputed logarithmic values that faders and vpots can send.
-                                            // std::map<float, std::string> dspHexLookupMap;   // Map for correlating the possible UI fader values to their dsp hex values.
 
     void deactivateEventListeners();
 
-    // Access to the mixermanager
-    // MixerManager &mixerManager;
 
     //[/UserVariables]
 

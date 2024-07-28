@@ -13,14 +13,14 @@
 #include "Debug.h"
 
 
-/**
+/*****************************************************************************
  * @brief Constructor for the EventBus.
  *        "MainComponent" is the first class to instantiate this singleton,
  *        so this constructor is run on program startup, after the channel
  *        and UI/console channelstrip objects have been instantiated in 
  *        arrays. Then after that, the MainComponent constructor will
  *        call methods here in EventBus, to hand over pointers to the objects.
- */
+ *****************************************************************************/
 EventBus::EventBus() : channelStripButtonBase{
                            // Base button index of channelstrips
                            0x051, 0x059, 0x041, 0x049, 0x031, 0x039, // 1 - 6

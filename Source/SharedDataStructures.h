@@ -17,6 +17,7 @@
 static constexpr int CHANNEL_COUNT = 96;
 constexpr int CHANNEL_STRIP_COUNT = 24; // Number of channel strips, excluding the master strip.
 constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
+const int MASTER_CH_STRIP = 24;
 
 enum EventSource
 {
@@ -63,7 +64,7 @@ enum ChStripID
     CH_STRIP_MASTER
 };
 
-const int MASTER_CH_STRIP = 24;
+
 
 
 
@@ -119,6 +120,18 @@ enum ChStripButtonBase
 };
 
 
+// ChannelStrip buttons
+enum ButtonType
+{
+    MUTE_BTN,
+    SOLO_BTN,
+    SELECT_BTN,
+    WRITE_BTN,
+    ASSIGN_BTN,
+    REC_RDY_BTN,
+    NUMBER_OF_CHSTRIP_BUTTONS
+};
+
 enum ButtonAction : char
 {
     BTN_PRESS = 's',
@@ -131,41 +144,6 @@ enum Aux
     AUX1, AUX2, AUX3, AUX4, AUX5, AUX6, AUX7, AUX8
 };
 
-
-// Lookup table for converting hexadecimal digits to their integer values.
-// All other values can remain 0, as input is always valid uppercase hex.
-// static const unsigned char hex_values[256] = {
-//     ['0'] = 0, ['1'] = 1, ['2'] = 2, ['3'] = 3, 
-//     ['4'] = 4, ['5'] = 5, ['6'] = 6, ['7'] = 7, 
-//     ['8'] = 8, ['9'] = 9, ['A'] = 10, ['B'] = 11, 
-//     ['C'] = 12, ['D'] = 13, ['E'] = 14, ['F'] = 15
-// };
-
-// /***************************************************************
-//  * @brief This function is used to convert a 2-char hex string
-//  *        like "F7" to an integer, using the lookup table.
-//  * 
-//  * @param hexString 
-//  * @return int 
-//  ***************************************************************/
-// inline int hexToInt(const char (&hexString)[2])
-// {
-//     return (hex_values[(unsigned char)hexString[0]] << 4) |
-//             hex_values[(unsigned char)hexString[1]];
-// }
-
-// /**************************************************************
-//  * @brief This function is used to convert a 3-char hex string
-//  *        like "2F3" to an integer.
-//  * 
-//  * @param hexString 
-//  * @return int 
-//  **************************************************************/
-// inline int hex3ToInt(const char (&hexString)[3]) {
-//     return (hex_values[(unsigned char)hexString[0]] << 8) |
-//            (hex_values[(unsigned char)hexString[1]] << 4) |
-//             hex_values[(unsigned char)hexString[2]];
-// }
 
 class HexToIntLookup 
 {
@@ -289,15 +267,4 @@ class IntToHexLookup
 
 
 
-enum ButtonType
-{
-    // ChannelStrip buttons
-    MUTE_BTN,
-    SOLO_BTN,
-    SELECT_BTN,
-    WRITE_BTN,
-    ASSIGN_BTN,
-    REC_RDY_BTN,
-    NUMBER_OF_CHSTRIP_BUTTONS
-};
 

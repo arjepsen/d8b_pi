@@ -44,7 +44,6 @@ void MenuBar::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     menuBar->setBounds(getLocalBounds());
-    // settingsWindow.setBounds(10, 10, 300, 120);
 }
 
 juce::StringArray MenuBar::getMenuBarNames()
@@ -259,8 +258,5 @@ void MenuBar::menuItemSelected(int menuItemID, int topLevelMenuIndex)
             auto *window = new SettingsWindow("Settings", juce::Colours::lightgrey, juce::DocumentWindow::allButtons);
             window->setVisible(true);
         }
-
-        // std::unique_ptr<SettingsWindow> settingsWindow(new SettingsWindow());
-        // settingsWindow->setVisible(true);
     }
 }

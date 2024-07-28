@@ -10,9 +10,6 @@
 
 #include "ChannelStripClass.h"
 
-//constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
-
-
 constexpr int BRAIN_LED_CMD_LENGTH = 4;
 
 // Set first strip ID. (Increments with every object constructed)
@@ -64,10 +61,6 @@ void ChannelStrip::setChannelAssociation(Bank activeBank, Bank associationBank, 
 // TODO: ARE WE USING THIS?
 void ChannelStrip::updateChStrip(Bank bank)
 {
-    // First, retreive the bitmaps for the LED's for the current channel
-    // uint32_t currentOnLedBitmap = channelPtrs[activeBank]->getLedOnBitmap();
-    // uint32_t currentBlinkLedBitmap = channelPtrs[activeBank]->getLedBlinkBitmap();
-
     // THE CURRENT STATE IS SAVED IN THE OBJECT. COMPARE FOR CHECKING WHAT TO CHANGE
     uint32_t newLedOnStates = channelPtrs[bank]->getLedOnBitmap();
     uint32_t newLedBlinkStates = channelPtrs[bank]->getLedBlinkBitmap();
@@ -121,9 +114,6 @@ void ChannelStrip::updateChStrip(Bank bank)
     // Now update the fader position.
     // Create a fader command string from the new channel's volume string,
     // and send it.
-    //char brainFaderCommand[BRAIN_FADER_CMD_LENGTH]; 
-    //brainFaderCommand[0] = CH_STRIP_ID_STR[0];
-    //brainFaderCommand[1] = CH_STRIP_ID_STR[1];
     faderMoveCmd[2] = channelPtrs[bank]->getVolume()[0];
     faderMoveCmd[3] = channelPtrs[bank]->getVolume()[1];
     brainCom.send(faderMoveCmd, BRAIN_FADER_CMD_LENGTH);
@@ -185,51 +175,8 @@ void ChannelStrip::updateVpotLeds(Bank bank, VpotFunction vPotFunc)
 }
 
 
-
-
-// void ChannelStrip::faderMoveCallback(Bank currentBank, const char (&faderValue)[2], EventSource source)
-// {
-//     // First, call our associated channel, to let it send DSP commands
-//     channelPtrs[currentBank]->updateVolume(faderValue);
-
-//     NEXT - how to handle the fader moves?
-//     maybe a seperate method? Then eventbus could iterate over them all without
-//     having to remove the caller first....
-//     NO - 'cause the caller is already moved!!!'
-
-//     OPTIONS:
-//     1:
-//     Channel object keeps track of associated channelstrips on the different banks.
-//     Then, calling upateVolume could return the association, and THIS strip could
-//     send brain commands for all associated strips on the current bank.
-
-//     2:
-//     Like 1, except now the strip hands the association back to eventbus, 
-//     which iterates over it and sends association commands to all associated strips.
-
-//     3:
-//     Eventbus keeps track of association. It should then be able to iterate over it
-//     and send commands.
-//     This avoids the whole back-and-forth, and it also avoids unsubscription handling.
-
-// }
-
-
-// void ChannelStrip::updateChannelVolume(Bank currentBank, const char (&faderValue)[2])
-// {
-//     // Call the channel method for sending the DSP command.
-//     channelPtrs[currentBank]->updateVolume(faderValue);
-// }
-
 void ChannelStrip::updateFaderPosition(Bank currentBank)
 {
-    // char brainFaderCommand[BRAIN_FADER_CMD_LENGTH]; 
-    // brainFaderCommand[0] = CH_STRIP_ID_STR[0];
-    // brainFaderCommand[1] = CH_STRIP_ID_STR[1];
-    // brainFaderCommand[2] = channelPtrs[currentBank]->getVolume()[0];
-    // brainFaderCommand[3] = channelPtrs[currentBank]->getVolume()[1];
-    // brainFaderCommand[4] = 'f';
-    // brainCom.send(brainFaderCommand, BRAIN_FADER_CMD_LENGTH);
     faderMoveCmd[2] = channelPtrs[currentBank]->getVolume()[0];
     faderMoveCmd[3] = channelPtrs[currentBank]->getVolume()[1];
     brainCom.send(faderMoveCmd, BRAIN_FADER_CMD_LENGTH);
