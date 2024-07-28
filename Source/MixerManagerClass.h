@@ -14,9 +14,14 @@
 
 #pragma once
 
+#include "BrainComClass.h"
 #include "ChannelClass.h"
+#include "ChannelIDMap.h"
 #include "ChannelStripClass.h"
+#include "ChannelStripComponent.h"
 #include "CircularBuffer.h"
+#include "DspComClass.h"
+#include "EventBusClass.h"
 #include "FXSlotClass.h"
 #include "IOSlotClass.h"
 #include "MixerInitScripts.h"
@@ -26,19 +31,13 @@
 #include <cstdint>
 #include <termios.h>
 #include <unordered_map>
-#include "ChannelIDMap.h"
-#include "ChannelStripComponent.h"
-#include "EventBusClass.h"
-#include "BrainComClass.h"
-#include "DspComClass.h"
 
 class MixerManager
 {
-private:
+  private:
     // References to singletons
-    Settings &settings; 
-    //MasterChannel &masterChannel;   
-    EventBus &eventBus;     
+    Settings &settings;
+    EventBus &eventBus;
     BrainCom &brainCom;
     DspCom &dspCom;
     CircularBuffer &circBuffer;
@@ -60,10 +59,7 @@ private:
 
     // Create a buffer with the defined width from the circular buffer.
     char msgBuffer[BUFFER_WIDTH];
-
-	// Various members/variables
     bool isInitializing = false; // Flag for avoid starting multiple init threads.
-
 
     MixerManager();  // Constructor
     ~MixerManager(); // Destructor
@@ -73,26 +69,20 @@ private:
     MixerManager &operator=(const MixerManager &) = delete;
 
     std::thread messageHandlerThread;
-
     void handleBufferMessage();
 
-public:
+  public:
     static MixerManager &getInstance(); // Returns a reference to the instance.
-
     bool setBrainPort(std::string deviceString);
     bool setDspPort(std::string deviceString);
     const std::string getBrainPort() const;
     const std::string getDspPort() const;
-
     const std::map<std::string, std::string> getUsbPortMap();
     bool getBrainBoostState();
     void setBrainBoostState(bool);
-
     void initIOSlot(IOSlot *ioSlotPtr, IOSlotID ioSlotID);
     void initFXSlot(FXSlot *fxSlotPtr, FXSlotID fxSlotID);
-
     void initMixer(juce::Button *initMixerBtn);
-
 };
 
 // Singleton modifications
@@ -101,4 +91,3 @@ inline MixerManager &MixerManager::getInstance()
     static MixerManager instance;
     return instance;
 }
-
