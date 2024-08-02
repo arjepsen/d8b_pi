@@ -58,7 +58,6 @@ void ChannelStrip::setChannelAssociation(Bank activeBank, Bank associationBank, 
 
 // This is for updating a strip according to it's channel. It is up to the caller to ensure that this is
 // called on an active bank.
-// TODO: ARE WE USING THIS?
 void ChannelStrip::updateChStrip(Bank bank)
 {
     // THE CURRENT STATE IS SAVED IN THE OBJECT. COMPARE FOR CHECKING WHAT TO CHANGE
@@ -81,14 +80,11 @@ void ChannelStrip::updateChStrip(Bank bank)
         // Get bit value (0 or 1)
         uint32_t bitValue = (changeOnBitmap >> bitIndex) & 1;
 
-        // Add the value to get the ON or OFF command for the LED
-        LedStateCommand stateCmd = static_cast<LedStateCommand>(LED_OFF_CMD - bitValue);    // off=106, on=105
-
         // Construct Brain command, and send it.
         brainLedCommand[0] = CH_STRIP_LED_MAP[CH_STRIP_INDEX][bitIndex][0];
         brainLedCommand[1] = CH_STRIP_LED_MAP[CH_STRIP_INDEX][bitIndex][1];
         brainLedCommand[2] = CH_STRIP_LED_MAP[CH_STRIP_INDEX][bitIndex][2];
-        brainLedCommand[3] = stateCmd;
+        brainLedCommand[3] = LED_OFF_CMD - ((newLedOnStates >> bitIndex) & 1);  // Set on/off command. off=106, on=105
         brainCom.send(brainLedCommand, LED_COMMAND_LENGTH);
 
         // Clear lowest set bit
@@ -112,12 +108,9 @@ void ChannelStrip::updateChStrip(Bank bank)
     currentLedBlinkStates = newLedBlinkStates;
 
     // Now update the fader position.
-    // Create a fader command string from the new channel's volume string,
-    // and send it.
     faderMoveCmd[2] = channelPtrs[bank]->getVolume()[0];
     faderMoveCmd[3] = channelPtrs[bank]->getVolume()[1];
     brainCom.send(faderMoveCmd, BRAIN_FADER_CMD_LENGTH);
-
 }
 
 

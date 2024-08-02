@@ -47,47 +47,41 @@ EventBus::EventBus() : channelStripButtonBase{
 EventBus::~EventBus() {}
 
 
-
-// TODO: BUT - A SUBSCRIPTION FOR A STRIP IS FOR ALL THREE CONTROLS....
-// YES - BUT THEN WHAT ABOUT NON-CHANNELSTRIP?
-// OK, ONE SUBSCRIBE METHOD FOR CHANNELS. ANOTHER FOR THE MASTER SECTION.
-
-
-// NEW WAY (JUNE'24) USING BITMAPS FOR TRACKING SUBSCRIPTION
-void EventBus::channelStripEventSubscribe(int chArrayIndex, ChStripID channelStripID, Bank associationBank)
-{
-    // Set the bit in the map
-    channelAssociationBitmaps[channelStripID][associationBank] |= 1 << chArrayIndex;
-
-    // Call the channelStrip to set it's stuff.
-    channelStripArray[channelStripID]->setChannelAssociation(currentBank, associationBank, &channelArray[chArrayIndex]);
-}
-
-
 // ##########################################################################################
 // ############################### POSTERS ##################################################
 // ##########################################################################################
 
+
+/******************************************************************************
+ * @brief This method is called when a fader is moved (both UI/Console).
+ *        First, it tells the ChannelStrip object to tell the Channel it
+ *        controls on the current bank, to send a volume command to the 
+ *        DSP controller. 
+ *        Next, it creates two bitmaps - one with all channelstrips associated
+ *        with the calling strip on this bank, and one where the caller
+ *        is removed. (since the fader is already moved on the caller).
+ *        The method uses a bit of bitwise tricks to use the correct bitmap
+ *        by using the "source" enumeration. Then it iterates over all 1's 
+ *        in the bitmaps for both UI and Console, and calls the methods
+ *        to move their associated faders.
+ * 
+ * @param channelStripID The ID enumeration for the calling ChannelStrip
+ * @param eventValue     The 2-char hex value that the fader was moved to.
+ * @param source         EventSource enumeration. Console = 0, UI = 1.
+ ******************************************************************************/
 void EventBus::postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
 {
     // First, let the channelstrip call the channel for sending DSP command.
-    //(channelStripArray[channelStripID]->*faderEventHandlers[channelStripID])(currentBank, eventValue);
-
     channelStripArray[channelStripID]->updateChannelVolume(currentBank, eventValue);
 
     // Prepare bitmaps for indexing all associated strips, excluding the "caller".
     uint32_t fullBitmap = channelAssociationBitmaps[channelStripID][currentBank];
     uint32_t reducedBitmap = fullBitmap & ~(1 << channelStripID);
 
-    // Next, we must move all associated fader, including the identical strip on the "opposite" (UI/Console).
-    // Use the fact that source is an enum (Console=0, UI=1), to set up bitmaps. (Avoids using conditionals.)
-    // So the idea is: "source" is either 0 or 1, so all it's bits will be 0, except the last, which can be 1 or 0.
-    // We want to create two bitmaps of all 1's or all 0's.
-    // For mask1, we first invert, then add 1. If source was 0, then mask1 is all 0's, if source was 1, it's now all 1's.
-    // For mask2, we simply invert mask1.
-
-    uint32_t mask1 = ~source + 1;
-    uint32_t mask2 = ~mask1; //(~source ^ 1) + 1;
+    // Use source enum with bitwise magic to create these two masks.
+    // If source was 0, then mask1 is all 0's, else it will be all 1's.
+    uint32_t mask1 = ~source + 1;   
+    uint32_t mask2 = ~mask1; // Inversion of mask1.
 
     // Use them to set the correct bitmasks, so the "caller" is not moved.
     uint32_t consoleBitmap = (fullBitmap & mask1) | (reducedBitmap & mask2);
@@ -109,6 +103,7 @@ void EventBus::postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], E
         uiBitmap &= uiBitmap - 1;
     }
 }
+
 
 void EventBus::postVpotEvent(ChStripID channelStripID, int eventValue, EventSource source)
 {
@@ -136,35 +131,24 @@ void EventBus::postVpotEvent(ChStripID channelStripID, int eventValue, EventSour
 // ##################################################################################
 // ###################################### OTHERS ####################################
 // ##################################################################################
-void EventBus::setCurrentBank(Bank bank)
-{
-    // Set the currentBank member
-    currentBank = bank;
 
-    // // Update the callback map pointer.
-    // switch (currentBank)
-    // {
-    //     case LINE_BANK:
-    //         currentBankCallbacks = &lineBankCallbacks;
-    //         break;
-    //     case TAPE_BANK:
-    //         currentBankCallbacks = &tapeBankCallbacks;
-    //         break;
-    //     case EFFECTS_BANK:
-    //         currentBankCallbacks = &effectsBankCallbacks;
-    //         break;
-    //     case MASTERS_BANK:
-    //         currentBankCallbacks = &mastersBankCallbacks;
-    //         break;
-    //     default:;
-    //         // Handle invalid bank input.
-    // }
+
+
+void EventBus::channelStripEventSubscribe(int chArrayIndex, ChStripID channelStripID, Bank associationBank)
+{
+    // Set the bit in the map
+    channelAssociationBitmaps[channelStripID][associationBank] |= 1 << chArrayIndex;
+
+    // Call the channelStrip to set it's stuff.
+    channelStripArray[channelStripID]->setChannelAssociation(currentBank, associationBank, &channelArray[chArrayIndex]);
 }
 
-Bank EventBus::getCurrentBank()
-{
-    return currentBank;
-}
+
+
+// Bank EventBus::getCurrentBank()
+// {
+//     return currentBank;
+// }
 
 void EventBus::initializeButtonCallbackMaps()
 {
@@ -361,4 +345,21 @@ void EventBus::loadSettings()
     initializeChannelStrips();
 
     // TODO: Also handle the Master Section LED's
+}
+
+void EventBus::changeBank(Bank newBank)
+{
+    // 1 - update "currentbank."
+
+
+    // 2 - iterate through all channelstrips - let them update according to new bank.
+    // BOTH console and UI
+    for (int i = 0; i < CHANNEL_STRIP_COUNT; i++)
+    {
+        channelStripArray[i]->updateChStrip(newBank);
+    }
+
+    currentBank = newBank;
+    // 4 - Anything for the master section?
+
 }

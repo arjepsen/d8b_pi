@@ -15,7 +15,7 @@
  *        One interesting thing is that any channelstrip on any bank
  *        can be made to control any of the 96 DSP channels.
  *        In order to keep track of which strip controls which channel, 
- *        EventBus keeps a 2D array of bitmaps - 96 bitmaps for each bank.
+ *        eventBus keeps a 2D array of bitmaps - 96 bitmaps for each bank.
  *        So for each of the 96 channels we use these bitmaps to track 
  *        which channelstrips are currently set up to control it.
  *        This is what is meant by "ChannelAssociation".
@@ -83,7 +83,7 @@ class EventBus
 
 
     void initializeButtonCallbackMaps();
-    void initializeButtonBaseLookup();
+    //void initializeButtonBaseLookup();
 
     void initializeChannels();
     void initializeChannelStrips();
@@ -95,11 +95,7 @@ class EventBus
 
     const int channelStripButtonBase[CHANNEL_STRIP_COUNT];
 
-
-    // This method is used to switch bank - by changing the pointer
-    void setCurrentBank(Bank bank);
-
-    Bank getCurrentBank(); 
+    //Bank getCurrentBank(); 
 
     void postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source);
     void postVpotEvent(ChStripID channelStripID, int vPotChangeValue, EventSource source);
@@ -122,6 +118,8 @@ class EventBus
     // These methods are for saving and reading all settings to and from file.
     void saveSettings();
     void loadSettings();
+
+    void changeBank(Bank newBank);
 
 };
 

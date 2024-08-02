@@ -302,7 +302,24 @@ void MixerManager::handleBufferMessage()
                 int buttonID = hexToIntLookup.hex3ToInt(hexValueString);
 
 
-                eventBus.postButtonEvent(buttonID, static_cast<ButtonAction>(msgCategory));
+                // eventBus.postButtonEvent(buttonID, static_cast<ButtonAction>(msgCategory));
+                // TODO: TESTING BANK CHANGE
+                if (buttonID == 0x10B)
+                {
+                    eventBus.changeBank(LINE_BANK);
+                }
+                else if (buttonID == 0x10C)
+                {
+                    eventBus.changeBank(TAPE_BANK);
+                }
+                else if (buttonID == 0x10D)
+                {
+                    eventBus.changeBank(EFFECTS_BANK);
+                }
+                else if (buttonID == 0x108)
+                {
+                    eventBus.changeBank(TAPE_BANK);
+                }
 
                 break;
             }

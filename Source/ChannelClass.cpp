@@ -10,10 +10,11 @@
 
 #include "ChannelClass.h"
 #include "ChannelIDMap.h"
-#include <iomanip>
-#include <sstream>
-#include <string.h>
+// #include <iomanip>
+// #include <sstream>
+#include <cstring>
 #include <unistd.h>
+#include <algorithm>    // for std::clamp
 #include "Debug.h"
 
 

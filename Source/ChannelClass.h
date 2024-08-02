@@ -14,22 +14,16 @@
 #pragma once
 
 #include "DspComClass.h"
-#include <array>
 #include <cstdint>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include "SharedDataStructures.h"
 #include "LEDClass.h"
-#include <functional>
+
 
 
 class Channel
 {
   private:
     // References to singletons
-    //EventBus &eventBus;
-    //BrainCom &brainCom;
     DspCom &dspCom;
     IntToHexLookup &intToHexLookup;
     HexToIntLookup &hexToIntLookup;
@@ -41,9 +35,9 @@ class Channel
     uint32_t desiredLedBlinkBitmap = 0;
 
     // Mask for clearing the ring LED bits.
-    static const int32_t CLEAR_RING_MASK = ~0x07FF8;   
+    static const int32_t CLEAR_RING_MASK = ~0x07FF8;   // 0000 0111 1111 1111 1000 0000
 
-    const int CH_NUMBER;  // TODO: maybe enumerate this?
+    const int CH_NUMBER;
     const char *const DSP_CH_ID_STR;
 
     static constexpr size_t DSP_PAN_CMD_LENGTH = 18;
@@ -74,7 +68,11 @@ class Channel
 
     static uint8_t nextChannelNumber; // Static variable to keept track of next object's ID
 
+    // Pointer to the vPot turn method - set by current vpot function.
     int (Channel::*vPotMethods[NUMBER_OF_VPOT_FUNCTIONS])(int vPotValue, EventSource source);
+    
+    // These are the specific vPot methods
+    // TODO: These might need to be adjusted, to account for channels above 48.... (FX, RET, etc.)
     int updatePan(int vPotValue, EventSource source);
     int updateAuxSend1(int vPotValue, EventSource source);
     int updateAuxSend2(int vPotValue, EventSource source);
