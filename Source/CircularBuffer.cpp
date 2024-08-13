@@ -12,7 +12,7 @@ CircularBuffer::~CircularBuffer() {}
 
 /***********************************************************
  * @brief Method used for pushing a message on to the queue.
- *      // ENSURE MESSAGE LENGTH IS BELOW "WIDTH"
+ *      // TODO: ENSURE MESSAGE LENGTH IS BELOW "WIDTH"
  *
  * @param message
  **********************************************************/
@@ -31,7 +31,8 @@ void CircularBuffer::push(const char *message, size_t msgLength)
     }
 
     // Copy message to buffer.
-    strcpy(buffer_[head_], message);
+    //strcpy(buffer_[head_], message);
+    memcpy(buffer_[head_], message, msgLength + 1); // +1 for null terminator.
 
     // Write the message length (index of last char) to the message length array.
     messageLengths_[head_] = msgLength;
@@ -41,9 +42,9 @@ void CircularBuffer::push(const char *message, size_t msgLength)
 
     // Increment buffer-message-count.
     // TODO: Do we want to use this for anything? Else remove.
-    msgCount++;
+    // msgCount++;
 
-    if (maxMsgCount < msgCount) maxMsgCount = msgCount;
+    // if (maxMsgCount < msgCount) maxMsgCount = msgCount;
 
     // Release mutex, and notify.
     lock.unlock();
@@ -69,15 +70,17 @@ size_t CircularBuffer::pop(char *messageBuffer)
         condVar_.wait(lock);
     }
 
-    // Ok, we're asked for a message, and there's something in the queue.
-    strcpy(messageBuffer, buffer_[tail_]);
-
     // Get message length
     size_t messageLength = messageLengths_[tail_];
 
+    // Ok, we're asked for a message, and there's something in the queue.
+    //strcpy(messageBuffer, buffer_[tail_]);
+    memcpy(messageBuffer, buffer_[tail_], messageLength + 1);
+
+
     // Move tail to next index
     tail_ = next_index(tail_);
-    msgCount--;
+    //msgCount--;
     lock.unlock();
 
     return messageLength;

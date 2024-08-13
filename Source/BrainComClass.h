@@ -25,6 +25,9 @@ class BrainCom : public ComBase
     BrainCom(const BrainCom &) = delete;
     BrainCom &operator=(const BrainCom &) = delete;
 
+    // Create a lookup table for received chars
+    uint8_t actionTable[256] = {0}; // Initialize all to ACTION_NONE
+
     bool brainBoostState = false;
 
     virtual void messageReceiver() override;
@@ -40,4 +43,12 @@ inline BrainCom &BrainCom::getInstance()
 {
     static BrainCom instance;
     return instance;
+}
+
+// ##################################################################################
+// This method is responsible for what happens when a heart beat (l or k) is recevied
+// ##################################################################################
+inline void BrainCom::heartbeatReceived()
+{
+    // TODO: empty for now - maybe send the L / 0???
 }

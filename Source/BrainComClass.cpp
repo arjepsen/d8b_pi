@@ -13,7 +13,26 @@
 #include <stdexcept>
 #include <unistd.h>
 
-BrainCom::BrainCom() {}
+// Define action codes
+#define ACTION_NONE 0
+#define ACTION_TERMINATOR 1
+#define ACTION_HEARTBEAT 2
+#define ACTION_APOGEE_HEARTBEAT 3
+
+BrainCom::BrainCom()
+{
+    // Populate the action table with actions
+    actionTable['f'] = ACTION_TERMINATOR; // End of fader message
+    actionTable['v'] = ACTION_TERMINATOR; // End of vPot message
+    actionTable['u'] = ACTION_TERMINATOR; // end of button message
+    actionTable['o'] = ACTION_TERMINATOR; // End of apogee heartbeat ("F8o")
+    actionTable['K'] = ACTION_TERMINATOR; // End of "system" message? (Used by fader calibrations.)
+
+    actionTable['l'] = ACTION_HEARTBEAT;
+    actionTable['k'] = ACTION_HEARTBEAT;
+    // TODO: others?
+}
+
 BrainCom::~BrainCom() {}
 
 // ################################################################################################
@@ -62,34 +81,57 @@ void BrainCom::messageReceiver()
             // Increment index
             msgIndex++;
 
-            // TODO: maybe we can optimize this? Might not need everything from a to z?
-            // A lower case letter means message complete. Push, and reset.
-            if (recvChar >= 'a' && recvChar <= 'z')
+            // Use lookup table for determining action, instead of checking every possibility
+            uint8_t action = actionTable[(unsigned char)recvChar];
+            switch (action)
             {
-                // We might receive heartbeat in the middle of a message.
-                // In that case, don't increment index, or reset.
-                if (recvChar == 'l' || recvChar == 'k')
-                {
-                    // DEBUG_MSG("hearbeat: %c\n", recvChar);
-                    msgIndex--; // Decrement, to erase from messages.
+                case ACTION_TERMINATOR:
+                    message[msgIndex] = '\0';       // Terminate string.
+                    circBuffer.push(message, msgIndex); // Push to buffer.
+                    msgIndex = 0;                       // Reset index for the next message
+                    break;
+
+                case ACTION_HEARTBEAT:
+                    // TODO: Set up heartbeat handling
+                    msgIndex --;    // Decrement to overwrite heartbeat character.
                     heartbeatReceived();
-                }
-                else
-                {
-                    // Full message received. Add null terminator.
-                    message[msgIndex] = '\0';
-                    circBuffer.push(message, msgIndex); // Push message to the circular buffer.
+                    break;
 
-                    // Reset index for next message
-                    msgIndex = 0;
-                }
+                default:
+                    // Char was part of message, and is already written. 
+                    break;
+
             }
+
+            // // TODO: maybe we can optimize this? Might not need everything from a to z?
+            // // A lower case letter means message complete. Push, and reset.
+            // if (recvChar >= 'a' && recvChar <= 'z')
+            // {
+            //     // We might receive heartbeat in the middle of a message.
+            //     // In that case, don't increment index, or reset.
+            //     if (recvChar == 'l' || recvChar == 'k')
+            //     {
+            //         // DEBUG_MSG("hearbeat: %c\n", recvChar);
+            //         msgIndex--; // Decrement, to erase from messages.
+            //         heartbeatReceived();
+            //     }
+            //     else
+            //     {
+            //         // Full message received. Add null terminator.
+            //         message[msgIndex] = '\0';
+            //         circBuffer.push(message, msgIndex); // Push message to the circular buffer.
+
+            //         // Reset index for next message
+            //         msgIndex = 0;
+            //     }
+            // }
         }
 
-        else if (result == 0) // 0 chars recevied - EOF
-        {
-            // Should we add any special functionality here??
-        }
+        // TODO:
+        // else if (result == 0) // 0 chars recevied - EOF
+        // {
+        //     // Should we add any special functionality here??
+        // }
 
         else if (result < 0)
         {
@@ -100,12 +142,4 @@ void BrainCom::messageReceiver()
 
     // We probably shouldn't get here... but just in case.
     DEBUG_MSG("BRAIN LOOP EXITED!!\n");
-}
-
-// ##################################################################################
-// This method is responsible for what happens when a heart beat (l or k) is recevied
-// ##################################################################################
-void BrainCom::heartbeatReceived()
-{
-    // TODO: empty for now - maybe send the L / 0???
 }

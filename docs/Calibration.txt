@@ -1,0 +1,1379 @@
+Before calibration, the "calibration prep" commands are run - see that doc.
+
+When we press "OK" this procudure happens:
+
+1)
+First we turn some leds back on:
+476i 472i 4B6i 4CCi 4C2i 4D8i 4DEi 4D4i 4EAi 4E0i 47Bi47Ci47Ei
+EQ, On, ring leds for the four vpots, Select1,2 and 4
+
+2)
+Then in the display we write:
+80u20v20v20v47v41v49v4Ev20v20v8Au20v20v20v47v41v49v4Ev20v20v20v20v20v20v47v41v49v4Ev20v9Du20v20v20vA1u47v41v49v4Ev20vA7u7EvC2u30v2Ev30vC6u64v42vCCu30v2Ev30vD0u64v42vD6u30v2Ev30v20v64v42vE0u30v2Ev30v20v64v42v
+which writes:
+   GAIN      GAIN      GAIN      GAIN  ~
+  0.0 dB    0.0dB     0.0dB     0.0dB
+
+Note: the command contains quite a few "20v" wwhich are spaces.
+This could serve to ensure that we overwrite previous text, but again,
+maybe we could simply send a command that clears the display first?
+
+3)
+Now, we turn off some leds:
+476j4B6j4CCj4C2j4D8j4DEj4D4j4EAj4E0j472j47Bj47Cj47Dj47Ej
+EQ, ring leds, On, Select1-4
+
+4)
+Write to the display:
+80u43v61v6Cv69v62v72v61v74v69v6Ev67v2Ev8Du44v6Fv6Ev27v74v93u74v6Fv75v63v68v20v63v6Fv6Ev73v6Fv6Cv65v2Ev2Ev2Ev20v20vA7u20vC2u20v20v20vC6u20v20vCCu20v20v20vD0u20v20vD6u20v20v20vDAu20v20vE0u20v30v20v25v20v20v
+
+Calibrating. Don't touch console...
+                                 0 %
+
+5)
+Turn on the "fader motors off" button led, and move all faders to zero.
+503i1800f00f100f200f300f400f500f600f700f800f900fA00fB00fC00fD00fE00fF00f1000f1100f1200f1300f1400f1500f1600f1700f
+
+NOTE: this is also what happens when we press the button.
+This actually does NOT physically turn off the motors - instead it instructs
+the program to not send any commands to move faders on the console.
+(when the button is disengaged, faders are simply moved to their actual
+position, and program re-instructed to move them as normal)
+
+
+===========================================================================
+============== THE FOLLOWING IS THE "CORE" CALIBRATION ====================
+
+The calibration is done in three rounds. In every round the faders are first
+moved to bottom, and then a number of commands are sent to the brain for each
+fader, which sends responses back, seemingly depending on the registered 
+fader position.
+Next the faders are sent to the top, and again a number of commands are sent
+for each fader, again with responses.
+
+IN THE FIRST ROUND, the first "bottom" command is "__FE0000L__K", where
+the "__" is replace by the fader ID (0x00 - 0x18)
+Then subtract 0x02 from the first two digits (FE - 02 = FC") for the next
+command (so second command is __FC0000L__K).
+The last "down" command for each fader in the first round is "__AC0000L__K".
+
+In every round, after moving the faders to the top, the first "up" command
+is found by adding 0x02 to the first two digits of the last "down" command,
+and then subracting 0x0100 from the remaining four digits.
+(ex. AC0000 -> AEFF00)
+(ex. 5A0A80 -> 5C0980)
+NOTE: this is not one simple addition or subtraction - as can be seen by
+these two examples. It is two operations on the different digits.
+
+IN THE FIRST ROUND, this means that the first "up" command is "__AEFF00L__K"
+Then we add 0x0040 to the last four digits for the next command (AEFF40)
+Note that FFC0 wraps around to 0000 WITHOUT incrementing the first two
+digits (AE).
+This continues untill we reach __AE0980L__K as the last "up" command in the
+first round.
+
+Also after every round having finished the top, the faders are again moved 
+down for the next round. The first "down" command is found similarly - but 
+reversed - as to how we found the first "up" command.
+We take the last "up" command, subtract 0x02 from the first two digits, and
+then adding 0x0100 to the last four digits.
+(ex. AE0980 -> AC0A80)
+(ex. 5CFC40 -> 5AFD40)
+
+So to recap the first round:
+Start at FE0000 and subtract 0x02 from the first two digits until the last
+command which is AC0000. Then for the top, start with AEFF00 and add 0x0040
+to the last four digits, until we have AE0980 as the last up command.
+
+RESPONSES:
+Now, as mentioned, for every command we send to the brain, the brain sends
+a response in the form of "xxK", where xx is a positional value.
+So, in a way we are shooting for having "00K" for the bottom response,
+and "FFK" for the top response.
+This is where it gets a bit tricky/complicated.
+In the first round, in my tests, all bottom commands gave a "00K" response.
+However, the top responses varied quite a bit between the faders, where most
+faders started around "EBK" and ended around "F8K".
+SO: IN THE FIRST ROUND IT SEEMS WE SIMPLY IGNORE THE RESPONSES, AND GO 
+THROUGH THE PRE-DETERMINED COMMANDS DISCRIBED ABOVE.
+However, four the next rounds, things are a bit different.
+
+
+SECOND ROUND:
+So as described, the faders are again moved to the bottom, and we start
+sending a number of commands. The first command is "__AC0A80L__K" for
+every fader - regardless of the responses to the top commands in round 1.
+Again, we subtrac 0x02 from the first two digits, so the second command is
+"__AA0A80L__K". In my tests, the second round also yielded a response of 
+"00K" for every command for every fader for the bottom. This means that
+the procedure COULD have a differece, if there would be a different response
+... 
+Anyway, this continues until we have 5A0A80 as the last bottom command value.
+Now, as described, we find the first top command to be __5C0980L__K
+BUT here we have a difference from first round, in that now we subtract 
+0x0100 from the last four digits BUT ONLY UNTIL WE NO LONGER GET "FFK" AS A 
+RESPONSE! 
+So when we get a different response (could be "FEK") we start ADDING 0x0040
+to the last four digits instead.
+ex:
+5CFC80  -   FFK
+5CFB80  -   FFK
+5CFA80  -   FFK
+5CF980  -   FFK
+5CF880  -   FEK (change)
+5CF8C0  -   FEK (adding 0x0040)
+
+Here we continue to add 0x0040 until we again get a response of FFK, and we 
+take note of this last command value, since this is now what we will use
+to find the first "bottom" command in round 3.
+
+THIRD ROUND:
+So, as desribed before, the faders are again moved to the bottom, but since 
+the end command for second round up commands will differ from fader to fader,
+that also means that we now have different start commands for each fader.
+
+Now in this round, we once again subtract 0x02 from the first two digits 
+between each command. BUT now we take note of the responses. When the response
+changes from "00K" to something else (like 02K), we then add 0x02 back to 
+the first two digits untill we get a response of 00K.
+Again, now we take note of the end value, since again we will determine the
+first top command from this value, as described above. Again - this means
+that every fader in round three is likely to have different starting up
+commands.
+For the up commands, we now subtract 0x0100 from the last four digits untill
+we no longer get a "FFK" response. Then we add 0x0040 untill we get FFK again.
+
+
+After this, we "re-establish" the conditions we had before the calibration
+(clear display, write correct stuff, turn on/off various leds, and move faders
+to their respective positions.)
+
+
+
+So the procedure for fader1 could look like:
+Send fader to bottom:   "0000f"
+Wait 1 second.
+Force fader to bottom:  "10000f"
+Wait 1 second.
+Force fader to bottom again: "10000f"
+wait 1 second.
+
+call this method:
+set command string: XXFE0000LXXK
+write in channelstrip ID: 00FE0000L00K
+set first two digit value: int msbDigits = 0xFF (start loop by subtracting)
+Iterate wwhile msbDigits >= 0xAC:
+    msbDigits =- 0x02
+    convert to chars, write into command string.
+    send command
+    wait for response (00K) (but ignore value for now)
+    (error handling?)
+
+
+
+    
+
+##############################################################################
+################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------- FIRST ROUND ---------------------------
+
+First, send __FE0000L__K (with __ replaced by ID - 00-18)
+then jump two down on the first two-char hex value, so the next is:
+__FC0000L__K
+__FA0000L__K
+and so on all the way down to __AC0000L__K
+At each command, the brain should respond "00K". "00" seems to be 
+position value. 
+In my tests, this first round did nok produce any response other than "00K".
+I suspect if one of the faders did respond differently... welll... somehting?
+
+Anyways, after running these commands to all faders, commands are sent to 
+move them to their top position.
+Then another round of commands are sent.
+This time it starts at
+__AEFF00L__K     and the response is "EBK"
+__AEFF40L__K
+__AEFF80L__K
+__AEFFC0L__K
+__AE0000L__K    here it jumps from FF to 00....
+__AE0040L__K
+__AE0080L__K
+__AE00C0L__K
+__AE0100L__K
+so now it jumps UP by 4 on the next-last hex digit - but wrapping around.
+It continues to rise up to
+__AE0980L__K
+BUT the responses start at "EBK", but changes upwards.
+And other fdaers start at "ECK"....
+So maybe here we are tracking a change in values over the given range?
+It could seem, that maybe we should be shooting for "FFK", but for now, 
+the range seems set. As the commands rise, the response goes upwards,
+for now seemingly "F9K" is the highest in this first round.
+
+
+---------------- SECOND ROUND -------------------------------------
+
+Next, the faders are sent down again.
+THis time, the commands sent start at:
+__AC0A80L__K    -   00K
+__AA0A80L__K
+__A80A80L__K
+jumping down a value of two at a time for the first two hex chars.
+it ends at:
+__5A0A80L__K
+with all replies being 00K
+It is currently uncertain what would happen if the response was NOT 00K at this point.
+
+After this second bottom round, the faders at sent high again.
+
+__5C0980L__K    -   FFK
+__5C0880L__K    -   FFK
+__5C0780L__K
+...
+__5C0080L__K
+__5CFF80L__K
+so now it seems the middle two hex chars are decreasing.
+But it wraps around from 00 to FF
+Here, when the respons changes from FFK to FEK, the command changes,
+so now instead of decreasing the middle two chars, we now INCREASE 
+the MSB of the last two hex chars, so they go up from 80 to C0 etc.
+In other words, we look at these 3 digits: __--XXX-L__K, by first decreasing
+the first two by 1, and when the response changes from FFK, we start increasing
+the last two digits upwards by 4:
+098 -   FFK
+088
+078
+068
+058
+048
+038
+028
+018
+008
+FF8
+FE8
+FD8
+FC8
+FB8
+FA8
+F98
+F88 -   FEK (here's the change.)
+F8C -   FCK
+F90 -   FCK
+...
+this increases by 4 till:
+...
+FB4 -   FCK
+FB8 -   FCK
+FBC -   FDK ( change, closer to FEK)
+FC0 -   FEK     Here also we get a fader moved message: "00FEf".
+FC4 -   FEK
+FC8 -   FEK
+FCC -   FEK     ("00FFf" - message)
+__5CFD00L__K -   FFK
+so at this point, the fader seems to have been calibrated to the top value FFK
+
+
+
+----------------- THIRD ROUND ------------------------------
+Again, faders goes to bottom.
+
+Now we send:
+__5AFE00L__K    -   00K
+__58FE00L__K    -   00K
+so now again we decrease by 2.
+We do this until the reply changes, then increase again by 2, untill
+we get back to 00K
+...
+__26FE00L__K    -   00K
+24  -   00K
+22  -   00K
+20  -   02K
+22  -   02K
+24  -   02K
+26  -   02K
+28  -   02K
+2A  -   02K
+2C  -   02K
+2E  -   02K
+30  -   01K
+32  -   00K
+
+BUT BUT BUT - the start command changes from fader to fader....
+
+It seems that the start command is calculated from the end-command of the
+second round - so:
+fader1 up ended at __5CFD00L__K, and starts second round down at __5AFE00L__K
+so start down command for third round subtracts 5CFD00 - 5AFE00 = 1FF00
+so every start command in third round down is 0x1FF00 subtracted from the 
+end value in the second round up.
+
+another way to look at it: round2 last commands has the form "5CFxx0".
+the first command in round3 then has the form "5AFyy0", where
+yy = xx + 10 (in hex mind you!)
+
+##################################################################
+##################################################################
+OKOKOKOKOK.... SO generally speaking:
+We look at the 6 digits of the command, not as a whole number, but more
+like the first two digits seperated, and then the last four digits as a
+number of its own.
+So, in every round, we take the last "down" command, and add 0x02 to the
+first two digits, and subtract 0x0100 from the last four.
+(ex1: AC0000 -> AEFF00)
+(ex2: 5A0A80 -> 5C0980)
+NOTE: it is NOT a simple calculation of the whole.
+
+When we go from up to down, the new down command is similar but reversed.
+Now we subtract 0x02 from the first two digits, and add 0x0100 to the last
+four.
+
+
+=====================================================================
+
+6)
+About a second later (about 2 heartbeats (l-k-l-k)) (actually more like 1 second)
+this command is sent:
+10000f10100f10200f10300f10400f10500f10600f10700f10800f10900f10A00f10B00f10C00f10D00f10E00f10F00f11000f11100f11200f11300f11400f11500f11600f11700f11800f
+This seems to be another fader-move command, except this one moves the faders
+faster/more forcefully. Essentially it again tells the faders to go to zero,
+but in quite a more firm voice! 
+
+7)
+After yet another 2 heartbeats (l-k-l-k), the forceful command is sent again.
+10000f10100f10200f10300f10400f10500f10600f10700f10800f10900f10A00f10B00f10C00f10D00f10E00f10F00f11000f11100f11200f11300f11400f11500f11600f11700f11800f
+
+8)
+Again we wait for 2 heartbeats we start to send these commands.
+(note that the "C0o/F8o" for the apogee heartbeat also still arrives...)
+00FE0000L00K
+00FC0000L00K
+00FA0000L00K
+00F80000L00K
+00F60000L00K
+00F40000L00K
+00F20000L00K
+00F00000L00K
+00EE0000L00K
+00EC0000L00K
+00EA0000L00K
+00E80000L00K
+00E60000L00K
+00E40000L00K
+00E20000L00K
+00E00000L00K
+00DE0000L00K
+...(continueing)
+00D00000L00K
+00CE0000L00K
+...(continueing)
+00C00000L00K
+00BE0000L00K
+...(continuing)
+00B00000L00K
+00AE0000L00K
+00AC0000L00K
+
+after each of these commands, the brain responds: "00K"
+This seems to do calibrations on fader 1.
+
+9)
+now we update the display:
+E1u31v
+which write "1" to the percent counter in the display.
+
+10)
+Now the procedure starts working on fader 2, starting with:
+01FE0000L01K
+01FC0000L01K
+...
+01AC0000L01K
+
+so the pattern is the same as for fader 1, and brain again replies "00K" for each command.
+
+11)
+There is no display printing between fader2 and fader3, so we continue with:
+02FE0000L02K
+...
+02AC0000L02K
+
+12)
+Before fader4 starts, we update display:
+C0u2AvE1u32v
+this changes the percent count to 2, and also starts a progress line of "*"
+so it prints an asterisk at first position in the second line.
+
+13)
+Fader 4 starts:
+03FE0000L03K
+...
+
+14)
+before fader 5 starts, we update the percent to 3:
+E1u33v
+
+15)
+Fader 5:
+04FE0000L04K
+...
+
+16)
+Fader 6 (no display update)
+05FE0000L05K
+...
+
+17)
+Update display to 4 percent
+E1u34v
+and start fader 7:
+06FE0000L06K
+...
+
+18)
+update to 5 percent, and start fader 8:
+E1u35v
+07FE0000L07K
+...
+
+19)
+Before fader 9, we update the "progress bar" of asterisks:
+C1u2Av
+08FE0000L08K
+...
+
+20)
+update to 6 percent before fader 10:
+E1u36v
+09FE0000L09K
+...
+
+21)
+update to 7 percent before fader 11:
+E1u37v
+0AFE0000L0AK
+...
+
+22)
+No display update before fader 12:
+0BFE0000L0BK
+...
+
+23)
+Update to 8 percent before fader 13:
+E1u38v
+0CFE0000L0CK
+...
+
+24)
+Before fader 14, update percent to 9, and add to progress bar:
+C2u2Av
+E1u39v
+0DFE0000L0DK
+...
+
+25)
+No display update before fader 15:
+0EFE0000L0EK
+...
+
+26)
+Update percent to 10 before fader 16:
+E1u31v30v20v25v
+(this moves the percent sign one to the right, clearing the space it was in before)
+0FFE0000L0FK
+...
+
+27)
+Update percent to 11 before fader 17:
+E2u31v
+10FE0000L10K
+...
+
+28)
+No display update before fader 18:
+11FE0000L11K
+...
+
+29)
+Progress bar + 12 % before fader 19:
+C3u2AvE2u32v
+12FE0000L12K
+...
+
+30)
+13%, fader 20:
+E2u33v
+13FE0000L13K
+...
+
+31)
+Fader 21:
+14FE0000L14K
+...
+
+32)
+14%, fader 22:
+E2u34v
+15FE0000L15K
+...
+
+33)
+15%, fader 23:
+E2u35v
+16FE0000L16K
+...
+
+34)
+Progress bar, fader 24:
+C4u2Av
+17FE0000L17K
+...
+
+35)
+16%, fader 25 (master):
+E2u36v
+18FE0000L18K
+...
+
+AGAIN, remember for each fader command to wait for brain to reply "00K"
+
+36)
+First round of calibrating the bottom position is now done.
+Update percent to 17:
+E2u37v
+
+37)
+Move all fader to top position, using our firm voice!
+100FFf101FFf102FFf103FFf104FFf105FFf106FFf107FFf108FFf109FFf10AFFf10BFFf10CFFf10DFFf10EFFf10FFFf110FFf111FFf112FFf113FFf114FFf115FFf116FFf117FFf118FFf
+
+38)
+Wait for 2 heartbeats (actually more like 1.5 - k-l-k), then send the command again
+100FFf101FFf102FFf103FFf104FFf105FFf106FFf107FFf108FFf109FFf10AFFf10BFFf10CFFf10DFFf10EFFf10FFFf110FFf111FFf112FFf113FFf114FFf115FFf116FFf117FFf118FFf
+
+39)
+Wait for another 1.5 heartbeat, then we start calibrating the top position.
+This is similar to the buttom, but now the brain something else.
+The reply seems to change a bit over the course of the commands:
+
+40)
+00AEFF00L00K    -   EBK
+00AEFF40L00K    -   EBK
+00AEFF80L00K    -   EBK
+00AEFFC0L00K    -   EBK
+00AE0000L00K    -   EBK
+00AE0040L00K    -   EBK
+00AE0080L00K    -   EBK
+00AE00C0L00K    -   EBK
+00AE0100L00K    -   EBK
+00AE0140L00K    -   EBK
+00AE0180L00K    -   EBK
+00AE01C0L00K    -   EBK
+00AE0200L00K    -   EBK
+00AE0240L00K    -   EBK
+00AE0280L00K    -   EDK     FIRST DIFFERENCE
+00AE02C0L00K    -   EEK
+00AE0300L00K    -   EFK
+00AE0340L00K    -   EFK
+00AE0380L00K    -   EFK
+00AE03C0L00K    -   F0K
+00AE0400L00K    -   F0K
+00AE0440L00K    -   F0K
+00AE0480L00K    -   F0K
+00AE04C0L00K    -   F0K
+00AE0500L00K    -   F1K
+00AE0540L00K    -   F2K
+00AE0580L00K    -   F2K
+00AE05C0L00K    -   F2K
+00AE0600L00K    -   F2K
+00AE0640L00K    -   F3K
+00AE0680L00K    -   F3K
+00AE06C0L00K    -   F4K
+00AE0700L00K    -   F4K
+00AE0740L00K    -   F4K
+00AE0780L00K    -   F4K
+00AE07C0L00K    -   F5K
+00AE0800L00K    -   F6K
+00AE0840L00K    -   F6K
+00AE0880L00K    -   F6K
+00AE08C0L00K    -   F7K
+00AE0900L00K    -   F7K
+00AE0940L00K    -   F7K
+00AE0980L00K    -   F8K
+
+
+41)
+Next, fader 2:
+01AEFF00L01K
+
+THE REPLIES SEEMS TO NOT NECESSARILY FOLLOW LIKE FADER1- SO WE DONT KNOW
+IF THE PROGRAM DOES ANYTHING PARTICULAR WITH THE REPLIES.....
+
+42)
+Before fader 3 we update percent to 18:
+E2u38v
+02AEFF00L02K
+
+43)
+Before fader 4, 19%, and progress bar
+C5u2Av
+E2u39v
+03AEFF00L03K
+
+44)
+fader 5
+04AEFF00L04K
+(in this round, this one seems to start replies at EDK, and went up to FAK)
+
+45)
+update percent  to 20 before fader 6
+E1u32v30v
+05AEFF00L05K
+
+46)
+update to 21%, fader 7
+E2u31v
+06AEFF00L06K
+
+47)
+fader 8
+07AEFF00L07K
+
+48)
+22% + progress bar. Fader 9
+C6u2Av
+E2u32v
+08AEFF00L08K
+
+49)
+23%, fader 10
+E2u33v
+09AEFF00L09K
+
+50)
+fader 11
+0AAEFF00L0AK
+
+51)
+24%, fader 12
+E2u34v
+0BAEFF00L0BK
+
+52)
+25%, fader 13
+E2u35v
+0CAEFF00L0CK
+
+53)
+Progress bar, fader 14
+C7u2Av
+0DAEFF00L0DK
+
+54)
+26%, fader 15
+E2u36v
+0EAEFF00L0EK
+
+55)
+27%, fader 16
+E2u37v
+0FAEFF00L0FK
+
+56)
+fader 17
+10AEFF00L10K
+
+57)
+28%, fader 18
+E2u38v
+11AEFF00L11K
+
+58)
+29%, progress bar, fader 19
+C8u2Av
+E2u39v
+12AEFF00L12K
+
+59)
+fader 20
+13AEFF00L13K
+
+60)
+30%, fader 21
+E1u33v30v
+14AEFF00L14K
+
+61)
+31%, fader 22
+E2u31v
+15AEFF00L15K
+
+62)
+fader 23
+16AEFF00L16K
+
+
+63)
+32%, progress bar, fader 24
+C9u2Av
+E2u32v
+17AEFF00L17K
+
+64)
+33%, fader 25 (master)
+E2u33v
+18AEFF00L18K
+
+65)
+Again, the faders are told to go to zero:
+10000f10100f10200f10300f10400f10500f10600f10700f10800f10900f10A00f10B00f10C00f10D00f10E00f10F00f11000f11100f11200f11300f11400f11500f11600f11700f11800f
+and we wait for 1.5 heartbeat (k-l-k)
+
+66)
+Another round of go to zero
+10000f10100f10200f10300f10400f10500f10600f10700f10800f10900f10A00f10B00f10C00f10D00f10E00f10F00f11000f11100f11200f11300f11400f11500f11600f11700f11800f
+and another wait. (l-k-l)
+
+67)
+Fader 1
+Now we go through the faders again, but these commands seem different than 
+first time, although again the response is "00K"
+00AC0A80L00K
+00AA0A80L00K
+00A80A80L00K
+00A60A80L00K
+00A40A80L00K
+00A20A80L00K
+00A00A80L00K
+009E0A80L00K
+009C0A80L00K
+009A0A80L00K
+00980A80L00K
+00960A80L00K
+00940A80L00K
+00920A80L00K
+00900A80L00K
+008E0A80L00K
+008C0A80L00K
+008A0A80L00K
+00880A80L00K
+00860A80L00K
+00840A80L00K
+00820A80L00K
+00800A80L00K
+007E0A80L00K
+007C0A80L00K
+007A0A80L00K
+00780A80L00K
+00760A80L00K
+00740A80L00K
+00720A80L00K
+00700A80L00K
+006E0A80L00K
+006C0A80L00K
+006A0A80L00K
+00680A80L00K
+00660A80L00K
+00640A80L00K
+00620A80L00K
+00600A80L00K
+005E0A80L00K
+005C0A80L00K
+005A0A80L00K
+
+68)
+34%, Fader 2
+E2u34v
+01AC0A80L01K
+
+69)
+35%, fader 3
+E2u35v
+02AC0A80L02K
+
+70)
+Progress bar, fader 4
+CAu2Av
+03AC0A80L03K
+
+71)
+36%, fader 5
+E2u36v
+04AC0A80L04K
+
+72)
+37%, fader 6
+E2u37v
+05AC0A80L05K
+
+72)
+fader 7
+06AC0A80L06K
+
+73)
+38%, fader 8
+E2u38v
+07AC0A80L07K
+
+
+74)
+Progress bar, 39%, fader 9
+CBu2Av
+E2u39v
+08AC0A80L08K
+
+75)
+fader 10
+09AC0A80L09K
+
+76)
+40%, fader 11
+E1u34v30v
+0AAC0A80L0AK
+
+77)
+41%, fader 12
+E2u31v
+0BAC0A80L0BK
+
+78)
+fader 13
+0CAC0A80L0CK
+
+79)
+Progress bar, 42%, fader 14
+CCu2Av
+E2u32v
+0DAC0A80L0DK
+
+
+80)
+43%, fader 15
+E2u33v
+0EAC0A80L0EK
+
+81)
+fader 16
+0FAC0A80L0FK
+
+82)
+44%, fader 17
+E2u34v
+10AC0A80L10K
+
+83)
+45%, fader 18
+E2u35v
+11AC0A80L11K
+
+84)
+Progress bar, fader 19
+CDu2Av
+12AC0A80L12K
+
+85)
+46%, fader 20
+E2u36v
+13AC0A80L13K
+
+86)
+47%, fader 21
+E2u37v
+14AC0A80L14K
+
+87)
+fader 22
+15AC0A80L15K
+
+88)
+48%, fader 23
+E2u38v
+16AC0A80L16K
+
+
+89)
+49%, progress bar, fader 24
+CEu2Av
+E2u39v
+17AC0A80L17K
+
+90)
+fader 25 (master)
+18AC0A80L18K
+
+
+91)
+50%.
+once again, tell faders to go to top.
+E1u35v30v
+100FFf101FFf102FFf103FFf104FFf105FFf106FFf107FFf108FFf109FFf10AFFf10BFFf10CFFf10DFFf10EFFf10FFFf110FFf111FFf112FFf113FFf114FFf115FFf116FFf117FFf118FFf
+
+92)
+wait for 1.5 heartbets, then fader up again:
+100FFf101FFf102FFf103FFf104FFf105FFf106FFf107FFf108FFf109FFf10AFFf10BFFf10CFFf10DFFf10EFFf10FFFf110FFf111FFf112FFf113FFf114FFf115FFf116FFf117FFf118FFf
+and again, wait 1.5
+
+93)
+Like for the second bottom part, the command is now different
+fader1
+005C0980L00K    -   FFK
+005C0880L00K    -   FFK
+005C0780L00K    -   FFK
+005C0680L00K    -   FFK
+005C0580L00K    -   FFK
+005C0480L00K    -   FFK
+005C0380L00K    -   FFK
+005C0280L00K    -   FFK
+005C0180L00K    -   FFK
+005C0080L00K    -   FFK
+005CFF80L00K    -   FFK
+005CFE80L00K    -   FFK
+005CFD80L00K    -   FFK
+005CFC80L00K    -   FFK
+005CFB80L00K    -   FFK
+005CFA80L00K    -   FFK
+005CF980L00K    -   FFK
+005CF880L00K    -   FEK (different response)
+005CF8C0L00K    -   FCK
+005CF900L00K    -   FCK
+005CF940L00K    -   FCK
+005CF980L00K    -   FCK
+005CF9C0L00K    -   FCK
+005CFA00L00K    -   FCK
+005CFA40L00K    -   FCK
+005CFA80L00K    -   FCK
+005CFAC0L00K    -   FCK
+005CFB00L00K    -   FCK
+005CFB40L00K    -   FCK
+005CFB80L00K    -   FCK
+005CFBC0L00K    -   FDK
+005CFC00L00K    -   FEK   00FEf (Brain sends a "fader was moved" message....)
+005CFC40L00K    -   FEK
+005CFC80L00K    -   FEK
+005CFCC0L00K    -   FEK   00FEf (again?)
+005CFD00L00K    -   FEK
+
+94)
+51%, fader2
+E2u31v
+015C0980L01K    -   FFK
+015C0880L01K    -   FFK
+015C0780L01K    -   FFK     01FFf
+Seems that we get quite a few "fader moved" messages now....
+
+95)
+Fader 3
+025C0980L02K
+
+96)
+Progress bar, 52%, fader4
+CFu2Av
+E2u32v
+035C0980L03K
+
+97)
+53%, fader 5
+E2u33v
+045C0980L04K
+
+
+98)
+Fader 6
+055C0980L05K
+
+99)
+54%, fader 7
+E2u34v
+065C0980L06K
+
+100)
+55%, fader 8
+E2u35v
+075C0980L07K
+
+101)
+Progress bar, fader 9
+D0u2Av
+085C0980L08K
+
+102)
+56%, fader 10
+E2u36v
+095C0980L09K
+
+103)
+57%, fader 11
+E2u37v
+0A5C0980L0AK
+
+104)
+fader 12
+0B5C0980L0BK
+
+105)
+58%, fader 13
+E2u38v
+0C5C0980L0CK
+
+106)
+59%, progress bar, fader 14
+D1u2Av
+E2u39v
+0D5C0980L0DK
+
+107)
+fader 15
+0E5C0980L0EK
+
+108)
+60%, fader 16
+E1u36v30v
+0F5C0980L0FK
+
+109)
+61%, fader 17
+E2u31v
+105C0980L10K
+
+110)
+fader 18
+115C0980L11K
+
+111)
+62%, progress, fader 19
+D2u2Av
+E2u32v
+125C0980L12K
+
+112)
+63%, fader 20
+E2u33v
+135C0980L13K
+
+113)
+fader 21
+145C0980L14K
+
+114)
+64%, fader 22
+E2u34v
+155C0980L15K
+
+115)
+65%, fader 23
+E2u35v
+165C0980L16K
+
+116)
+Progressbar, fader 24
+D3u2Av
+175C0980L17K
+
+117)
+66%, fader 25 (master)
+E2u36v
+185C0980L18K
+
+Ok, second round top done.
+
+118)
+67%
+Again, we move the faders to bottom. (and we keep yelling)
+E2u37v
+10000f10100f10200f10300f10400f10500f10600f10700f10800f10900f10A00f10B00f10C00f10D00f10E00f10F00f11000f11100f11200f11300f11400f11500f11600f11700f11800f
+
+And again, we wait for 1.5 heartbeat (1 second)
+
+119)
+repeat the fader command
+10000f10100f10200f10300f10400f10500f10600f10700f10800f10900f10A00f10B00f10C00f10D00f10E00f10F00f11000f11100f11200f11300f11400f11500f11600f11700f11800f
+wait 1 sec
+
+120)
+fader 1
+005AFE00L00K    -   00K
+0058FE00L00K
+0056FE00L00K
+0054FE00L00K
+0052FE00L00K
+0050FE00L00K
+004EFE00L00K
+004CFE00L00K
+004AFE00L00K
+0048FE00L00K
+0046FE00L00K
+0044FE00L00K
+0042FE00L00K
+0040FE00L00K
+003EFE00L00K
+003CFE00L00K
+003AFE00L00K
+0038FE00L00K
+0036FE00L00K
+0034FE00L00K
+0032FE00L00K
+0030FE00L00K
+002EFE00L00K
+002CFE00L00K
+002AFE00L00K
+0028FE00L00K
+0026FE00L00K
+0024FE00L00K
+0022FE00L00K
+                here we got a "0002f"
+0020FE00L00K    -   02K
+                now it seeems the comands increase again??? 
+0022FE00L00K    -   02K
+0024FE00L00K    -   02K
+0026FE00L00K    -   02K
+0028FE00L00K    -   02K
+002AFE00L00K    -   02K
+002CFE00L00K    -   02K
+002EFE00L00K    -   02K
+0030FE00L00K    -   01K   "0000f"
+                
+0032FE00L00K    -   00K
+
+Do the commands adjust after the responds??
+
+121)
+fader 2
+015AFE00L01K    -   00K
+...
+0126FE00L01K    -   00K "0102f"
+
+0124FE00L01K    -   02K
+0126FE00L01K    -   02K
+0128FE00L01K    -   02K
+012AFE00L01K    -   02K
+012CFE00L01K    -   02K
+012EFE00L01K    -   02K
+0130FE00L01K    -   02K
+0132FE00L01K    -   02K
+0134FE00L01K    -   02K
+0136FE00L01K    -   01K
+0138FE00L01K    -   00K "0100f"
+
+SO - it seems that the commands decrease until we get the fader move messge, 
+or the "not" 00K (02K)... and the we go back up till we get to "00K"
+and a 00f fader message?
+
+
+122)
+68%, fader 3
+E2u38v
+025AFD40L02K    -   00K     THIS IS DIFFERENT start than above...??
+0258FD40L02K
+0256FD40L02K
+0254FD40L02K
+0252FD40L02K
+0250FD40L02K
+024EFD40L02K
+024CFD40L02K
+024AFD40L02K
+0248FD40L02K
+0246FD40L02K
+0244FD40L02K
+0242FD40L02K
+0240FD40L02K
+023EFD40L02K
+023CFD40L02K
+023AFD40L02K
+0238FD40L02K
+0236FD40L02K
+0234FD40L02K
+0232FD40L02K
+0230FD40L02K
+022EFD40L02K
+022CFD40L02K
+022AFD40L02K
+0228FD40L02K
+0226FD40L02K
+0224FD40L02K
+0222FD40L02K    -   00K     "0201f"
+0220FD40L02K    -   01K
+----turnaround----
+0222FD40L02K    -   02K
+0224FD40L02K    -   02K
+0226FD40L02K    -   02K
+0228FD40L02K    -   02K
+022AFD40L02K    -   02K
+022CFD40L02K    -   02K
+022EFD40L02K    -   02K
+0230FD40L02K    -   02K
+0232FD40L02K    -   01K     "0200f"
+0234FD40L02K    -   00K
+
+
+123)
+69%, progress bar, fader 4
+D4u2Av
+E2u39v
+035AFD00L03K    -   00K
+...
+0322FD00L03K    -   00K     "0301f"
+0320FD00L03K    -   01K
+0322FD00L03K    -   02K
+0324FD00L03K    -   02K
+0326FD00L03K    -   02K
+0328FD00L03K    -   02K
+032AFD00L03K    -   02K
+032CFD00L03K    -   02K
+032EFD00L03K    -   02K
+0330FD00L03K    -   02K
+0332FD00L03K    -   01K
+0334FD00L03K    -   01K     "0300f"
+0336FD00L03K    -   00K
+
+124)
+fader 5
+045AFC40L04K    -   00K
+...
+041CFC40L04K    -   00K
+041AFC40L04K    -   02K -   "0402f"
+041CFC40L04K    -   02K
+...
+042AFC40L04K    -   02K
+
+042CFC40L04K    -   01K
+042EFC40L04K    -   01K     "0400f"
+0430FC40L04K    -   00K
+
+
+125)
+70%, fader 6
+E1u37v30v
+055AFE00L05K    -   00K
+0558FE00L05K    -   00K
+...
+0528FE00L05K    -   00K
+0526FE00L05K    -   00K     "0502f"
+0524FE00L05K    -   02K
+0526FE00L05K    -   02K
+...
+0534FE00L05K    -   02K
+0536FE00L05K    -   01K     "0500f"
+0538FE00L05K    -   00K
+
+
+126)
+71%, fader 7
+E2u31v
+065AFD00L06K    -   00K
+...
+0620FD00L06K    -   00K     "0602f"
+061EFD00L06K    -   02K
+0620FD00L06K    -   02K
+...
+0630FD00L06K    -   02K
+0632FD00L06K    -   01K     "0600f"
+0634FD00L06K    -   00K
+
+
+127)
+fader 8
+075AFDC0L07K    -   00K
+...
+0724FDC0L07K    -   00K     "0702f"
+0722FDC0L07K    -   02K
+0724FDC0L07K    -   02K
+...
+0734FDC0L07K    -   02K     "0701f"
+0736FDC0L07K    -   01K
+0738FDC0L07K    -   00K     "0700f"
+
+
+128)
+72%, progress bar, fader 9
+D5u2Av
+E2u32v
+085AFE80L08K    -   00K
+...
+081EFE80L08K    -   00K     "0802f"
+081CFE80L08K    -   02K
+081EFE80L08K    -   02K
+...
+082CFE80L08K    -   02K
+082EFE80L08K    -   01K
+0830FE80L08K    -   01K     "0800f"
+0832FE80L08K    -   00K
+
+
+129)
+73%, fader 10
+E2u33v
+095AFF00L09K    -   00K
+...
+0922FF00L09K    -   00K
+0920FF00L09K    -   02K     "0902f"
+0922FF00L09K    -   02K
+...
+0930FF00L09K    -   02K
+0932FF00L09K    -   01K
+0934FF00L09K    -   01K     "0901f"
+0936FF00L09K    -   00K
+
+130)
+Fader 11
+0A5AFF00L0AK    -   00K
+...
+0A24FF00L0AK    -   00K
+0A22FF00L0AK    -   02K     "0A02f"
+0A24FF00L0AK    -   02K
+...
+0A32FF00L0AK    -   02K
+0A34FF00L0AK    -   01K
+0A36FF00L0AK    -   01K     "0A00f"
+0A38FF00L0AK    -   00K
+
+
+131)
+74%, fader 12
+E2u34v
+0B5AFF80L0BK    -   00K
+...
+0B26FF80L0BK    -   00K     "0B02f"
+0B24FF80L0BK    -   02K     "0B03f"
+0B26FF80L0BK    -   03K
+0B28FF80L0BK    -   03K
+0B2AFF80L0BK    -   03K
+0B2CFF80L0BK    -   03K
+0B2EFF80L0BK    -   03K
+0B30FF80L0BK    -   03K
+0B32FF80L0BK    -   02K     "0B02f"
+0B34FF80L0BK    -   02K
+0B36FF80L0BK    -   02K     "0B00f"
+0B38FF80L0BK    -   00K
+
+
+CELLE 12007
+132)
+75%, fader 13
+E2u35v
+0C5AFF40L0CK
+
+
+
+
+
+
+
+
+

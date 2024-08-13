@@ -71,6 +71,8 @@ EventBus::~EventBus() {}
  ******************************************************************************/
 void EventBus::postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
 {
+    WE NEED TO IMPLEMENT HOW WE ARE WORKING, WHEN FADER MOTORS ARE "OFF"
+
     // First, let the channelstrip call the channel for sending DSP command.
     channelStripArray[channelStripID]->updateChannelVolume(currentBank, eventValue);
 

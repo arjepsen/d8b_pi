@@ -51,6 +51,8 @@
       <FILE id="whafmG" name="EventBusClass.cpp" compile="1" resource="0"
             file="Source/EventBusClass.cpp"/>
       <FILE id="ROWLES" name="EventBusClass.h" compile="0" resource="0" file="Source/EventBusClass.h"/>
+      <FILE id="uwsCB1" name="faderCalibration.h" compile="0" resource="0"
+            file="Source/faderCalibration.h"/>
       <FILE id="KBfc7i" name="FaderValueLookupClass.h" compile="0" resource="0"
             file="Source/FaderValueLookupClass.h"/>
       <FILE id="iGI3dL" name="FileManager.cpp" compile="1" resource="0" file="Source/FileManager.cpp"/>

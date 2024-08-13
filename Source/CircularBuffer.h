@@ -30,8 +30,11 @@ class CircularBuffer
     char buffer_[BUFFER_LENGTH][BUFFER_WIDTH];
     size_t messageLengths_[BUFFER_LENGTH];
 
-    std::atomic<size_t> head_;
-    std::atomic<size_t> tail_;
+    // std::atomic<size_t> head_;
+    // std::atomic<size_t> tail_;
+    alignas(64) std::atomic<size_t> head_;
+    alignas(64) std::atomic<size_t> tail_;
+
     std::mutex mutex_;
     std::condition_variable condVar_;
 
