@@ -324,7 +324,8 @@ void MixerManager::handleBufferMessage()
                 break;
             }
             default:
-                printf("OTHER MESSAGE: %s\n", msgBuffer);
+                break;
+                //printf("OTHER MESSAGE: %s\n", msgBuffer);
                 // TODO: handle other possible messages from the brain, but in particular also DSP
         }
     }

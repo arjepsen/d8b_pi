@@ -14,6 +14,355 @@
 #include "Debug.h"
 
 
+// Trying a new initialization script
+InitErrorType initializeMixerNew()
+{
+    const int MAX_RETRIES = 5;
+
+    // ===========================================================================
+    // ================== 1. SET UP COM PORTS ====================================
+    // ===========================================================================
+    MixerManager &mixerManager = MixerManager::getInstance();   // Fetch singleton.
+
+    // Set up file descriptors. Brain not const, since we can boost it
+    int BRAIN = openSerialPort(mixerManager.getBrainPort().c_str(), B115200);
+    const int DSP = openSerialPort(mixerManager.getDspPort().c_str(), B115200);
+
+    // Check for error.
+    if (BRAIN == -1 || DSP == -1)
+    {
+        DEBUG_MSG("PORT INITIALIZATION FAILED!\n");
+        return PORT_OPEN_FAILED;
+    }
+
+    DEBUG_MSG("Ports initialized.\n");
+    usleep(50000); // Sleep.
+
+
+    // ===========================================================================
+    // ====================== 2. INITIALIZE COMMUNICATION ========================
+    // ===========================================================================
+    char replyChar = '\0'; // Initial null terminator.
+    int retries = 0;
+
+    // Send 'R' to both boards, and check reply.
+    write(BRAIN, "R", 1);
+    while (replyChar != 'R')
+    {
+        if (read(BRAIN, &replyChar, 1) == 1 && replyChar == 'R')
+        {
+            DEBUG_MSG("Brain connected.\n");
+            break;
+        }
+
+        retries++;
+        usleep(200000); // Sleep 200ms
+        if (retries >= MAX_RETRIES)
+            return RESET_BRAIN_TIMEOUT; // Maybe something wrong with brain connection
+    }
+
+    // Reset for DSP round.
+    replyChar = '\0'; 
+    retries = 0;
+    write(DSP, "R", 1);
+    while (replyChar != 'R')
+    {
+        if (read(DSP, &replyChar, 1) == 1 && replyChar == 'R')
+        {
+            DEBUG_MSG("DSP connected.\n");
+            break;
+        }
+        retries++;
+        usleep(200000);
+        if (retries >= MAX_RETRIES)
+            return RESET_DSP_TIMEOUT; // Maybe something wrong with DSP connection
+    }
+
+
+    // ===========================================================================
+    // ====================== 3. DISPLAY WELCOME MESSAGE =========================
+    // ===========================================================================
+    write(BRAIN, DISPLAY_LOW, strlen(DISPLAY_LOW)); // Display intensity = low (preserve display)
+
+    // Send "01u" which clears the display.
+    write(BRAIN, "01u", 3);
+    usleep(20000); // Sleep for 20ms - needed for clear display to finish.
+
+    // Send "0Cu" - unsure what this does... not even sure it's needed... but it is sent in the original.
+    write(BRAIN, "0Cu", 3);
+    usleep(20000); // Sleep for 20ms
+
+    // Display the welcome message.
+    write(BRAIN, WELCOME_STRING, strlen(WELCOME_STRING));
+    sleep(2); // Let it stay there a fews secs for admirations sake.
+
+
+    // ===========================================================================
+    // ====================== 4. SEND DSP FIRMWARE (Master)=======================
+    // ===========================================================================
+    // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    // Display DSP firmware upload message
+    write(BRAIN, UPLOADING_DSP_FIRMWARE_MESSAGE, strlen(UPLOADING_DSP_FIRMWARE_MESSAGE));
+
+    // Send the DSP firmware
+    sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
+
+    // DSP Prooooobably sends an 'R' in response - check this.
+    retries = 0;
+    bool gotR35 = false;
+    while (true)
+    {
+        std::string dspResponse = getDspResponse(DSP);
+        DEBUG_MSG("\n\nDSP RESPONSE IS: %s\n\n", dspResponse.c_str());
+
+        if (dspResponse.substr(0,1) == "R")
+        {
+            // Check if we already got more than just R
+            if (dspResponse.substr(0, 3) == "R35")
+            {
+                gotR35 = true;
+            }
+            break;
+        }
+        else
+        {
+            retries++;
+            DEBUG_MSG("Number of retries for DSP 'R' are now: %d\n", retries);
+        }
+
+        if (retries > MAX_RETRIES)
+        {
+            DEBUG_MSG("NOT R RESPONSE\n");
+            return UPLOAD_DSP_FAILED;
+        }
+    }
+
+
+    // ===========================================================================
+    // ========================= 5. SEND BRAIN FIRMWARE ==========================
+    // ===========================================================================
+    // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    // Upload firmware (check for boost)
+    if (mixerManager.getBrainBoostState())
+    {
+        // Display fast firmware message
+        write(BRAIN, BOOST_MESSAGE1, strlen(BOOST_MESSAGE1));
+        sleep(1);
+        write(BRAIN, BOOST_MESSAGE2, strlen(BOOST_MESSAGE2));
+
+        // Upload fast firmware.
+        sendFirmwareFile(BRAINWARE_FAST_FILE, BRAIN);
+
+        // Close the old slow filedescriptor of yestoreyore:
+        close(BRAIN);
+
+        // Initialize new connection speed:
+        BRAIN = openSerialPort(mixerManager.getBrainPort().c_str(), B230400);
+    }
+    else
+    {
+        // Guess we will stay with old slow speed then.
+        write(BRAIN, UPLOAD_FIRMWARE_MESSAGE1, strlen(UPLOAD_FIRMWARE_MESSAGE1));
+        write(BRAIN, UPLOAD_FIRMWARE_MESSAGE2, strlen(UPLOAD_FIRMWARE_MESSAGE2));
+        sendFirmwareFile(BRAINWARE_FILE, BRAIN);
+    }
+
+    // Now check for a response from the brain. This is usually first an 'R', and then
+    // some vpot and fader messages that reports the status/position of those.
+    // TODO: does this impact the calibration string below?
+    retries = 0;
+    while (true)
+    {
+        std::string brainResponse = getBrainResponse(BRAIN);
+        if (brainResponse.substr(0, 3) == "R00")
+        {
+            DEBUG_MSG("Brain reply to firmware: %s\n", brainResponse.c_str());
+            break;
+        }
+
+        retries++;
+        if (retries > MAX_RETRIES)
+        {
+            DEBUG_MSG("Brain seems unresponsive to receiving firmware");
+            return UPLOAD_BRAIN_FAILED;
+        }       
+    }
+
+
+    // ===========================================================================
+    // ======================= 6. SEND FADER CALIBRATIONS ========================
+    // ===========================================================================
+
+    // Faders gets calibrated by sending commands to the brain, and reacting on 
+    // the responses. The commands has a format like this: 163AF840L16K, with this
+    // being a command for fader 16 (hex value 0x16 = 22 = channel strip 23) 
+    // So, in that command, the value is "3AF840". During boot, we will send a 
+    // value where we add 0x100 to that value, so on boot we would send the 
+    // command: "163AF940L"
+
+    // TODO:
+    // What we need to do here is to implement calibration, and let it save to 
+    // a file. Then we need to open that here, and use the saved calibration
+    // command.
+    // For now, just use this:
+    std::string calibString = "0034F640L013AF780L0238F6C0L0336F600L0432F480L053AF800L0636F640L0738F740L0832F6C0L093AF8C0L0A38F840L0B3AF880L0C3AF900L0D36F800L0E3EFA80L0F38F840L103AF900L1136F800L1236F800L1336F840L1438F940L1536F840L163AF940L1738F8C0L183AFA00L";
+    write(BRAIN, calibString.c_str(), calibString.length());
+
+
+    // ===========================================================================
+    // ========================== 7. SET UP I/O CARDS ============================
+    // ===========================================================================
+    // Detection of I/O cards are done by sending queries to the brain.
+    // First, clear display, then display:
+    // TAPE A   TAPE B   TAPE C   ALTIO
+    //   -        -        -        -
+
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+    write(BRAIN, TAPE_LIST, strlen(TAPE_LIST));
+
+    // Create the IO card slot object pointers. (Constructor initializes card).
+    // Then use function to query and display ID code.
+    IOSlot *tapeA = new IOSlot(BRAIN, TAPEIO_SLOT_A);
+    writeIOCardIdDisplayCode(BRAIN, tapeA, TAPE_A_DISPLAY_LOCATION);
+
+    IOSlot *tapeB = new IOSlot(BRAIN, TAPEIO_SLOT_B);
+    writeIOCardIdDisplayCode(BRAIN, tapeB, TAPE_B_DISPLAY_LOCATION);
+
+    IOSlot *tapeC = new IOSlot(BRAIN, TAPEIO_SLOT_C);
+    writeIOCardIdDisplayCode(BRAIN, tapeC, TAPE_C_DISPLAY_LOCATION);
+
+    IOSlot *altIO = new IOSlot(BRAIN, TAPEIO_SLOT_ALTIO);
+    writeIOCardIdDisplayCode(BRAIN, altIO, ALTIO_DISPLAY_LOCATION);
+
+    // Admire the beauty of it.
+    sleep(1);
+
+    //////////////////////////////////////////////////////////////////////////////
+    // NOTE: at this point we might start receiving the heatbeat "l-k"
+    //////////////////////////////////////////////////////////////////////////////
+
+
+    // ===========================================================================
+    // ===================== 8. SET UP DIGITAL I/O & CLOCK =======================
+    // ===========================================================================
+    // Clear screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    // Display "Digital IO card" and "Clock card:"
+    write(BRAIN, DIGITAL_IO_STRING, strlen(DIGITAL_IO_STRING));
+    write(BRAIN, CLOCK_STRING, strlen(CLOCK_STRING));
+
+    // Clear the buffer of "klk's" otherwise card detect fails.
+    tcflush(BRAIN, TCIOFLUSH);
+
+    // Identify Digital card and Clock.
+    IOSlot *digiIO = new IOSlot(BRAIN, DIGITAL_IO_SLOT);
+    writeIOCardIdDisplayCode(BRAIN, digiIO, DIGICARD_DISPLAY_LOCATION);
+
+    IOSlot *clockIO = new IOSlot(BRAIN, CLOCK_IO_SLOT);
+    writeIOCardIdDisplayCode(BRAIN, clockIO, CLOCK_DISPLAY_LOCATION);
+
+    // More admiration.
+    sleep(1);
+
+
+    // ===========================================================================
+    // ==================== 9. QUERY MR. BRAIN'S ESN NUMBER ======================
+    // ===========================================================================
+    tcflush(BRAIN, TCIOFLUSH); // First clear buffer.
+    write(BRAIN, "s", 1);
+
+    // Then check response.
+    retries = 0;
+    while (true)
+    {
+        std::string brainResponse = getBrainResponse(BRAIN);
+        printf("My ESN: %s\n", brainResponse.c_str());
+    }
+    // TODO: Save this somewhere, to be retreived in the UI
+
+    usleep(20000);
+
+
+    // ===========================================================================
+    // ==================== 10. UPLOAD DSP FIRMWARE (slave) ======================
+    // ===========================================================================
+    // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    // Display the uploading slave firmware message, and send the file.
+    write(BRAIN, UPLOADING_DSP_SLAVE_MESSAGE, strlen(UPLOADING_DSP_SLAVE_MESSAGE));
+    sendFirmwareFile(DSP_SLAVE_FIRMWARE_FILE, DSP);
+    sleep(1);
+
+
+    // ===========================================================================
+    // ======================== 11. UPLOAD "Config.asc" ==========================
+    // ===========================================================================
+    // TODO: Should we display anything there? It's over so quick anyway?
+    //       maybe we could allow some debugging info to be displayed....
+    //       We could make an option somewhere in the UI to display more debug
+    //       messages during boot, accepting longer boot time?
+
+    // For reasons p.t. unkown, this file's content is sent twice.
+    sendFirmwareFile(DSP_CONFIG_FILE, DSP);
+    sendFirmwareFile(DSP_CONFIG_FILE, DSP);
+    sleep(1);
+
+
+    // ===========================================================================
+    // ======================== 12. Initialize FX cards ==========================
+    // ===========================================================================
+
+    // Clear Screen
+    write(BRAIN, "01u", 3);
+    usleep(20000);
+
+    // Display the FX card list:
+    write(BRAIN, FX_CARD_LIST, strlen(FX_CARD_LIST));
+    tcflush(BRAIN, TCIOFLUSH);
+
+    // Create the FX card slot object pointers.
+    FXSlot *fxSlotA = new FXSlot(BRAIN, FX_SLOT_A);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotA, FX_SLOT_A);
+
+    FXSlot *fxSlotB = new FXSlot(BRAIN, FX_SLOT_B);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotB, FX_SLOT_B);
+
+    FXSlot *fxSlotC = new FXSlot(BRAIN, FX_SLOT_C);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotC, FX_SLOT_C);
+
+    FXSlot *fxSlotD = new FXSlot(BRAIN, FX_SLOT_D);
+    writeFXCardIdDisplayCode(BRAIN, fxSlotD, FX_SLOT_D);
+
+    // Pass the pointers to the mixermanager
+    mixerManager.initFXSlot(fxSlotA, FX_SLOT_A);
+    mixerManager.initFXSlot(fxSlotB, FX_SLOT_B);
+    mixerManager.initFXSlot(fxSlotC, FX_SLOT_C);
+    mixerManager.initFXSlot(fxSlotD, FX_SLOT_D);
+    sleep(1);
+
+}
+
+
+
+
+
+
+
+
+
+///////////////////// OLD /////////////////////////////////////////
+
 InitErrorType initializeMixer()
 {
     const int MAX_RETRIES = 5; // Used for defining how many retries various attempts will have.
@@ -130,7 +479,10 @@ InitErrorType initializeMixer()
 
     // Check response from Brain it should look something like:
     // R0027v0129v0202v0326v042Fv053Dv0623v073Ev083Cv0918v0A3Fv0B3Cv0C3Ev0D0Cv0E1Av0F2Cv1024v1127v1205v131Fv1419v1524v163Bv1705v1804v1A31v1B2Av1C39v1D37v1E2Dv1F03v2014v
-    //  - we still don't quite know what this string means.... it's FROM brain, and uses "v"....
+    // So the first R might be a reset, or something?
+    // But the rest follows the vpot messages, so it is likely a vpot report for all the desks vpots.
+    // Could be a position. Seems if faders are up at boot, they will also be reported.
+
     retries = 0;
     while (true)
     {
@@ -206,7 +558,7 @@ InitErrorType initializeMixer()
 
     // ================== "S" ================================
 
-    // Next, send an "s".... unsure exactly what this command does.
+    // Next, send an "s".... This queries the ESN number of the brain.
     tcflush(BRAIN, TCIOFLUSH); // First clear buffer.
     write(BRAIN, "s", 1);
 
@@ -215,15 +567,16 @@ InitErrorType initializeMixer()
     while (true)
     {
         std::string brainResponse = getBrainResponse(BRAIN);
-        if (brainResponse == BRAIN_S_RESPONSE)
-        {
-            break;
-        }
-        retries++;
-        if (retries > MAX_RETRIES)
-        {
-            return S_RESPONSE_FAILED;
-        }
+        
+        // if (brainResponse == BRAIN_S_RESPONSE)
+        // {
+        //     break;
+        // }
+        // retries++;
+        // if (retries > MAX_RETRIES)
+        // {
+        //     return S_RESPONSE_FAILED;
+        // }
             
     }
 
@@ -243,7 +596,9 @@ InitErrorType initializeMixer()
     // Send the DSP firmware
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
-    // Here the DSP replies "R350D" - check it.
+    // Here the DSP replies "R350D" - check it. Sometimes its 351Dd
+    // Actually, it seems the R is sent during the firmware upload, and the remaining 351Dd can
+    // be sent much later, after the "7X2$...."
     DEBUG_MSG("Checking DSP reply to firmware upload\n");
     retries = 0;
     while (true)
