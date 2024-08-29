@@ -31,6 +31,8 @@ class EventBus;
 
 //[/Headers]
 
+
+
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -39,16 +41,16 @@ class EventBus;
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class ChannelStripComponent : public ChannelStripComponentInterface,
-                              public juce::Component,
-                              public juce::Slider::Listener,
-                              public juce::Button::Listener,
-                              public juce::ComboBox::Listener,
-                              public juce::Label::Listener
+class ChannelStripComponent  : public ChannelStripComponentInterface,
+                               public juce::Component,
+                               public juce::Slider::Listener,
+                               public juce::Button::Listener,
+                               public juce::ComboBox::Listener,
+                               public juce::Label::Listener
 {
-  public:
+public:
     //==============================================================================
-    ChannelStripComponent();
+    ChannelStripComponent ();
     ~ChannelStripComponent() override;
 
     //==============================================================================
@@ -60,14 +62,16 @@ class ChannelStripComponent : public ChannelStripComponentInterface,
     void activateEventListeners() override;
     //[/UserMethods]
 
-    void paint(juce::Graphics &g) override;
+    void paint (juce::Graphics& g) override;
     void resized() override;
-    void sliderValueChanged(juce::Slider *sliderThatWasMoved) override;
-    void buttonClicked(juce::Button *buttonThatWasClicked) override;
-    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
-    void labelTextChanged(juce::Label *labelThatHasChanged) override;
+    void sliderValueChanged (juce::Slider* sliderThatWasMoved) override;
+    void buttonClicked (juce::Button* buttonThatWasClicked) override;
+    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
+    void labelTextChanged (juce::Label* labelThatHasChanged) override;
 
-  private:
+
+
+private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
     // References to singletons, and other objects instantiations.
@@ -128,10 +132,12 @@ class ChannelStripComponent : public ChannelStripComponentInterface,
     std::unique_ptr<juce::ComboBox> juce__comboBox4;
     std::unique_ptr<juce::Slider> chLevelToTape;
 
+
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelStripComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelStripComponent)
 };
 
 //[EndFile] You can add extra defines here...
 
 //[/EndFile]
+

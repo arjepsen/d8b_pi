@@ -24,7 +24,8 @@ BrainCom::BrainCom()
     // Populate the action table with actions
     actionTable['f'] = ACTION_TERMINATOR; // End of fader message
     actionTable['v'] = ACTION_TERMINATOR; // End of vPot message
-    actionTable['u'] = ACTION_TERMINATOR; // end of button message
+    actionTable['u'] = ACTION_TERMINATOR; // end of button down message
+    actionTable['s'] = ACTION_TERMINATOR; // End of button up message
     actionTable['o'] = ACTION_TERMINATOR; // End of apogee heartbeat ("F8o")
     actionTable['K'] = ACTION_TERMINATOR; // End of "system" message? (Used by fader calibrations.)
 
@@ -88,6 +89,7 @@ void BrainCom::messageReceiver()
                 case ACTION_TERMINATOR:
                     message[msgIndex] = '\0';       // Terminate string.
                     circBuffer.push(message, msgIndex); // Push to buffer.
+                    printf("BRAIN MESSAGE RECEIVED: %s\n", message);
                     msgIndex = 0;                       // Reset index for the next message
                     break;
 

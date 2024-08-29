@@ -1468,7 +1468,8 @@ void ChannelStripComponent::activateEventListeners()
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="ChannelStripComponent" componentName="ChannelStripComponent"
-                 parentClasses="public juce::Component" constructorParams="" variableInitialisers="eventBus(EventBus::getInstance())&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())&#10;&#10;hexToIntLookup(HexToIntLookup::getInstance())"
+                 parentClasses="public ChannelStripComponentInterface, public juce::Component"
+                 constructorParams="" variableInitialisers="eventBus(EventBus::getInstance())&#10;    faderValueLookup(FaderValueLookup::getInstance())&#10;&#10;intToHexLookup(IntToHexLookup::getInstance())&#10;&#10;hexToIntLookup(HexToIntLookup::getInstance())"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="75" initialHeight="1024">
   <BACKGROUND backgroundColour="ff242d31">

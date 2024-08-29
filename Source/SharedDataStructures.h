@@ -189,13 +189,13 @@ public:
         return instance;
     }
 
-    int hexToInt(const char (&hexString)[2]) 
+    inline int hexToInt(const char (&hexString)[2]) 
     {
         return (hex_values[(unsigned char)hexString[0]] << 4) |
                hex_values[(unsigned char)hexString[1]];
     }
 
-    int hex3ToInt(const char (&hexString)[3]) 
+    inline int hex3ToInt(const char (&hexString)[3]) 
     {
         return (hex_values[(unsigned char)hexString[0]] << 8) |
                (hex_values[(unsigned char)hexString[1]] << 4) |

@@ -80,6 +80,8 @@
 #define UFX_DISPLAY_BASE "u55v46v58v"
 #define EMPTY_DISPLAY_BASE "u65v6Dv70v74v79v"
 
+
+
 enum IoCardSlotType
 {
     TAPE_A,
@@ -98,7 +100,8 @@ enum InitErrorType
     RESET_DSP_TIMEOUT,
     UPLOAD_BRAIN_FAILED,
     UPLOAD_DSP_FAILED,
-    S_RESPONSE_FAILED
+    S_RESPONSE_FAILED,
+    DSP_R35xxd_RESPONSE_FAILED
 };
 
 int openSerialPort(const char *device_path, speed_t baud_rate);
@@ -111,5 +114,6 @@ void writeIOCardIdDisplayCode(int brainDescriptor, IOSlot* ioSlot, std::string l
 void writeFXCardIdDisplayCode(int brainDescriptor, FXSlot* fxSlot, FXSlotID slotID);
 
 InitErrorType initializeMixer();
+InitErrorType initializeMixerNew();
 
 void test();

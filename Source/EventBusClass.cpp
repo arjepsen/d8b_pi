@@ -71,7 +71,7 @@ EventBus::~EventBus() {}
  ******************************************************************************/
 void EventBus::postFaderEvent(ChStripID channelStripID, char (&eventValue)[2], EventSource source)
 {
-    WE NEED TO IMPLEMENT HOW WE ARE WORKING, WHEN FADER MOTORS ARE "OFF"
+    // TODO: How do we handle "fader motors off??"
 
     // First, let the channelstrip call the channel for sending DSP command.
     channelStripArray[channelStripID]->updateChannelVolume(currentBank, eventValue);
@@ -342,6 +342,12 @@ void EventBus::loadSettings()
     // Then write the various parts into their thingimabobs.
 
     // for now:
+    // HOW DO WE SAVE SETTINGS?
+    // maybe each channel loads its settings from file upon instantiation?
+    // Maybe we need to open one config file, and then keep it open during runtime to
+    // keep settings updated?
+
+
     initializeChannels();   // Maybe this method should write in the settings?
     initializeUiStrips();
     initializeChannelStrips();

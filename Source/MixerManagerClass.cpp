@@ -171,7 +171,8 @@ void MixerManager::initMixer(juce::Button *initMixerBtn)
             [this, initMixerBtn]()
             {
                 // Perform Mixer initialization / boot.
-                InitErrorType initResult = initializeMixer();
+                //InitErrorType initResult = initializeMixer();
+                InitErrorType initResult = initializeMixerNew();
 
                 // Check if an error returned
                 if (initResult != INIT_SUCCESS)
@@ -324,7 +325,8 @@ void MixerManager::handleBufferMessage()
                 break;
             }
             default:
-                printf("OTHER MESSAGE: %s\n", msgBuffer);
+                break;
+                //printf("OTHER MESSAGE: %s\n", msgBuffer);
                 // TODO: handle other possible messages from the brain, but in particular also DSP
         }
     }

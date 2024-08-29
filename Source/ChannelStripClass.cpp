@@ -107,8 +107,6 @@ void ChannelStrip::updateChStrip(Bank bank)
     currentLedOnStates = newLedOnStates;
     currentLedBlinkStates = newLedBlinkStates;
 
-    CHECK WHAT HAPPENS IN CALIBRATION - MAYBE IMPLEMENT.....
-
     // Now update the fader position.
     faderMoveCmd[2] = channelPtrs[bank]->getVolume()[0];
     faderMoveCmd[3] = channelPtrs[bank]->getVolume()[1];
