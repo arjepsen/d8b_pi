@@ -623,6 +623,10 @@ InitErrorType initializeMixer()
     // But the rest follows the vpot messages, so it is likely a vpot report for all the desks vpots.
     // Could be a position. Seems if faders are up at boot, they will also be reported.
 
+    // So the first R might be a reset, or something?
+    // But the rest follows the vpot messages, so it is likely a vpot report for all the desks vpots.
+    // Could be a position. Seems if faders are up at boot, they will also be reported.
+
     retries = 0;
     while (true)
     {
@@ -699,6 +703,7 @@ InitErrorType initializeMixer()
     // ================== "S" ================================
 
     // Next, send an "s".... This queries the ESN number of the brain.
+    // Next, send an "s".... This queries the ESN number of the brain.
     tcflush(BRAIN, TCIOFLUSH); // First clear buffer.
     write(BRAIN, "s", 1);
 
@@ -707,6 +712,16 @@ InitErrorType initializeMixer()
     while (true)
     {
         std::string brainResponse = getBrainResponse(BRAIN);
+        
+        // if (brainResponse == BRAIN_S_RESPONSE)
+        // {
+        //     break;
+        // }
+        // retries++;
+        // if (retries > MAX_RETRIES)
+        // {
+        //     return S_RESPONSE_FAILED;
+        // }
         
         // if (brainResponse == BRAIN_S_RESPONSE)
         // {
@@ -736,6 +751,9 @@ InitErrorType initializeMixer()
     // Send the DSP firmware
     sendFirmwareFile(DSP_MASTER_FIRMWARE_FILE, DSP);
 
+    // Here the DSP replies "R350D" - check it. Sometimes its 351Dd
+    // Actually, it seems the R is sent during the firmware upload, and the remaining 351Dd can
+    // be sent much later, after the "7X2$...."
     // Here the DSP replies "R350D" - check it. Sometimes its 351Dd
     // Actually, it seems the R is sent during the firmware upload, and the remaining 351Dd can
     // be sent much later, after the "7X2$...."
