@@ -95,6 +95,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/MixerManagerClass_34f257d5.o \
   $(JUCE_OBJDIR)/SettingsClass_e17fe7f6.o \
   $(JUCE_OBJDIR)/SettingsComponent_119b047b.o \
+  $(JUCE_OBJDIR)/SettingsFileManagerClass_6f55e533.o \
   $(JUCE_OBJDIR)/SettingsWindow_d17777fc.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
@@ -228,6 +229,11 @@ $(JUCE_OBJDIR)/SettingsClass_e17fe7f6.o: ../../Source/SettingsClass.cpp
 $(JUCE_OBJDIR)/SettingsComponent_119b047b.o: ../../Source/SettingsComponent.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling SettingsComponent.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/SettingsFileManagerClass_6f55e533.o: ../../Source/SettingsFileManagerClass.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling SettingsFileManagerClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/SettingsWindow_d17777fc.o: ../../Source/SettingsWindow.cpp

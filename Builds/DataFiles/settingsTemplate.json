@@ -1,0 +1,128 @@
+{
+    "ActiveBank": "LINE",
+    "SelectedChannel": 1,
+    "channels": [
+        {
+            "Channel Number": 1,
+            "volume": "00",
+            "Trim": 20,
+            "Pre Insert": "",
+            "Post Insert": "",
+            "Assignment": [1,2,"LR"],
+            "Pan": 0,
+            "Phase": false,
+            "Group": 0,
+            "Filter": false,
+            "Delay": 0,
+            "Playback": "Run",
+            "Write": true,  // channellist
+            "Isolate": false,
+            "AUX": [
+                {
+                    "1": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "2": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "3": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "4": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "5": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "6": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "7": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    },
+                    "8": {
+                        "Send Level": 0,
+                        "Pre Fader": true
+                    }
+                }
+            ],
+            "Stereo AUX": [
+                {
+                    "9-10": {
+                        "Send Level": 0,
+                        "PrePost": "pre",
+                        "Pan": -67
+                    },
+                    "11-12": {
+                        "Send Level": 0,
+                        "PrePost": "pre",
+                        "Pan": -67
+                    }
+                }
+            ],
+
+            "EQ": {
+                "low": -3,
+                "mid": 2,
+                "high": 4
+            },
+            "Compressor": {
+                "Active": false,
+                "Threshold": "10D5",
+                "Ratio": "45D1",
+                "Attack": "4C3",
+                "Release": "32",
+                "Output": "00",
+                "Soft": false
+            },
+            "Gate": {
+                "Active": false,
+                "Range": "109C",
+                "Attack": "FFFF",
+                "Release": "24D",
+                "Threshold": "708",
+                "Expand": false,
+                "Ratio": "FFFF",
+                "Midi": false
+            }
+        },
+
+    ],
+    "Effects": {},
+    "Returns": {},
+    "Groups": {
+        "Volume": ["C1", "C1", "C1", "C1", "C1", "C1", "C1", "C1"]
+    },
+    "MIDI": {},
+    "BUS": {
+        "1": {
+            "volume": "C1"
+        }
+    },
+    
+    "master": {
+        "volume": 90,
+        "AUX send": {
+            "1": {}
+        }
+        "eq": {
+            "low": 2,
+            "mid": 0,
+            "high": -2
+        }
+    },
+    "masterSection": {
+        "Locator": {},
+        "channel1": "output1",
+        "channel2": "output2",
+        // More routing configurations...
+    },
+    "Editor": {}
+}

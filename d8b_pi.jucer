@@ -92,6 +92,10 @@
             file="Source/SettingsComponent.cpp"/>
       <FILE id="ukFybi" name="SettingsComponent.h" compile="0" resource="0"
             file="Source/SettingsComponent.h"/>
+      <FILE id="A8xJx9" name="SettingsFileManagerClass.cpp" compile="1" resource="0"
+            file="Source/SettingsFileManagerClass.cpp"/>
+      <FILE id="xoxQm2" name="SettingsFileManagerClass.h" compile="0" resource="0"
+            file="Source/SettingsFileManagerClass.h"/>
       <FILE id="kHmpSU" name="SettingsWindow.cpp" compile="1" resource="0"
             file="Source/SettingsWindow.cpp"/>
       <FILE id="UzBH4k" name="SettingsWindow.h" compile="0" resource="0"
