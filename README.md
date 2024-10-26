@@ -10,6 +10,8 @@ I have sniffed out about 95-99% of these messages and commands. And are in the p
 
 So, I have hit a roadblock with this project, in relation to the EQ.
 When changing one of the three parameters for an EQ band (Gain, Frequency and Q), the cpu-unit sends a 20-byte long value to the DSP. Unfortunately - so far - I have been unable to reverse engieneer how this valuer gets calculated. I wonder if it is sort of filter coefficients of a bi-quad filter, but I am not certain.
+I have sniffed out some of these 20-byte values, sweeping through one parameter, while keeping the other two constant - these are available in the docs/EQ investigations folder.
+
 Here is what I do know:
 
 
