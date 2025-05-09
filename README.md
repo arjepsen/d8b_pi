@@ -1,3 +1,8 @@
+## Update may '25
+So, I may finally have overcome the brickwall mentioned below.
+It seems chatgpt has finally read enough of the internet, and gotten smart enough, to move on and give me some valueable insight into what is going on with how the EQ settings construct a 20-byte value.
+more to come.
+
 # d8b_pi
 This is a project that aims to replace the "cpu-unit" of the Mackie d8b mixer with a simple raspberry pi.
 The mixer contains two ADSP2181 processors. One on the "Brain" board, and one on the DSP board.
