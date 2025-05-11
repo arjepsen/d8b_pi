@@ -1,0 +1,41 @@
+Below is a description of the first band of the 4-band parametric EQ
+
+When a parameter (Gain, Frequency or Q) is changed, a 20-byte hex value is sent 
+to the DSP board. This value represents the coefficients for a "bi-quad" fir filter.
+(see: https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html)
+
+20-byte message  =  5 × 32-bit words
+                     └─ big-endian, most-significant byte first
+                     └─ each word is a signed fixed-point number
+                        in **Q4.28** format:  1 sign | 3 integer | 28 fraction bits
+                     └─ order =  b0  b1  b2  a1  a2
+(a0 is not sent, since we "normalize" so that a0 = 1 )
+
+
+(so mathwise we have:)
+y[n] = b0·x[n] + b1·x[n−1] + b2·x[n−2] − a1·y[n−1] − a2·y[n−2]
+
+Anyways, it is worth noting, that the internal sample-rate also plays a part here. According to chatgpt, the desk uses 47027 Hz - not 48000 precisely....
+(something about the crystal and stuff....)
+
+Anyways, we have these equations:
+
+A     = 10^(G / 40)               # √(10^(dB/20))
+ω0    = 2π · F / Fs
+α     = sin ω0 / (2Q)
+cosω  = cos ω0
+
+b0 = 1 + α·A
+b1 = −2·cos ω0
+b2 = 1 − α·A
+a0 = 1 + α/A
+a1 = −b1                     # *** sign flipped vs textbook ***
+a2 = −(1 − α/A)              # *** sign flipped vs textbook ***
+
+# normalise so a0 = 1
+b0, b1, b2, a1, a2  ←  divide each of them by a0
+
+The sign gets flipped, becuase it seems that the chip stores the feedback coefficients woth opposite sign in relation to RBJ's cookbok.
+
+Now, each normalized coefficient gets converted to signed Q4.28 format
+and then they are packed into the 20-byte value.
