@@ -88,6 +88,29 @@ enum VpotFunction
     NUMBER_OF_VPOT_FUNCTIONS
 };
 
+// ── Master-section v-pot raw IDs ───────────────────────────
+enum MasterVpotID : uint8_t
+{
+    MVPOT_LOW        = 0x19,
+    MVPOT_LOW_MID    = 0x1A,
+    MVPOT_HI_MID     = 0x1B,
+    MVPOT_HI         = 0x1C,
+    MVPOT_SOLO_STUDIO_LVL = 0x1D,
+    MVPOT_PHONES_1_LVL   = 0x1E,
+    MVPOT_PHONES_2_LVL   = 0x1F,
+    MVPOT_SPK_LEVEL  = 0x20,
+    NUMBER_OF_MASTER_VPOTS
+};
+
+// ── High-level functions those v-pots *may* perform ─────────
+enum MasterVpotFunc : uint8_t
+{
+    MVPOTFUNC_EQ,          // all four EQ bands
+    MVPOTFUNC_COMP_GATE,   // same four pots, different scaling
+    MVPOTFUNC_CR_LEVELS,   // studio, phones A, phones B, speakers
+    MVPOTFUNC_OTHER,       // future
+    NUMBER_OF_MVPOTFUNCS
+};
 
 
 
