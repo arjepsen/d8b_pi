@@ -10,12 +10,12 @@
 
 #pragma once
 
+#include "Debug.h"
 #include <cstring>
 #include <stdio.h>
-#include "Debug.h"
 
 static constexpr int CHANNEL_COUNT = 96;
-constexpr int CHANNEL_STRIP_COUNT = 24; // Number of channel strips, excluding the master strip.
+constexpr int CHANNEL_STRIP_COUNT = 24;   // Number of channel strips, excluding the master strip.
 constexpr int BRAIN_FADER_CMD_LENGTH = 5; // Max brain fader command length. i.e. "22ABf" excluding the null terminator
 const int MASTER_CH_STRIP = 24;
 
@@ -64,10 +64,7 @@ enum ChStripID
     CH_STRIP_MASTER
 };
 
-
-
-
-
+// ================ Vpots =======================================
 enum VpotFunction
 {
     VPOT_PAN,
@@ -91,28 +88,32 @@ enum VpotFunction
 // ── Master-section v-pot raw IDs ───────────────────────────
 enum MasterVpotID : uint8_t
 {
-    MVPOT_LOW        = 0x19,
-    MVPOT_LOW_MID    = 0x1A,
-    MVPOT_HI_MID     = 0x1B,
-    MVPOT_HI         = 0x1C,
+    MVPOT_LOW = 0x19,
+    MVPOT_LOW_MID = 0x1A,
+    MVPOT_HI_MID = 0x1B,
+    MVPOT_HI = 0x1C,
     MVPOT_SOLO_STUDIO_LVL = 0x1D,
-    MVPOT_PHONES_1_LVL   = 0x1E,
-    MVPOT_PHONES_2_LVL   = 0x1F,
-    MVPOT_SPK_LEVEL  = 0x20,
+    MVPOT_PHONES_1_LVL = 0x1E,
+    MVPOT_PHONES_2_LVL = 0x1F,
+    MVPOT_SPK_LEVEL = 0x20,
     NUMBER_OF_MASTER_VPOTS
 };
 
 // ── High-level functions those v-pots *may* perform ─────────
 enum MasterVpotFunc : uint8_t
 {
-    MVPOTFUNC_EQ,          // all four EQ bands
-    MVPOTFUNC_COMP_GATE,   // same four pots, different scaling
-    MVPOTFUNC_CR_LEVELS,   // studio, phones A, phones B, speakers
-    MVPOTFUNC_OTHER,       // future
+    MVPOTFUNC_EQ,        // all four EQ bands
+    MVPOTFUNC_COMP_GATE, // same four pots, different scaling
+    MVPOTFUNC_CR_LEVELS, // studio, phones A, phones B, speakers
+    MVPOTFUNC_OTHER,     // future
     NUMBER_OF_MVPOTFUNCS
 };
 
+using VpotHandler = void (*)(int /*delta-64…+63*/);
 
+extern const VpotHandler masterVpotDispatch[NUMBER_OF_MVPOTFUNCS][NUMBER_OF_MASTER_VPOTS];
+
+// =========================== BUTTONS ========================================
 
 enum ChStripButtonBase
 {
@@ -142,7 +143,6 @@ enum ChStripButtonBase
     STRIP24_BTN_BASE = 0x111
 };
 
-
 // ChannelStrip buttons
 enum ButtonType
 {
@@ -161,20 +161,25 @@ enum ButtonAction : char
     BTN_RELEASE = 'u'
 };
 
-
 enum Aux
 {
-    AUX1, AUX2, AUX3, AUX4, AUX5, AUX6, AUX7, AUX8
+    AUX1,
+    AUX2,
+    AUX3,
+    AUX4,
+    AUX5,
+    AUX6,
+    AUX7,
+    AUX8
 };
 
-
-class HexToIntLookup 
+class HexToIntLookup
 {
-private:
+  private:
     unsigned char hex_values[256];
 
     // Private constructor to prevent instantiation
-    HexToIntLookup() 
+    HexToIntLookup()
     {
         DEBUG_MSG("HEXTOINT CONSTRUCTOR\n");
 
@@ -202,32 +207,29 @@ private:
     }
 
     // Private Copy constructor and assignment operator to prevent copying
-    HexToIntLookup(const HexToIntLookup&);
-    HexToIntLookup& operator=(const HexToIntLookup&);
+    HexToIntLookup(const HexToIntLookup &);
+    HexToIntLookup &operator=(const HexToIntLookup &);
 
-public:
-    static HexToIntLookup& getInstance() 
+  public:
+    static HexToIntLookup &getInstance()
     {
         static HexToIntLookup instance; // Guaranteed to be destroyed, instantiated on first use.
         return instance;
     }
 
-    inline int hexToInt(const char (&hexString)[2]) 
+    inline int hexToInt(const char (&hexString)[2])
     {
         return (hex_values[(unsigned char)hexString[0]] << 4) |
                hex_values[(unsigned char)hexString[1]];
     }
 
-    inline int hex3ToInt(const char (&hexString)[3]) 
+    inline int hex3ToInt(const char (&hexString)[3])
     {
         return (hex_values[(unsigned char)hexString[0]] << 8) |
                (hex_values[(unsigned char)hexString[1]] << 4) |
-                hex_values[(unsigned char)hexString[2]];
+               hex_values[(unsigned char)hexString[2]];
     }
 };
-
-
-
 
 /**************************************************************************
  * @brief This is a simple singleton class that sets up an array for quick
@@ -287,7 +289,3 @@ class IntToHexLookup
 //     {0x031, 0x032, 0x033, 0x034, 0x035, 0x036}, // 5
 //     {0x039, 0x03A, 0x03B, 0x03C, 0x03D, 0x03E}, // 6
 // };
-
-
-
-
