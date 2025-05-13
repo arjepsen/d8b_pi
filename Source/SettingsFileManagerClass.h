@@ -14,49 +14,49 @@
   ==============================================================================
 */
 
-THIS IS AIMING AT HANDLING ALL SETTINGS, WRITING ALL EVERY TIME.
-INEFFECIENT.
-LETS MAKE IT SO WE CAN EFFECIENTLY CHANGE A SINGLE SETTING.
-BUT HOW OFTEN DO WE WRITE?
-DO WE REALLY WANT TO WRITE ON EVERYTHING, OR INSTEAD ON MAIN CHANGES?
-NO - THERE IS A SAVE OPTION - SO WE ONLY SAVE TO FILE WHEN THAT IT USED.
-SO WE MUST KEEP A "STANDARD SETTINGS" FILE....
+// THIS IS AIMING AT HANDLING ALL SETTINGS, WRITING ALL EVERY TIME.
+// INEFFECIENT.
+// LETS MAKE IT SO WE CAN EFFECIENTLY CHANGE A SINGLE SETTING.
+// BUT HOW OFTEN DO WE WRITE?
+// DO WE REALLY WANT TO WRITE ON EVERYTHING, OR INSTEAD ON MAIN CHANGES?
+// NO - THERE IS A SAVE OPTION - SO WE ONLY SAVE TO FILE WHEN THAT IT USED.
+// SO WE MUST KEEP A "STANDARD SETTINGS" FILE....
 
-from manual:
-New Session (Ctrl+N)
-• Press Ctrl+N or click the File menu, drag down to
-New Session, and release.
-• Select this to—wait, let me guess—start a new
-session.
-• The OS will ask you to save changes to the
-current session, if necessary.
-• Next, you get the chance to name the new session,
-select which folder it ends up in, create a new
-folder to put it in, or cancel.
-• The session can be saved to the internal hard
-drive or to a 3.5" floppy disk.
-• A session consists of all snapshots, automation
-data, and—if you choose—custom EQ, effects,
-and dynamics patches.
-• A new session uses the Template as its initial
-status"
+// from manual:
+// New Session (Ctrl+N)
+// • Press Ctrl+N or click the File menu, drag down to
+// New Session, and release.
+// • Select this to—wait, let me guess—start a new
+// session.
+// • The OS will ask you to save changes to the
+// current session, if necessary.
+// • Next, you get the chance to name the new session,
+// select which folder it ends up in, create a new
+// folder to put it in, or cancel.
+// • The session can be saved to the internal hard
+// drive or to a 3.5" floppy disk.
+// • A session consists of all snapshots, automation
+// data, and—if you choose—custom EQ, effects,
+// and dynamics patches.
+// • A new session uses the Template as its initial
+// status"
 
 
-autosave feature.....
+// autosave feature.....
 
-a new session is using a template, but we can also save as template to update the ... tadaaa... template.
+// a new session is using a template, but we can also save as template to update the ... tadaaa... template.
 
-the following are stored in the Template:
-• Channel Name
-• Noise Filter setting (in Channel List)
-• Channel Layout (rearrangement)
-• MDS Network settings
-• Stereo/Surround setting
-• Current Tempo (default to 120 bpm)
-• Time View (SMPTE/BBT/Milliseconds)
-• Mix Editor – Grid Setting (resolution—called
-Snap Grid in the pull-down), Enable Snapping,
-Snap to Cues, Snap to Grid
+// the following are stored in the Template:
+// • Channel Name
+// • Noise Filter setting (in Channel List)
+// • Channel Layout (rearrangement)
+// • MDS Network settings
+// • Stereo/Surround setting
+// • Current Tempo (default to 120 bpm)
+// • Time View (SMPTE/BBT/Milliseconds)
+// • Mix Editor – Grid Setting (resolution—called
+// Snap Grid in the pull-down), Enable Snapping,
+// Snap to Cues, Snap to Grid
 
 #pragma once
 
