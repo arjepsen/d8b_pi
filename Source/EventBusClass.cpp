@@ -158,7 +158,7 @@ void EventBus::initializeButtonCallbackMaps()
     // clang-format off
     buttonCallbackMap[LINE_BANK] = {
         // ================== CHANNELSTRIP 1-12 BUTTONS =============================
-        // mute, solo, select, write, assing, recRdy
+        // mute, solo, select, write, assign, recRdy
         {0x001, {}}, {0x002, {}}, {0x003, {}}, {0x004, {}}, {0x005, {}}, {0x006, {}},
         // ChannelStrip 12
         {0x009, {}}, {0x00A, {}}, {0x00B, {}}, {0x00C, {}}, {0x00D, {}}, {0x00E, {}},
