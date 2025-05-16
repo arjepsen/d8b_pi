@@ -33,8 +33,7 @@ MainComponent::MainComponent()
     {
         ChStripID chStripID = channelStripArray[i].getChannelStripID();
 
-        // The channelstrips controls one channel per bank. Set their
-        // initial pointers.
+        // The channelstrips controls one channel per bank. Set their initial pointers.
         for (Bank bank = LINE_BANK; bank < NUMBER_OF_BANKS; bank = (Bank)(bank + 1))
         {
             int channelIndex = chStripID + (bank * CHANNEL_STRIP_COUNT);
