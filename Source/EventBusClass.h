@@ -66,9 +66,6 @@ class EventBus
     // Declare a 2D array of channel association bitmaps.
     uint32_t channelAssociationBitmaps[CHANNEL_COUNT][NUMBER_OF_BANKS];
 
-    // Create a Bank variable for holding the currently selected bank.
-    Bank currentBank;
-
     // Make a pointer to the array of UI ChannelStripComponents
     ChannelStripComponentInterface *channelStripComponentArray[CHANNEL_STRIP_COUNT + 1];    // incl. master
     
@@ -78,8 +75,14 @@ class EventBus
     // Array of pointers to all channelstrips (+1 = incl. master)
     ChannelStripInterface* channelStripArray[CHANNEL_STRIP_COUNT + 1];
 
+    // Create a Bank variable for holding the currently selected bank.
+    Bank currentBank;
+
     // Keep a variable for current vpot functionality.
     VpotFunction currentVpotFunction = VPOT_PAN;
+
+    // Keep a pointer to the currently selected channelstrip
+    ChannelStrip *selectedChStrip;
 
 
     void initializeButtonCallbackMaps();
@@ -110,6 +113,7 @@ class EventBus
     void setChannelStripComponentArray(ChannelStripComponent * chStripCompArray, MasterStripComponent * masterComponentPtr);
     void setChannelStripArray(ChannelStrip * chStripArray, MasterChannel * masterChannelPtr);
     void setChannelArray(Channel * chArray);
+    void setSelectedChStrip(ChStripID chStrip);
 
 
     // Use this for enable UI controls, after the console is booted.

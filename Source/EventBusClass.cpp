@@ -315,12 +315,27 @@ void EventBus::setChannelStripArray(ChannelStrip * chStripArray, MasterChannel *
     }
     channelStripArray[CHANNEL_STRIP_COUNT] = masterChannelPtr; // Point to the MasterChannelStrip object
 
+    // Also, set the selected channel to the first.
+    // The array are of INTERFACES, so we need to do a static cast
+    // TODO: yet another thing to be loadable when we load a session
+    selectedChStrip = static_cast<ChannelStrip*>(channelStripArray[0]);
+    setSelectedChStrip(CH_STRIP1);
+
 }
 
 void EventBus::setChannelArray(Channel * chArray)
 {
     channelArray = chArray;
 }
+
+void EventBus::setSelectedChStrip(ChStripID chStrip)
+{
+    if (chStrip < CHANNEL_STRIP_COUNT)
+    {
+        selectedChStrip = static_cast<ChannelStrip*>(channelStripArray[chStrip]);
+    }
+}
+
 
 void EventBus::enableUiListeners()
 {
