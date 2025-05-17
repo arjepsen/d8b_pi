@@ -55,6 +55,10 @@
             file="Source/faderCalibration.h"/>
       <FILE id="KBfc7i" name="FaderValueLookupClass.h" compile="0" resource="0"
             file="Source/FaderValueLookupClass.h"/>
+      <FILE id="TTW0kq" name="FatChannelClass.cpp" compile="1" resource="0"
+            file="Source/FatChannelClass.cpp"/>
+      <FILE id="U8tmYB" name="FatChannelClass.h" compile="0" resource="0"
+            file="Source/FatChannelClass.h"/>
       <FILE id="iGI3dL" name="FileManager.cpp" compile="1" resource="0" file="Source/FileManager.cpp"/>
       <FILE id="rVLCvd" name="FileManager.h" compile="0" resource="0" file="Source/FileManager.h"/>
       <FILE id="lkn7of" name="FXCardClass.h" compile="0" resource="0" file="Source/FXCardClass.h"/>

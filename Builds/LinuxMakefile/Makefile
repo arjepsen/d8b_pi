@@ -83,6 +83,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/ComBaseClass_ed57a2f.o \
   $(JUCE_OBJDIR)/DspComClass_13c8c7b9.o \
   $(JUCE_OBJDIR)/EventBusClass_f5722df3.o \
+  $(JUCE_OBJDIR)/FatChannelClass_aace254f.o \
   $(JUCE_OBJDIR)/FileManager_9cd5b872.o \
   $(JUCE_OBJDIR)/FXSlotClass_d9b92fe9.o \
   $(JUCE_OBJDIR)/IOSlotClass_f67f5815.o \
@@ -169,6 +170,11 @@ $(JUCE_OBJDIR)/DspComClass_13c8c7b9.o: ../../Source/DspComClass.cpp
 $(JUCE_OBJDIR)/EventBusClass_f5722df3.o: ../../Source/EventBusClass.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling EventBusClass.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/FatChannelClass_aace254f.o: ../../Source/FatChannelClass.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling FatChannelClass.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/FileManager_9cd5b872.o: ../../Source/FileManager.cpp
