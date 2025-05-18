@@ -22,6 +22,14 @@
 // Then - like the channelstrip - the fatchannel will handle the ring-leds.
 // It should also inform the UI.
 
+// HOWEVER, currently, the postVpotEvent in eventbus handles update calls to associated channels (in case more channels control same channel...)
+// So this also makes calls to update the ring-leds and updating the UI....
+// But how do we then handle this, when we move a fat-channel vpot? it would still try to do these calls.....?
+// maybe instead here we just expand the "channelAssociationBitmaps" array (maybe rename it?) so that for the vpots on the master section, it will always just return 
+// the same index?
+
+// Also, the postVpotEvent makes call to the channelstripcomponent - the UI ... Do we need thsi for the fatchannel?
+
 
 #include "ChannelClass.h"
 #include "ChannelStripClass.h"
@@ -40,7 +48,7 @@ class FatChannel : inherit from controlinterface
     void setState(State newState) { state = newState; };
 
 
-    void postVpotEvent(ChStripID channelStripID, int vPotChangeValue, EventSource source);
+    vPotEventHandler.....
 
   private:
     State state = EQ;
