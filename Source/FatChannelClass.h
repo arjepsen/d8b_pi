@@ -28,7 +28,7 @@
 
 #pragma once
 
-class FatChannel
+class FatChannel : inherit from controlinterface
 {
   public:
     // clang-format off
@@ -40,6 +40,7 @@ class FatChannel
     void setState(State newState) { state = newState; };
 
 
+    void postVpotEvent(ChStripID channelStripID, int vPotChangeValue, EventSource source);
 
   private:
     State state = EQ;
