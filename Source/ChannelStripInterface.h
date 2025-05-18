@@ -26,3 +26,9 @@ class ChannelStripInterface
     virtual void updateVpotLeds(Bank bank, VpotFunction vPotFunc) = 0;
     virtual int getChannelStripVpotValue(Bank currentBank, VpotFunction currentVpotFunction) = 0;
 };
+
+
+class ControlInterface
+{
+    
+}
