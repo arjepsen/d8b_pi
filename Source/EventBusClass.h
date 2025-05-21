@@ -48,6 +48,22 @@ using ButtonCallback = std::function<void(ButtonAction, Bank)>;
 using FaderEventHandler = void (ChannelStripInterface::*)(Bank, const char (&)[2]);
 
 
+// MAY '25: Trying to move to function pointers:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+struct VpotDispatchEntry 
+{
+    int (*handler)(void* context, Bank bank, int value, VpotFunction func, EventSource src);
+    void* context;
+};
+
+int handleChannelStripVpot(void* context, Bank currentBank, int value, VpotFunction func, EventSource src)
+{
+    ChannelStrip* strip = static_cast<ChannelStrip*>(context);
+    return strip->channelPtrs[currentBank]->vPotEvent(func, value, src);
+}
+
+
+
+
 class EventBus
 {
   private:
@@ -68,12 +84,17 @@ class EventBus
 
     // Make a pointer to the array of UI ChannelStripComponents
     ChannelStripComponentInterface *channelStripComponentArray[CHANNEL_STRIP_COUNT + 1];    // incl. master
-    
+
     // Same for ChannelStrips and Channels
     Channel *channelArray;
 
     // Array of pointers to all channelstrips (+1 = incl. master)
     ChannelStripInterface* channelStripArray[CHANNEL_STRIP_COUNT + 1];
+
+
+    // MAY '25: exchanging the interface array with function pointers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    VpotDispatchEntry vpotDispatch[0x20] = {};  // vpot ID's go from 0x00 to 0x20 // TODO: should maybe enum it....
+
 
     // Create a Bank variable for holding the currently selected bank.
     Bank currentBank;

@@ -52,6 +52,14 @@ class ChannelStrip : public ChannelStripInterface
         return channelPtrs[currentBank]->vPotEvent(vPotFunc, vPotValue, source);
     }
 
+    inline int forwardVpotEvent(Bank currentBank, int vPotValue, VpotFunction vPotFunc, EventSource source)
+    {
+        return channelPtrs[currentBank]->vPotEvent(vPotFunc, vPotValue, source);
+    }
+
+
+
+
     // TODO: when vpot functionality changes, channelstrips on current bank must be updated.
     // TODO: THis also goes for the UI.
 

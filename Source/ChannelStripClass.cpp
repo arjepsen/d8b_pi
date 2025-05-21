@@ -185,3 +185,9 @@ void ChannelStrip::refreshStrip()
 }
 
 
+// Free function for handling vPot events, directing it to the channel the strip is currently controlling
+int handleChannelStripVpot(void* context, Bank currentBank, int vPotValue, VpotFunction function, EventSource source)
+{
+    auto* strip = static_cast<ChannelStrip*>(context);
+    return strip->forwardVpotEvent(currentBank, vPotValue, function, source);
+}

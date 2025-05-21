@@ -5,6 +5,8 @@
               maxBinaryFileSize="20971520" cppLanguageStandard="20">
   <MAINGROUP id="hHfYNg" name="d8b_pi">
     <GROUP id="{2A1B8560-4155-ED71-CEB1-417F6F169C9F}" name="Source">
+      <FILE id="eJgLRC" name="ControlInterface.h" compile="0" resource="0"
+            file="Source/ControlInterface.h"/>
       <FILE id="RywKi6" name="BrainComClass.cpp" compile="1" resource="0"
             file="Source/BrainComClass.cpp"/>
       <FILE id="s0eKIb" name="BrainComClass.h" compile="0" resource="0" file="Source/BrainComClass.h"/>
