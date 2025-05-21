@@ -51,7 +51,7 @@ using FaderEventHandler = void (ChannelStripInterface::*)(Bank, const char (&)[2
 // MAY '25: Trying to move to function pointers:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 struct VpotDispatchEntry 
 {
-    int (*handler)(void* context, Bank bank, int value, VpotFunction func, EventSource src);
+    int (*handler)(void* context, Bank currentBank, int vpotValue, VpotFunction function, EventSource source);
     void* context;
 };
 

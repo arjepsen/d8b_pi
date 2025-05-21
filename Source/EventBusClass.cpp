@@ -312,6 +312,12 @@ void EventBus::setChannelStripArray(ChannelStrip * chStripArray, MasterChannel *
     for (int i = 0; i < CHANNEL_STRIP_COUNT; i++) 
     {
         channelStripArray[i] = &chStripArray[i]; // Point to each ChannelStrip object
+        
+        // Register VPot handler
+        vpotDispatch[i] = {
+            .handler = handleChannelStripVpot,
+            .context = &chStripArray[i]
+        };
     }
     channelStripArray[CHANNEL_STRIP_COUNT] = masterChannelPtr; // Point to the MasterChannelStrip object
 
@@ -319,7 +325,7 @@ void EventBus::setChannelStripArray(ChannelStrip * chStripArray, MasterChannel *
     // The array are of INTERFACES, so we need to do a static cast
     // TODO: yet another thing to be loadable when we load a session
     selectedChStrip = static_cast<ChannelStrip*>(channelStripArray[0]);
-    setSelectedChStrip(CH_STRIP1);
+    setSelectedChStrip(CH_STRIP1);    
 
 }
 
@@ -385,4 +391,12 @@ void EventBus::changeBank(Bank newBank)
     currentBank = newBank;
     // 4 - Anything for the master section?
 
+}
+
+
+// FREE FUNCTIONS FOR HANLDER - MOVING TO FUNCTION PONTER
+int handleChannelStripVpot(void* context, Bank currentBank, int vpotValue, VpotFunction func, EventSource source)
+{
+    ChannelStrip* strip = static_cast<ChannelStrip*>(context);
+    return strip->getChannelPointer(currentBank)->vPotEvent(func, vpotValue, source);
 }
